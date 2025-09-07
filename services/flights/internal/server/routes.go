@@ -12,8 +12,8 @@ func NewMux() *http.ServeMux {
 
 	// Register Connect/gRPC/gRPC-Web handlers
 	flightsServer := NewFlightsServer()
-	path, handler := v1connect.NewFlightsServiceHandler(flightsServer)
-	mux.Handle(path, handler)
+	flightPath, flightHandler := v1connect.NewFlightsServiceHandler(flightsServer)
+	mux.Handle(flightPath, flightHandler)
 
 	// Health check
 	mux.HandleFunc("/health", health.HealthHandler)
