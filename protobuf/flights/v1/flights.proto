@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package flights.v1;
+
+option go_package = "services/flights;flights";
+
+service FlightsService {
+  rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
+}
+
+message CreateFlightRequest {
+  string number = 1;
+  string origin = 2;
+  string destination = 3;
+  string departure_time = 4;
+  string arrival_time = 5;
+}
+
+message CreateFlightResponse {
+  string id = 1;
+  string number = 2;
+  string origin = 3;
+  string destination = 4;
+  string departure_time = 5;
+  string arrival_time = 6;
+  string status = 7;
+}

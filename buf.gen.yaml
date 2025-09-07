@@ -1,0 +1,17 @@
+version: v2
+managed:
+  enabled: true
+  override:
+    - file_option: go_package_prefix
+      value: github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf
+plugins:
+  # Go stubs
+  - remote: buf.build/protocolbuffers/go
+    out: services/flights/internal/protobuf/
+    opt: paths=source_relative
+  - remote: buf.build/connectrpc/go
+    out: services/flights/internal/protobuf/
+    opt: paths=source_relative
+
+inputs:
+  - directory: protobuf
