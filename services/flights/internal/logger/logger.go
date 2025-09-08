@@ -13,7 +13,7 @@ func Init(environment string) {
 		Level: slog.LevelInfo,
 	}
 
-	if environment == "development" {
+	if environment == "dev" {
 		opts.Level = slog.LevelDebug
 	}
 
