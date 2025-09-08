@@ -2,12 +2,12 @@ package create
 
 import (
 	"context"
-	"errors"
 
 	"connectrpc.com/connect"
 	app "github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -25,11 +25,14 @@ func (r *CreateFlightResolver) CreateFlightGRPC(
 ) (*connect.Response[v1.CreateFlightResponse], error) {
 	logger.Debug("CreateFlight request", "number", req.Msg.GetNumber())
 
-	if req.Msg.GetDepartureTime() == nil || req.Msg.GetArrivalTime() == nil {
-		return nil, connect.NewError(
-			connect.CodeInvalidArgument,
-			errors.New("departure_time and arrival_time are required"),
-		)
+	if err := validation.ValidateRequiredInput(map[string]any{
+		"departure_time": req.Msg.GetDepartureTime(),
+		"arrival_time":   req.Msg.GetArrivalTime(),
+		"number":         req.Msg.GetNumber(),
+		"origin":         req.Msg.GetOrigin(),
+		"destination":    req.Msg.GetDestination(),
+	}); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
 	flight, err := r.service.CreateFlight(
