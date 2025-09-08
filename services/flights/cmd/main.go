@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
@@ -41,8 +45,31 @@ func main() {
 	}
 	addr := ":" + port
 
+	srv := &http.Server{
+		Addr:         addr,
+		Handler:      h2c.NewHandler(mux, &http2.Server{}),
+		ReadTimeout:  15 * time.Second,
+		WriteTimeout: 30 * time.Second,
+		IdleTimeout:  120 * time.Second,
+	}
+
 	logger.Info("FlightsService listening", "addr", addr)
-	if err := http.ListenAndServe(addr, h2c.NewHandler(mux, &http2.Server{})); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		logger.Error("Server error", "err", err)
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			logger.Error("Server error", "err", err)
+		}
+	}()
+
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
+
+	<-stop
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Error("Server shutdown error", "err", err)
 	}
 }
