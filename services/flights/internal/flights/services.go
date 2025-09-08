@@ -7,6 +7,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	flightrepo "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
 	"github.com/google/uuid"
 )
 
@@ -32,11 +33,26 @@ func (s *Service) CreateFlight(
 		return nil, exceptions.ErrInvalidTimes
 	}
 
+	normalizedNumber, err := validation.ValidateAndNormalizeFlightNumber(number)
+	if err != nil {
+		return nil, err
+	}
+
+	normalizedOrigin, err := validation.ValidateAndNormalizeIATACode(origin)
+	if err != nil {
+		return nil, err
+	}
+
+	normalizedDestination, err := validation.ValidateAndNormalizeIATACode(destination)
+	if err != nil {
+		return nil, err
+	}
+
 	flight := &models.Flight{
 		ID:            uuid.New(),
-		Number:        number,
-		Origin:        origin,
-		Destination:   destination,
+		Number:        normalizedNumber,
+		Origin:        normalizedOrigin,
+		Destination:   normalizedDestination,
 		DepartureTime: departure,
 		ArrivalTime:   arrival,
 		Status:        "SCHEDULED",
