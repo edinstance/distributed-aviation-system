@@ -111,12 +111,11 @@ docker run -d \
 
 ### Docker Compose
 
-This uses the [docker-compose.yml](docker-compose.yml) file. Make sure the migrations have been run on the docker
-database as well and that the enviroment variables are set in the [.env](.env) file.
+This uses the [docker-compose.yml](docker-compose.yml) file. Make sure the migrations have been run on the Docker database as well and that the environment variables are set in the [.env](.env) file.
 
 ```bash
 
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Database Migrations
