@@ -1,7 +1,7 @@
 services:
   postgres:
     container_name: flights-database
-    image: postgres
+    image: postgres:17.6
     environment:
       POSTGRES_DB: flights
       POSTGRES_USER: postgres
