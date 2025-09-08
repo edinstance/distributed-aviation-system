@@ -22,6 +22,16 @@ func Init(environment string) {
 	slog.SetDefault(Logger)
 }
 
+func init() {
+	if Logger == nil {
+		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+			Level: slog.LevelInfo,
+		})
+		Logger = slog.New(handler)
+		slog.SetDefault(Logger)
+	}
+}
+
 func Info(msg string, args ...any) {
 	Logger.Info(msg, args...)
 }
