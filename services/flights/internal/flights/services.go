@@ -28,9 +28,9 @@ func (s *Service) CreateFlight(
 	arrival time.Time,
 ) (*models.Flight, error) {
 
-    if !arrival.After(departure) {
-        return nil, exceptions.ErrInvalidTimes
-    }
+	if !arrival.After(departure) {
+		return nil, exceptions.ErrInvalidTimes
+	}
 
 	flight := &models.Flight{
 		ID:            uuid.New(),

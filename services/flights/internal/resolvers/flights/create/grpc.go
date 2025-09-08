@@ -23,7 +23,7 @@ func (r *CreateFlightResolver) CreateFlightGRPC(
 	ctx context.Context,
 	req *connect.Request[v1.CreateFlightRequest],
 ) (*connect.Response[v1.CreateFlightResponse], error) {
- 	logger.Debug("CreateFlight request", "number", req.Msg.GetNumber())
+	logger.Debug("CreateFlight request", "number", req.Msg.GetNumber())
 
 	if req.Msg.GetDepartureTime() == nil || req.Msg.GetArrivalTime() == nil {
 		return nil, connect.NewError(
@@ -32,14 +32,14 @@ func (r *CreateFlightResolver) CreateFlightGRPC(
 		)
 	}
 
- 	flight, err := r.service.CreateFlight(
- 		ctx,
- 		req.Msg.GetNumber(),
- 		req.Msg.GetOrigin(),
- 		req.Msg.GetDestination(),
- 		req.Msg.GetDepartureTime().AsTime(),
- 		req.Msg.GetArrivalTime().AsTime(),
- 	)
+	flight, err := r.service.CreateFlight(
+		ctx,
+		req.Msg.GetNumber(),
+		req.Msg.GetOrigin(),
+		req.Msg.GetDestination(),
+		req.Msg.GetDepartureTime().AsTime(),
+		req.Msg.GetArrivalTime().AsTime(),
+	)
 
 	if err != nil {
 		logger.Error("Failed to create flight", "err", err)
