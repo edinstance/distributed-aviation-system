@@ -105,7 +105,7 @@ docker run -d \
   -p 8081:8081 \
   -e PORT=8081 \
   -e ENVIRONMENT=dev \
-  -e DATABASE_URL=postgres://postgres:postgres@localhost:5432/flights?sslmode=disable
+  -e DATABASE_URL=postgres://postgres:postgres@host.docker.internal:5432/flights?sslmode=disable
   flights-service
 ```
 
