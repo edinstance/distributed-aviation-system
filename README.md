@@ -5,7 +5,7 @@ This project is a distributed system that re-creates some functionality of exist
 # Buf
 
 [Buf](https://buf.build/home) is used to manage Protobuf definitions and generate client and server stubs for our
-services. Buf is configured in the [buf.yml](buf.yml) and the code generation is in [buf.gen.yml](buf.gen.yml).
+services. Buf is configured in the [buf.yml](buf.yaml) and the code generation is in [buf.gen.yml](buf.gen.yaml).
 
 ## Installation
 
@@ -27,5 +27,5 @@ installed correctly using
 2. Generating code stubs
 
 ```shell
-  buf generate
+  buf generate --template buf.gen.yaml
 ```

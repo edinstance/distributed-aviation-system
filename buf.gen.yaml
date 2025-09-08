@@ -6,10 +6,10 @@ managed:
       value: github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf
 plugins:
   # Go stubs
-  - remote: buf.build/protocolbuffers/go
+  - remote: buf.build/protocolbuffers/go:v1.36.8
     out: services/flights/internal/protobuf/
     opt: paths=source_relative
-  - remote: buf.build/connectrpc/go
+  - remote: buf.build/connectrpc/go:v1.18.1
     out: services/flights/internal/protobuf/
     opt: paths=source_relative
 
