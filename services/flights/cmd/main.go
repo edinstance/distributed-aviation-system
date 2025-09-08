@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/server"
 	"github.com/joho/godotenv"
@@ -22,9 +23,18 @@ func main() {
 
 	port := os.Getenv("PORT")
 	env := os.Getenv("ENVIRONMENT")
+	databaseURL := os.Getenv("DATABASE_URL")
 
 	logger.Init(env)
-	mux := server.NewMux()
+
+	pool, err := database.Init(databaseURL)
+	if err != nil {
+		logger.Error("Failed to initialise database", "err", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+
+	mux := server.NewMux(pool)
 
 	if port == "" {
 		port = "8081"
