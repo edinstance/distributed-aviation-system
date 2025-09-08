@@ -2,26 +2,41 @@ syntax = "proto3";
 
 package flights.v1;
 
+import "google/protobuf/timestamp.proto";
+
 option go_package = "services/flights;flights";
 
 service FlightsService {
   rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
 }
 
-message CreateFlightRequest {
-  string number = 1;
-  string origin = 2;
-  string destination = 3;
-  string departure_time = 4;
-  string arrival_time = 5;
+enum FlightStatus {
+  FLIGHT_STATUS_UNSPECIFIED = 0;
+  FLIGHT_STATUS_SCHEDULED = 1;
+  FLIGHT_STATUS_DELAYED = 2;
+  FLIGHT_STATUS_CANCELLED = 3;
 }
 
-message CreateFlightResponse {
+message Flight {
   string id = 1;
   string number = 2;
   string origin = 3;
   string destination = 4;
-  string departure_time = 5;
-  string arrival_time = 6;
-  string status = 7;
+  google.protobuf.Timestamp departure_time = 5;
+  google.protobuf.Timestamp arrival_time = 6;
+  FlightStatus status = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message CreateFlightRequest {
+  string number = 1;
+  string origin = 2;
+  string destination = 3;
+  google.protobuf.Timestamp departure_time = 4;
+  google.protobuf.Timestamp arrival_time = 5;
+}
+
+message CreateFlightResponse {
+  Flight flight = 1;
 }
