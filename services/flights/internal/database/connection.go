@@ -37,6 +37,7 @@ func Init(databaseURL string) (*pgxpool.Pool, error) {
 	defer cancel()
 	if err := pool.Ping(ctx); err != nil {
 		logger.Error("Error pinging the DB pool", "err", err)
+		pool.Close()
 		return nil, fmt.Errorf("DB ping failed: %w", err)
 	}
 
