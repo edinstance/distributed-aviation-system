@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS flights (
 CREATE TRIGGER set_updated_date_flights
     BEFORE UPDATE ON flights
     FOR EACH ROW
-    EXECUTE FUNCTION update_last_updated_date();
+    EXECUTE FUNCTION update_updated_date();

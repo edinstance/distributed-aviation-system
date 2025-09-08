@@ -125,7 +125,7 @@ docker-compose up -d
 
 The service includes SQL migration files in the `migrations/` directory:
 
-- `000001_update_last_updated_date.up.sql` / `000001_update_last_updated_date.down.sql`
+- `000001_update_updated_date.up.sql` / `000001_update_updated_date.down.sql`
 - `000002_create_flights.up.sql` / `000002_create_flights.down.sql`
 
 ### Using golang-migrate
