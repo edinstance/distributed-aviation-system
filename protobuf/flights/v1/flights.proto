@@ -4,7 +4,7 @@ package flights.v1;
 
 import "google/protobuf/timestamp.proto";
 
-option go_package = "services/flights;flights";
+option go_package = "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1;v1";
 
 service FlightsService {
   rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
