@@ -20,11 +20,11 @@ func main() {
 	mux := server.NewMux()
 
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
 	addr := ":" + port
 
-	logger.Info("FlightsService listening on %s", addr)
+	logger.Info("FlightsService listening", "addr", addr)
 	if err := http.ListenAndServe(addr, h2c.NewHandler(mux, &http2.Server{})); err != nil && !errors.Is(err, http.ErrServerClosed) {
 		logger.Error("Server error: %v", err)
 	}
