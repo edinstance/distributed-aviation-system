@@ -7,11 +7,13 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 )
 
+// flightNumberRegex matches a normalised flight code.
 var flightNumberRegex = regexp.MustCompile(`^[A-Z]{2,3}[0-9]{1,6}$`)
 
+// ValidateAndNormalizeFlightNumber trims, upper-cases, and validates a flight code.
 func ValidateAndNormalizeFlightNumber(number string) (string, error) {
 	normalized := strings.ToUpper(strings.TrimSpace(number))
-	if len(normalized) == 0 || len(normalized) > 10 {
+	if normalized == "" {
 		return "", exceptions.ErrInvalidFlightNumber
 	}
 	if !flightNumberRegex.MatchString(normalized) {
