@@ -161,14 +161,18 @@ The service exposes Connect RPC endpoints and HTTP routes:
 
 ## Development
 
-### Code Formatting
+### Code Quality
+
+#### Formatting
 
 ```bash
 
 go fmt ./...
 ```
 
-### Linting
+#### Linting
+
+This project uses [golangci-lint](https://golangci-lint.run/) with a comprehensive configuration:
 
 ```bash
 
@@ -177,4 +181,7 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Run linter
 golangci-lint run
+
+# Auto-fix issues where possible
+golangci-lint run --fix
 ```
