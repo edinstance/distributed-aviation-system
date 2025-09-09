@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS flights (
     destination     VARCHAR(3)  NOT NULL,
     departure_time  TIMESTAMPTZ NOT NULL,
     arrival_time    TIMESTAMPTZ NOT NULL,
-    status          VARCHAR(20) NOT NULL CHECK (status IN ('SCHEDULED','DELAYED','CANCELLED')),
+    status          VARCHAR(20) NOT NULL,
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
