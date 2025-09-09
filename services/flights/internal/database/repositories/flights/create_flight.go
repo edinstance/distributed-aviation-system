@@ -16,7 +16,7 @@ func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *m
         RETURNING created_at, updated_at
     `
 
-	err := flightRepository.Pool.QueryRow(
+	err := flightRepository.pool.QueryRow(
 		ctx,
 		sql,
 		f.ID,

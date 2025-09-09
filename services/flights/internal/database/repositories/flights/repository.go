@@ -5,9 +5,9 @@ import (
 )
 
 type FlightRepository struct {
-	Pool *pgxpool.Pool
+	pool *pgxpool.Pool
 }
 
 func NewFlightRepository(pool *pgxpool.Pool) *FlightRepository {
-	return &FlightRepository{Pool: pool}
+	return &FlightRepository{pool: pool}
 }
