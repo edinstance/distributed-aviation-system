@@ -7,13 +7,13 @@ import (
 )
 
 type Flight struct {
-	ID            uuid.UUID
-	Number        string
-	Origin        string
-	Destination   string
-	DepartureTime time.Time
-	ArrivalTime   time.Time
-	Status        string
-	CreatedAt     time.Time `db:"created_at"`
-	UpdatedAt     time.Time `db:"updated_at"`
+	ID            uuid.UUID    `db:"id" json:"id"`
+	Number        string       `db:"number" json:"number"`
+	Origin        string       `db:"origin" json:"origin"`
+	Destination   string       `db:"destination" json:"destination"`
+	DepartureTime time.Time    `db:"departure_time" json:"departure_time"`
+	ArrivalTime   time.Time    `db:"arrival_time" json:"arrival_time"`
+	Status        FlightStatus `db:"status" json:"status"`
+	CreatedAt     time.Time    `db:"created_at" json:"created_at"`
+	UpdatedAt     time.Time    `db:"updated_at" json:"updated_at"`
 }
