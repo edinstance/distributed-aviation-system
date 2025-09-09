@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -22,7 +21,7 @@ func main() {
 
 	err := godotenv.Load()
 	if err != nil {
-		fmt.Println("No .env file found, relying on environment variables")
+		logger.Warn("No .env file found, relying on environment variables")
 	}
 
 	port := os.Getenv("PORT")
