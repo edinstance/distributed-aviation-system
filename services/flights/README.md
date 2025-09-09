@@ -4,7 +4,7 @@ This is a [go](https://go.dev/) microservice for managing flight data in the lar
 
 ## Prerequisites
 
-- Go 1.25.1
+- Go 1.25
 - PostgreSQL 17+
 - Docker (optional, for containerized deployment)
 - Docker Compose (optional, for local development with a database)
@@ -59,7 +59,7 @@ migrate -path migrations -database "$DATABASE_URL" up
 
 # Set environment variables or use the .env file
 export PORT=8081
-export DATABASE_URL="postgres://postgres:postgres@localhost:5432/flights"
+export DATABASE_URL="postgres://postgres:postgres@localhost:5432/flights?sslmode=disable"
 
 # Run the service
 go run cmd/main.go
