@@ -1,0 +1,73 @@
+package create
+
+import (
+	"context"
+
+	"connectrpc.com/connect"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models/converters"
+	app "github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
+	"google.golang.org/protobuf/types/known/timestamppb"
+)
+
+type CreateFlightResolver struct {
+	service *app.Service
+}
+
+func NewCreateFlightResolver(service *app.Service) *CreateFlightResolver {
+	return &CreateFlightResolver{service: service}
+}
+
+func (r *CreateFlightResolver) CreateFlightGRPC(
+	ctx context.Context,
+	req *connect.Request[v1.CreateFlightRequest],
+) (*connect.Response[v1.CreateFlightResponse], error) {
+	logger.Debug("CreateFlight request", "number", req.Msg.GetNumber())
+
+	if err := validation.ValidateRequiredInput(map[string]any{
+		"departure_time": req.Msg.GetDepartureTime(),
+		"arrival_time":   req.Msg.GetArrivalTime(),
+		"number":         req.Msg.GetNumber(),
+		"origin":         req.Msg.GetOrigin(),
+		"destination":    req.Msg.GetDestination(),
+	}); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, err)
+	}
+
+	flight, err := r.service.CreateFlight(
+		ctx,
+		req.Msg.GetNumber(),
+		req.Msg.GetOrigin(),
+		req.Msg.GetDestination(),
+		req.Msg.GetDepartureTime().AsTime(),
+		req.Msg.GetArrivalTime().AsTime(),
+	)
+
+	if err != nil {
+		logger.Error("Failed to create flight", "err", err)
+		return nil, connect.NewError(connect.CodeInternal, err)
+	}
+
+	// Convert string status to protobuf enum
+	status := converters.ToProtoStatus(flight.Status)
+
+	logger.Debug("CreateFlight response", "number", req.Msg.GetNumber(), "status", status)
+
+	resp := &v1.CreateFlightResponse{
+		Flight: &v1.Flight{
+			Id:            flight.ID.String(),
+			Number:        flight.Number,
+			Origin:        flight.Origin,
+			Destination:   flight.Destination,
+			DepartureTime: timestamppb.New(flight.DepartureTime),
+			ArrivalTime:   timestamppb.New(flight.ArrivalTime),
+			Status:        status,
+			CreatedAt:     timestamppb.New(flight.CreatedAt),
+			UpdatedAt:     timestamppb.New(flight.UpdatedAt),
+		},
+	}
+
+	return connect.NewResponse(resp), nil
+}
