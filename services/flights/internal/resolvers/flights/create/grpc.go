@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models/converters"
 	app "github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
@@ -50,15 +51,7 @@ func (r *CreateFlightResolver) CreateFlightGRPC(
 	}
 
 	// Convert string status to protobuf enum
-	var statusMap = map[string]v1.FlightStatus{
-		"SCHEDULED": v1.FlightStatus_FLIGHT_STATUS_SCHEDULED,
-		"DELAYED":   v1.FlightStatus_FLIGHT_STATUS_DELAYED,
-		"CANCELLED": v1.FlightStatus_FLIGHT_STATUS_CANCELLED,
-	}
-	status := statusMap[flight.Status]
-	if status == v1.FlightStatus(0) {
-		status = v1.FlightStatus_FLIGHT_STATUS_UNSPECIFIED
-	}
+	status := converters.ToProtoStatus(flight.Status)
 
 	logger.Debug("CreateFlight response", "number", req.Msg.GetNumber(), "status", status)
 

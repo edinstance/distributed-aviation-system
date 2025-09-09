@@ -59,7 +59,7 @@ func (s *Service) CreateFlight(
 		Destination:   normalizedDestination,
 		DepartureTime: departure,
 		ArrivalTime:   arrival,
-		Status:        "SCHEDULED",
+		Status:        models.FlightStatusScheduled,
 	}
 
 	if err := s.repo.CreateFlight(ctx, flight); err != nil {
