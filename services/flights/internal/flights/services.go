@@ -48,6 +48,10 @@ func (s *Service) CreateFlight(
 		return nil, err
 	}
 
+	if normalizedOrigin == normalizedDestination {
+		return nil, exceptions.ErrSameOriginAndDestination
+	}
+
 	flight := &models.Flight{
 		ID:            uuid.New(),
 		Number:        normalizedNumber,
