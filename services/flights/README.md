@@ -39,7 +39,7 @@ docker run -d \
   --name postgres-flights \
   -e DATABASE_URL=postgres://postgres@localhost:5432/flights \
   -p 5432:5432 \
-  postgres:15
+  postgres:17
 ```
 
 ### 3. Run Migrations
