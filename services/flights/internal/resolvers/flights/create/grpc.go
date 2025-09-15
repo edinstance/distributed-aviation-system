@@ -2,21 +2,27 @@ package create
 
 import (
 	"context"
+	"errors"
+	"time"
 
 	"connectrpc.com/connect"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models/converters"
-	app "github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-type CreateFlightResolver struct {
-	service *app.Service
+type FlightCreator interface {
+	CreateFlight(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error)
 }
 
-func NewCreateFlightResolver(service *app.Service) *CreateFlightResolver {
+type CreateFlightResolver struct {
+	service FlightCreator
+}
+
+func NewCreateFlightResolver(service FlightCreator) *CreateFlightResolver {
 	return &CreateFlightResolver{service: service}
 }
 
@@ -36,13 +42,19 @@ func (r *CreateFlightResolver) CreateFlightGRPC(
 		return nil, connect.NewError(connect.CodeInvalidArgument, err)
 	}
 
+	departureTS := req.Msg.GetDepartureTime()
+	arrivalTS := req.Msg.GetArrivalTime()
+	if departureTS == nil || arrivalTS == nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing required timestamp(s)"))
+	}
+
 	flight, err := r.service.CreateFlight(
 		ctx,
 		req.Msg.GetNumber(),
 		req.Msg.GetOrigin(),
 		req.Msg.GetDestination(),
-		req.Msg.GetDepartureTime().AsTime(),
-		req.Msg.GetArrivalTime().AsTime(),
+		departureTS.AsTime(),
+		arrivalTS.AsTime(),
 	)
 
 	if err != nil {
