@@ -15,30 +15,42 @@ func TestToProtoStatus(testHelper *testing.T) {
 		expected v1.FlightStatus
 	}{
 		{
+			name:     "Scheduled",
 			input:    models.FlightStatusScheduled,
 			expected: v1.FlightStatus_FLIGHT_STATUS_SCHEDULED,
 		},
 		{
+			name:     "Delayed",
 			input:    models.FlightStatusDelayed,
 			expected: v1.FlightStatus_FLIGHT_STATUS_DELAYED,
 		},
 		{
+			name:     "Departed",
 			input:    models.FlightStatusDeparted,
 			expected: v1.FlightStatus_FLIGHT_STATUS_DEPARTED,
 		},
 		{
+			name:     "InProgress",
 			input:    models.FlightStatusInProgress,
 			expected: v1.FlightStatus_FLIGHT_STATUS_IN_PROGRESS,
 		},
 		{
+			name:     "Arrived",
 			input:    models.FlightStatusArrived,
 			expected: v1.FlightStatus_FLIGHT_STATUS_ARRIVED,
 		},
 		{
+			name:     "Cancelled",
 			input:    models.FlightStatusCancelled,
 			expected: v1.FlightStatus_FLIGHT_STATUS_CANCELLED,
 		},
 		{
+			name:     "Unspecified",
+			input:    models.FlightStatusUnspecified,
+			expected: v1.FlightStatus_FLIGHT_STATUS_UNSPECIFIED,
+		},
+		{
+			name:     "Empty maps to Unspecified",
 			input:    "",
 			expected: v1.FlightStatus_FLIGHT_STATUS_UNSPECIFIED,
 		},
