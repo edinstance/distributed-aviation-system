@@ -185,3 +185,16 @@ golangci-lint run
 # Auto-fix issues where possible
 golangci-lint run --fix
 ```
+
+#### Testing
+
+```bash
+# Run tests
+go test -v ./...
+
+# Run tests with coverage
+go test -v -coverprofile=coverage.out ./...
+
+# View coverage report
+go tool cover -html=coverage.out
+```
