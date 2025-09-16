@@ -38,7 +38,7 @@ func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *m
 		// Check if it's a Postgres error
 		var pgErr *pgconn.PgError
 		if errors.As(err, &pgErr) {
-			if pgErr.Code == pgerrcode.UniqueViolation {
+			if pgErr.Code == pgerrcode.UniqueViolation && pgErr.ConstraintName == "unique_flight_instance" {
 				return fmt.Errorf(
 					"flight with number %s at %s already exists",
 					f.Number,
