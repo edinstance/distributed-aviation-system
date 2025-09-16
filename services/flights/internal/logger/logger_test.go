@@ -9,6 +9,13 @@ import (
 	"testing"
 )
 
+type ctxKey string
+
+const (
+	ctxKeyRequestID ctxKey = "request_id"
+	ctxKeyTraceID   ctxKey = "trace_id"
+)
+
 func parseLog(testHelper *testing.T, buffer *bytes.Buffer) map[string]interface{} {
 	var logEntry map[string]interface{}
 	if err := json.Unmarshal(buffer.Bytes(), &logEntry); err != nil {
@@ -134,7 +141,7 @@ func TestInfoContext(testHelper *testing.T) {
 		Level: slog.LevelInfo,
 	}))
 
-	contextWithRequestID := context.WithValue(context.Background(), "request_id", "123")
+	contextWithRequestID := context.WithValue(context.Background(), ctxKeyRequestID, "123")
 	InfoContext(contextWithRequestID, "context message", "user_id", "456")
 
 	logEntry := parseLog(testHelper, &outputBuffer)
@@ -156,7 +163,7 @@ func TestErrorContext(testHelper *testing.T) {
 		Level: slog.LevelError,
 	}))
 
-	contextWithTraceID := context.WithValue(context.Background(), "trace_id", "abc123")
+	contextWithTraceID := context.WithValue(context.Background(), ctxKeyTraceID, "abc123")
 	ErrorContext(contextWithTraceID, "context error", "status", "failed")
 
 	logEntry := parseLog(testHelper, &outputBuffer)
