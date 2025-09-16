@@ -45,8 +45,8 @@ func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *m
 					f.DepartureTime.Format(time.RFC3339),
 				)
 			} else {
-				logger.Error("Error saving flight to db", "id", f.ID, "error", err)
-				return fmt.Errorf("postgres error [%s]: %s", pgErr.Code, pgErr.Message)
+				logger.Error("Error saving flight to db", "id", f.ID, "code", pgErr.Code, "constraint", pgErr.ConstraintName, "error", err)
+				return fmt.Errorf("postgres error [%s]: %w", pgErr.Code, err)
 			}
 		}
 
