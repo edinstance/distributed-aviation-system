@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/server"
@@ -24,13 +25,10 @@ func main() {
 		logger.Warn("No .env file found, relying on environment variables")
 	}
 
-	port := os.Getenv("PORT")
-	env := os.Getenv("ENVIRONMENT")
-	databaseURL := os.Getenv("DATABASE_URL")
+	config.Init()
+	logger.Init(config.App.Environment)
 
-	logger.Init(env)
-
-	pool, err := database.Init(databaseURL)
+	pool, err := database.Init(config.App.DatabaseURL)
 	if err != nil {
 		logger.Error("Failed to initialise database", "err", err)
 		os.Exit(1)
@@ -39,6 +37,7 @@ func main() {
 
 	mux := server.NewMux(pool)
 
+	port := config.App.Port
 	if port == "" {
 		port = "8081"
 	}
