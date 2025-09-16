@@ -1,10 +1,32 @@
 package exceptions
 
-import "fmt"
+import (
+	"errors"
+
+	"connectrpc.com/connect"
+)
 
 var (
-	ErrInvalidIATACode          = fmt.Errorf("IATA code must be exactly 3 uppercase letters A-Z")
-	ErrInvalidFlightNumber      = fmt.Errorf("flight number must contain airline code (2-3 letters) followed by digits, max 10 characters")
-	ErrSameOriginAndDestination = fmt.Errorf("duplicate origin and destination code")
-	ErrInvalidTimes             = fmt.Errorf("arrival must be after departure")
+	ErrInvalidIATACode          = errors.New("IATA code must be exactly 3 uppercase letters A-Z")
+	ErrInvalidFlightNumber      = errors.New("flight number must contain airline code (2-3 letters) followed by digits, max 10 characters")
+	ErrSameOriginAndDestination = errors.New("duplicate origin and destination code")
+	ErrInvalidTimes             = errors.New("arrival must be after departure")
+	ErrInvalidInput             = errors.New("invalid input")
 )
+
+var errorCodeMap = map[error]connect.Code{
+	ErrInvalidInput:             connect.CodeInvalidArgument,
+	ErrInvalidTimes:             connect.CodeInvalidArgument,
+	ErrInvalidFlightNumber:      connect.CodeInvalidArgument,
+	ErrInvalidIATACode:          connect.CodeInvalidArgument,
+	ErrSameOriginAndDestination: connect.CodeInvalidArgument,
+}
+
+func MapErrorToGrpcCode(err error) connect.Code {
+	for e, code := range errorCodeMap {
+		if errors.Is(err, e) {
+			return code
+		}
+	}
+	return connect.CodeInternal
+}

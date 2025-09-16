@@ -2,23 +2,14 @@ package flights
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
-	flightrepo "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
 	"github.com/google/uuid"
 )
-
-// Service holds business logic for Flights
-type Service struct {
-	repo *flightrepo.FlightRepository
-}
-
-func NewFlightsService(repo *flightrepo.FlightRepository) *Service {
-	return &Service{repo: repo}
-}
 
 func (s *Service) CreateFlight(
 	ctx context.Context,
@@ -30,7 +21,8 @@ func (s *Service) CreateFlight(
 ) (*models.Flight, error) {
 
 	if !arrival.After(departure) {
-		return nil, exceptions.ErrInvalidTimes
+		return nil, fmt.Errorf("%w: departure=%v, arrival=%v",
+			exceptions.ErrInvalidTimes, departure, arrival)
 	}
 
 	normalizedNumber, err := validation.ValidateAndNormalizeFlightNumber(number)
@@ -62,7 +54,7 @@ func (s *Service) CreateFlight(
 		Status:        models.FlightStatusScheduled,
 	}
 
-	if err := s.repo.CreateFlight(ctx, flight); err != nil {
+	if err := s.Repo.CreateFlight(ctx, flight); err != nil {
 		return nil, err
 	}
 

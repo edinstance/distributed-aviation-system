@@ -7,10 +7,10 @@ import (
 	"time"
 
 	"connectrpc.com/connect"
-	"github.com/google/uuid"
-
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -18,7 +18,9 @@ type fakeService struct {
 	createFn func(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error)
 }
 
-func (f *fakeService) CreateFlight(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error) {
+func (f *fakeService) CreateFlight(
+	ctx context.Context, number, origin, dest string, dep, arr time.Time,
+) (*models.Flight, error) {
 	return f.createFn(ctx, number, origin, dest, dep, arr)
 }
 
@@ -28,8 +30,16 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 
 	f := &fakeService{
 		createFn: func(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error) {
-			testingHelper.Fatal("service.CreateFlight should not be called for validation errors")
-			return nil, nil
+			switch {
+			case number == "":
+				return nil, exceptions.ErrInvalidInput
+			case origin == "":
+				return nil, exceptions.ErrInvalidInput
+			case dest == "":
+				return nil, exceptions.ErrInvalidInput
+			default:
+				return nil, nil
+			}
 		},
 	}
 
@@ -92,6 +102,30 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 				Origin:        "LHR",
 				Destination:   "LGW",
 				DepartureTime: timestamppb.New(dep),
+			},
+			wantErr: true,
+			code:    connect.CodeInvalidArgument,
+		},
+		{
+			name: "invalid arrival time",
+			req: &v1.CreateFlightRequest{
+				Number:        "AB123",
+				Origin:        "LHR",
+				Destination:   "LGW",
+				DepartureTime: timestamppb.New(dep),
+				ArrivalTime:   &timestamppb.Timestamp{Seconds: 253402300800, Nanos: 0},
+			},
+			wantErr: true,
+			code:    connect.CodeInvalidArgument,
+		},
+		{
+			name: "invalid departure time",
+			req: &v1.CreateFlightRequest{
+				Number:        "AB123",
+				Origin:        "LHR",
+				Destination:   "LGW",
+				ArrivalTime:   timestamppb.New(dep),
+				DepartureTime: &timestamppb.Timestamp{Seconds: 253402300800, Nanos: 0},
 			},
 			wantErr: true,
 			code:    connect.CodeInvalidArgument,

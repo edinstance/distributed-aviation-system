@@ -8,9 +8,9 @@ import (
 	"connectrpc.com/connect"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models/converters"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -34,18 +34,15 @@ func (r *FlightResolver) CreateFlightGRPC(
 
 	if r.service == nil {
 		logger.Error("CreateFlight service not configured")
-		return nil, connect.NewError(connect.CodeInternal, errors.New("service not configured"))
+		return nil, connect.NewError(
+			connect.CodeInternal,
+			errors.New("service not configured"),
+		)
 	}
 
-	if err := validation.ValidateRequiredInput(map[string]any{
-		"departure_time": req.Msg.GetDepartureTime(),
-		"arrival_time":   req.Msg.GetArrivalTime(),
-		"number":         req.Msg.GetNumber(),
-		"origin":         req.Msg.GetOrigin(),
-		"destination":    req.Msg.GetDestination(),
-	}); err != nil {
-		return nil, connect.NewError(connect.CodeInvalidArgument, err)
-	}
+	number := req.Msg.GetNumber()
+	origin := req.Msg.GetOrigin()
+	dest := req.Msg.GetDestination()
 
 	departureTS := req.Msg.GetDepartureTime()
 	arrivalTS := req.Msg.GetArrivalTime()
@@ -53,33 +50,27 @@ func (r *FlightResolver) CreateFlightGRPC(
 	if departureTS == nil || arrivalTS == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing required timestamp(s)"))
 	}
-
 	if err := arrivalTS.CheckValid(); err != nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid arrival_time"))
 	}
-
 	if err := departureTS.CheckValid(); err != nil {
+		logger.Debug("Invalid departure timestamp", "err", err)
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid departure_time"))
 	}
 
 	flight, err := r.service.CreateFlight(
 		ctx,
-		req.Msg.GetNumber(),
-		req.Msg.GetOrigin(),
-		req.Msg.GetDestination(),
+		number,
+		origin,
+		dest,
 		departureTS.AsTime(),
 		arrivalTS.AsTime(),
 	)
 
 	if err != nil {
 		logger.Error("Failed to create flight", "err", err)
-		return nil, connect.NewError(connect.CodeInternal, err)
+		return nil, connect.NewError(exceptions.MapErrorToGrpcCode(err), err)
 	}
-
-	// Convert string status to protobuf enum
-	status := converters.ToProtoStatus(flight.Status)
-
-	logger.Debug("CreateFlight response", "number", req.Msg.GetNumber(), "status", status)
 
 	resp := &v1.CreateFlightResponse{
 		Flight: &v1.Flight{
@@ -89,11 +80,12 @@ func (r *FlightResolver) CreateFlightGRPC(
 			Destination:   flight.Destination,
 			DepartureTime: timestamppb.New(flight.DepartureTime),
 			ArrivalTime:   timestamppb.New(flight.ArrivalTime),
-			Status:        status,
+			Status:        converters.ToProtoStatus(flight.Status),
 			CreatedAt:     timestamppb.New(flight.CreatedAt),
 			UpdatedAt:     timestamppb.New(flight.UpdatedAt),
 		},
 	}
 
+	logger.Debug("CreateFlight response created", "number", flight.Number, "id", flight.ID)
 	return connect.NewResponse(resp), nil
 }
