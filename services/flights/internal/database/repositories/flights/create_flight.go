@@ -2,10 +2,14 @@ package flights
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 )
 
 func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *models.Flight) error {
@@ -31,8 +35,24 @@ func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *m
 	).Scan(&f.CreatedAt, &f.UpdatedAt)
 
 	if err != nil {
+		// Check if it's a Postgres error
+		var pgErr *pgconn.PgError
+		if errors.As(err, &pgErr) {
+			if pgErr.Code == pgerrcode.UniqueViolation {
+				return fmt.Errorf(
+					"flight with number %s at %s already exists",
+					f.Number,
+					f.DepartureTime.Format(time.RFC3339),
+				)
+			} else {
+				logger.Error("Error saving flight to db", "id", f.ID, "error", err)
+				return fmt.Errorf("postgres error [%s]: %s", pgErr.Code, pgErr.Message)
+			}
+		}
+
 		logger.Error("Error saving flight to db", "id", f.ID, "error", err)
 		return fmt.Errorf("create flight %s: %w", f.ID, err)
 	}
+
 	return nil
 }
