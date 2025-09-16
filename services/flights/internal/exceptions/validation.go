@@ -22,6 +22,10 @@ var errorCodeMap = map[error]connect.Code{
 	ErrSameOriginAndDestination: connect.CodeInvalidArgument,
 }
 
+// MapErrorToGrpcCode returns the corresponding connect.Code for the provided error.
+// It checks the error against the package's sentinel errors in errorCodeMap using
+// errors.Is (so wrapped errors are matched). If no mapping is found it returns
+// connect.CodeInternal.
 func MapErrorToGrpcCode(err error) connect.Code {
 	for e, code := range errorCodeMap {
 		if errors.Is(err, e) {
