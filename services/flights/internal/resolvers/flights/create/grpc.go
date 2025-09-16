@@ -32,6 +32,11 @@ func (r *FlightResolver) CreateFlightGRPC(
 ) (*connect.Response[v1.CreateFlightResponse], error) {
 	logger.Debug("CreateFlight request", "number", req.Msg.GetNumber())
 
+	if r.service == nil {
+		logger.Error("CreateFlight service not configured")
+		return nil, connect.NewError(connect.CodeInternal, errors.New("service not configured"))
+	}
+
 	if err := validation.ValidateRequiredInput(map[string]any{
 		"departure_time": req.Msg.GetDepartureTime(),
 		"arrival_time":   req.Msg.GetArrivalTime(),
@@ -44,8 +49,17 @@ func (r *FlightResolver) CreateFlightGRPC(
 
 	departureTS := req.Msg.GetDepartureTime()
 	arrivalTS := req.Msg.GetArrivalTime()
+
 	if departureTS == nil || arrivalTS == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing required timestamp(s)"))
+	}
+
+	if err := arrivalTS.CheckValid(); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid arrival_time"))
+	}
+
+	if err := departureTS.CheckValid(); err != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid departure_time"))
 	}
 
 	flight, err := r.service.CreateFlight(

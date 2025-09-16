@@ -26,6 +26,15 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 	dep := time.Date(2025, 1, 2, 3, 4, 5, 0, time.UTC)
 	arr := dep.Add(2 * time.Hour)
 
+	f := &fakeService{
+		createFn: func(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error) {
+			testingHelper.Fatal("service.CreateFlight should not be called for validation errors")
+			return nil, nil
+		},
+	}
+
+	resolver := NewCreateFlightResolver(f)
+
 	testCases := []struct {
 		name    string
 		req     *v1.CreateFlightRequest
@@ -89,15 +98,13 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 		},
 	}
 
-	resolver := NewCreateFlightResolver(nil)
-
-	for _, tc := range testCases {
-		testingHelper.Run(tc.name, func(testingHelper *testing.T) {
+	for _, testCase := range testCases {
+		testingHelper.Run(testCase.name, func(testingHelper *testing.T) {
 			ctx := context.Background()
-			req := connect.NewRequest(tc.req)
+			req := connect.NewRequest(testCase.req)
 			resp, err := resolver.CreateFlightGRPC(ctx, req)
 
-			if !tc.wantErr {
+			if !testCase.wantErr {
 				if err != nil {
 					testingHelper.Fatalf("unexpected error: %v", err)
 				}
@@ -114,10 +121,34 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 			if !errors.As(err, &connectionError) {
 				testingHelper.Fatalf("expected connect.Error, got %T", err)
 			}
-			if connectionError.Code() != tc.code {
-				testingHelper.Fatalf("expected code %v, got %v", tc.code, connectionError.Code())
+			if connectionError.Code() != testCase.code {
+				testingHelper.Fatalf("expected code %v, got %v", testCase.code, connectionError.Code())
 			}
 		})
+	}
+}
+
+func TestCreateFlightGRPCServiceNotConfigured(testingHelper *testing.T) {
+	resolver := NewCreateFlightResolver(nil)
+
+	req := connect.NewRequest(&v1.CreateFlightRequest{
+		Number:        "AB123",
+		Origin:        "LHR",
+		Destination:   "LGW",
+		DepartureTime: timestamppb.Now(),
+		ArrivalTime:   timestamppb.Now(),
+	})
+
+	_, err := resolver.CreateFlightGRPC(context.Background(), req)
+	if err == nil {
+		testingHelper.Fatal("expected error, got nil")
+	}
+	var connectionError *connect.Error
+	if !errors.As(err, &connectionError) {
+		testingHelper.Fatalf("expected connect.Error, got %T", err)
+	}
+	if connectionError.Code() != connect.CodeInternal {
+		testingHelper.Errorf("expected CodeInternal, got %v", connectionError.Code())
 	}
 }
 
