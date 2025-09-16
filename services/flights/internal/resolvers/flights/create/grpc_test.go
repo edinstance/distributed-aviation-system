@@ -162,6 +162,7 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 	if resp.Msg.Flight == nil {
 		testingHelper.Fatal("expected flight in response, got nil")
 	}
+
 	got := resp.Msg.Flight
 	if got.Id != flightID.String() {
 		testingHelper.Errorf("expected id %s, got %s", flightID, got.Id)

@@ -18,15 +18,15 @@ type FlightCreator interface {
 	CreateFlight(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error)
 }
 
-type CreateFlightResolver struct {
+type FlightResolver struct {
 	service FlightCreator
 }
 
-func NewCreateFlightResolver(service FlightCreator) *CreateFlightResolver {
-	return &CreateFlightResolver{service: service}
+func NewCreateFlightResolver(service FlightCreator) *FlightResolver {
+	return &FlightResolver{service: service}
 }
 
-func (r *CreateFlightResolver) CreateFlightGRPC(
+func (r *FlightResolver) CreateFlightGRPC(
 	ctx context.Context,
 	req *connect.Request[v1.CreateFlightRequest],
 ) (*connect.Response[v1.CreateFlightResponse], error) {

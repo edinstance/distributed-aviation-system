@@ -15,7 +15,7 @@ import (
 
 // FlightsServer implements the FlightsServiceHandler interface
 type FlightsServer struct {
-	createFlightResolver *flightsResolver.CreateFlightResolver
+	createFlightResolver *flightsResolver.FlightResolver
 }
 
 // NewFlightsServer creates a new FlightsServer instance
