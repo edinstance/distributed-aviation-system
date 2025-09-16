@@ -26,7 +26,7 @@ func TestValidateAndNormalizeFlightNumber(testHelper *testing.T) {
 			testHelper.Errorf("Expected normalization of %s to %s, got %s instead", testCase.number, testCase.expectedNormalized, result)
 		}
 		if !errors.Is(err, testCase.expectedError) {
-			testHelper.Errorf("Expected normalization of %s to %s, got %s instead", testCase.number, testCase.expectedError, err)
+			testHelper.Errorf("Expected error for %s to be %v, got %v instead", testCase.number, testCase.expectedError, err)
 		}
 	}
 }
