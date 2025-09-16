@@ -3,30 +3,14 @@ package create
 import (
 	"context"
 	"errors"
-	"time"
 
 	"connectrpc.com/connect"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models/converters"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
-
-type FlightCreator interface {
-	CreateFlight(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error)
-}
-
-type FlightResolver struct {
-	service FlightCreator
-}
-
-// NewCreateFlightResolver creates a new FlightResolver configured with the given FlightCreator.
-// The returned resolver delegates flight creation to the provided service.
-func NewCreateFlightResolver(service FlightCreator) *FlightResolver {
-	return &FlightResolver{service: service}
-}
 
 func (r *FlightResolver) CreateFlightGRPC(
 	ctx context.Context,

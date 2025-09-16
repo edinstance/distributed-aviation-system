@@ -21,7 +21,7 @@ import (
 func newGraphQLHandler(pool *pgxpool.Pool) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
 	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))
-	graphqlCreateFlightResolver := create.NewGraphQLCreateFlightResolver(flightService)
+	graphqlCreateFlightResolver := create.NewCreateFlightResolver(flightService)
 
 	resolver := &resolvers.Resolver{
 		CreateFlightResolver: graphqlCreateFlightResolver,

@@ -9,15 +9,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 )
 
-type GraphQLCreateFlightResolver struct {
-	service FlightCreator
-}
-
-func NewGraphQLCreateFlightResolver(service FlightCreator) *GraphQLCreateFlightResolver {
-	return &GraphQLCreateFlightResolver{service: service}
-}
-
-func (r *GraphQLCreateFlightResolver) CreateFlight(
+func (r *FlightResolver) CreateFlight(
 	ctx context.Context,
 	number string,
 	origin string,
