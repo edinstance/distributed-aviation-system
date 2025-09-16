@@ -39,7 +39,7 @@ docker run -d \
   --name postgres-flights \
   -e DATABASE_URL=postgres://postgres@localhost:5432/flights \
   -p 5432:5432 \
-  postgres:15
+  postgres:17
 ```
 
 ### 3. Run Migrations
@@ -161,14 +161,18 @@ The service exposes Connect RPC endpoints and HTTP routes:
 
 ## Development
 
-### Code Formatting
+### Code Quality
+
+#### Formatting
 
 ```bash
 
 go fmt ./...
 ```
 
-### Linting
+#### Linting
+
+This project uses [golangci-lint](https://golangci-lint.run/) with a comprehensive configuration:
 
 ```bash
 
@@ -177,4 +181,20 @@ go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 # Run linter
 golangci-lint run
+
+# Auto-fix issues where possible
+golangci-lint run --fix
+```
+
+#### Testing
+
+```bash
+# Run tests
+go test -v ./...
+
+# Run tests with coverage
+go test -v -coverprofile=coverage.out ./...
+
+# View coverage report
+go tool cover -html=coverage.out
 ```
