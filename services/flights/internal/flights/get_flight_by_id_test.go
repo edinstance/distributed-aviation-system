@@ -7,146 +7,82 @@ import (
 	"time"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestGetFlightById(t *testing.T) {
-	now := time.Now()
-	dep := now.Add(1 * time.Hour)
-	arr := dep.Add(2 * time.Hour)
+func TestService_GetFlightByID_WithFakeRepo(t *testing.T) {
+	validID := uuid.New()
 
-	repoErr := errors.New("db failure")
+	expectedFlight := &models.Flight{
+		ID:            validID,
+		Number:        "AA123",
+		Origin:        "LAX",
+		Destination:   "JFK",
+		DepartureTime: time.Now().Add(1 * time.Hour),
+		ArrivalTime:   time.Now().Add(6 * time.Hour),
+		Status:        models.FlightStatusScheduled,
+	}
 
 	tests := []struct {
-		name        string
-		number      string
-		origin      string
-		dest        string
-		departure   time.Time
-		arrival     time.Time
-		repo        *FakeRepo
-		expectError error
+		name           string
+		fakeRepo       *FakeRepo
+		inputID        uuid.UUID
+		expectErr      bool
+		expectedErrMsg string
+		expectedFlight *models.Flight
 	}{
 		{
-			name:      "valid flight",
-			number:    "AA123",
-			origin:    "JFK",
-			dest:      "LHR",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
+			name: "success",
+			fakeRepo: &FakeRepo{
+				GetFlightFn: func(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
+					return expectedFlight, nil
 				},
 			},
-			expectError: nil,
+			inputID:        validID,
+			expectErr:      false,
+			expectedFlight: expectedFlight,
 		},
 		{
-			name:        "arrival before departure",
-			number:      "AA123",
-			origin:      "JFK",
-			dest:        "LHR",
-			departure:   arr,
-			arrival:     dep,
-			repo:        &FakeRepo{},
-			expectError: exceptions.ErrInvalidTimes,
-		},
-		{
-			name:        "same origin and destination",
-			number:      "AA123",
-			origin:      "JFK",
-			dest:        "JFK",
-			departure:   dep,
-			arrival:     arr,
-			repo:        &FakeRepo{},
-			expectError: exceptions.ErrSameOriginAndDestination,
-		},
-		{
-			name:      "repo error",
-			number:    "AA123",
-			origin:    "JFK",
-			dest:      "LHR",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
+			name: "not found error",
+			fakeRepo: &FakeRepo{
+				GetFlightFn: func(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
+					return nil, errors.New("not found")
 				},
 			},
-			expectError: repoErr,
+			inputID:        validID,
+			expectErr:      true,
+			expectedErrMsg: "not found",
 		},
 		{
-			name:      "invalid flight number",
-			number:    "123",
-			origin:    "JFK",
-			dest:      "LHR",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
+			name: "nil flight but no error",
+			fakeRepo: &FakeRepo{
+				GetFlightFn: func(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
+					return nil, nil
 				},
 			},
-			expectError: exceptions.ErrInvalidFlightNumber,
-		},
-		{
-			name:      "invalid origin",
-			number:    "BA121",
-			origin:    "JFK132",
-			dest:      "LHR",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
-				},
-			},
-			expectError: exceptions.ErrInvalidIATACode,
-		},
-		{
-			name:      "invalid destination",
-			number:    "BA121",
-			origin:    "LHR",
-			dest:      "LHR1232",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
-				},
-			},
-			expectError: exceptions.ErrInvalidIATACode,
+			inputID:        validID,
+			expectErr:      false, // service will happily forward nil,nil
+			expectedFlight: nil,   // might want to guard against this in Service
 		},
 	}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			svc := NewFlightsService(tt.repo)
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			service := &Service{Repo: tc.fakeRepo}
 
-			flight, err := svc.CreateFlight(
-				context.Background(),
-				tt.number,
-				tt.origin,
-				tt.dest,
-				tt.departure,
-				tt.arrival,
-			)
+			flight, err := service.GetFlightByID(context.Background(), tc.inputID)
 
-			if tt.expectError != nil {
+			if tc.expectErr {
+				assert.Error(t, err)
+				if tc.expectedErrMsg != "" {
+					assert.Contains(t, err.Error(), tc.expectedErrMsg)
+				}
 				assert.Nil(t, flight)
-				assert.ErrorIs(t, err, tt.expectError)
-				return
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectedFlight, flight)
 			}
-
-			assert.NoError(t, err)
-			assert.NotNil(t, flight)
-			assert.Equal(t, tt.number, flight.Number)
-			assert.Equal(t, tt.origin, flight.Origin)
-			assert.Equal(t, tt.dest, flight.Destination)
-			assert.Equal(t, models.FlightStatusScheduled, flight.Status)
-			assert.NotEqual(t, uuid.Nil, flight.ID)
 		})
 	}
 }
