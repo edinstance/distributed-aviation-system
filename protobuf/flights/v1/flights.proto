@@ -8,6 +8,7 @@ option go_package = "github.com/edinstance/distributed-aviation-system/services/
 
 service FlightsService {
   rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
+  rpc GetFlightById(GetFlightByIdRequest) returns (GetFlightByIdResponse);
 }
 
 enum FlightStatus {
@@ -41,5 +42,13 @@ message CreateFlightRequest {
 }
 
 message CreateFlightResponse {
+  Flight flight = 1;
+}
+
+message GetFlightByIdRequest{
+  string id = 1;
+}
+
+message GetFlightByIdResponse {
   Flight flight = 1;
 }
