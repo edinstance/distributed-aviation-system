@@ -111,7 +111,8 @@ docker run -d \
 
 ### Docker Compose
 
-This uses the [docker-compose.yml](docker-compose.yml) file. Make sure the migrations have been run on the Docker database as well and that the environment variables are set in the [.env](.env) file.
+This uses the [docker-compose.yml](docker-compose.yml) file. Make sure the migrations have been run on the Docker
+database as well and that the environment variables are set in the [.env](.env) file.
 
 ```bash
 
@@ -154,10 +155,10 @@ migrate create -ext sql -dir migrations -seq add_new_table
 
 ## API Endpoints
 
-The service exposes Connect RPC endpoints and HTTP routes:
+The service exposes Connect RPC endpoints, a graphql endpoint and HTTP routes:
 
 - Health check: `GET /health`
-- Flight operations: Connect RPC endpoints for flight management
+- Flight operations: Connect RPC endpoints and a Graphql endpoint for flight management
 
 ## Development
 
@@ -186,7 +187,7 @@ golangci-lint run
 golangci-lint run --fix
 ```
 
-#### Testing
+### Testing
 
 ```bash
 # Run tests
@@ -198,3 +199,22 @@ go test -v -coverprofile=coverage.out ./...
 # View coverage report
 go tool cover -html=coverage.out
 ```
+
+### Graphql generation
+
+This project uses gqlgen for generating go code for handling the graphql endpoints.
+It uses the [gqlgen.yml](gqlgen.yml) file for configuration.
+To use it follow the steps below:
+
+#### Installation
+
+```shell
+go get github.com/99designs/gqlgen
+```
+
+#### Generation
+
+```shell
+go run github.com/99designs/gqlgen generate
+```
+
