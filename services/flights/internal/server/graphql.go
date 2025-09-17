@@ -19,6 +19,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// newGraphQLHandler creates and returns an HTTP handler serving the GraphQL API.
+// 
+// It wires the flights service and its resolvers into the executable schema and
+// configures transports and extensions used by the server. Configured transports
+// include OPTIONS, GET, POST, multipart form and WebSocket (with origins allowed
+// and a 10s keep-alive ping). Introspection is enabled and Automatic Persisted
+// Queries are backed by an LRU cache sized at 100 entries.
 func newGraphQLHandler(pool *pgxpool.Pool) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
 	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))

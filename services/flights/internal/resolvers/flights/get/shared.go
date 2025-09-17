@@ -16,7 +16,7 @@ type FlightResolver struct {
 }
 
 // NewGetFlightResolver creates a new FlightResolver configured with the given FlightGetter.
-// The returned resolver delegates flight retrieval to the provided service.
+// NewGetFlightResolver returns a FlightResolver that delegates flight retrieval to the provided FlightGetter.
 func NewGetFlightResolver(service FlightGetter) *FlightResolver {
 	return &FlightResolver{service: service}
 }
