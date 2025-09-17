@@ -14,6 +14,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql/resolvers"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/create"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/get"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -22,9 +23,11 @@ func newGraphQLHandler(pool *pgxpool.Pool) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
 	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))
 	graphqlCreateFlightResolver := create.NewCreateFlightResolver(flightService)
+	graphqlGetFlightResolver := get.NewGetFlightResolver(flightService)
 
 	resolver := &resolvers.Resolver{
 		CreateFlightResolver: graphqlCreateFlightResolver,
+		GetFlightResolver:    graphqlGetFlightResolver,
 	}
 
 	srv := handler.New(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))

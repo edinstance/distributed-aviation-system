@@ -1,6 +1,9 @@
 package resolvers
 
-import "github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/create"
+import (
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/create"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/get"
+)
 
 // This file will not be regenerated automatically.
 //
@@ -8,4 +11,5 @@ import "github.com/edinstance/distributed-aviation-system/services/flights/inter
 
 type Resolver struct {
 	CreateFlightResolver *create.FlightResolver
+	GetFlightResolver    *get.FlightResolver
 }
