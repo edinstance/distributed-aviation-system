@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/pashagolub/pgxmock/v4"
@@ -49,8 +50,12 @@ func TestFlightRepositoryCreateFlight(testHelper *testing.T) {
 			},
 		},
 		{
-			name:       "UniqueConstraintViolation",
-			mockErr:    &pgconn.PgError{Code: "23505", Message: "duplicate key value violates unique constraint"},
+			name: "UniqueConstraintViolation",
+			mockErr: &pgconn.PgError{
+				Code:           pgerrcode.UniqueViolation,
+				Message:        "duplicate key value violates unique constraint",
+				ConstraintName: "unique_flight_instance",
+			},
 			returnRows: false,
 			expectErr:  true,
 			assertChecks: func(testHelper *testing.T, flight *models.Flight, err error, createdAt, updatedAt time.Time) {
