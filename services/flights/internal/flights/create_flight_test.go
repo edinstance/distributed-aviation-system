@@ -1,4 +1,4 @@
-package flights_test
+package flights
 
 import (
 	"context"
@@ -8,22 +8,9 @@ import (
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
-
-type FakeRepo struct {
-	CreateFlightFn func(ctx context.Context, f *models.Flight) error
-}
-
-func (f *FakeRepo) CreateFlight(ctx context.Context, fl *models.Flight) error {
-	return f.CreateFlightFn(ctx, fl)
-}
-
-func newService(repo *FakeRepo) *flights.Service {
-	return flights.NewFlightsService(repo)
-}
 
 func TestCreateFlight(t *testing.T) {
 	now := time.Now()
@@ -136,7 +123,7 @@ func TestCreateFlight(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := newService(tt.repo)
+			svc := NewFlightsService(tt.repo)
 
 			flight, err := svc.CreateFlight(
 				context.Background(),

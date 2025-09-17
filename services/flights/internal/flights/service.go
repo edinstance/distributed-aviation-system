@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
+	"github.com/google/uuid"
 )
 
 type repository interface {
 	CreateFlight(ctx context.Context, f *models.Flight) error
+	GetFlightByID(ctx context.Context, id uuid.UUID) (*models.Flight, error)
 }
 
 type Service struct {

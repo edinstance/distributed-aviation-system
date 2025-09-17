@@ -60,8 +60,7 @@ func TestFlightRepositoryCreateFlight(testHelper *testing.T) {
 			expectErr:  true,
 			assertChecks: func(testHelper *testing.T, flight *models.Flight, err error, createdAt, updatedAt time.Time) {
 				require.Error(testHelper, err)
-				assert.Contains(testHelper, err.Error(), "flight with number")
-				assert.Contains(testHelper, err.Error(), "already exists")
+				assert.Contains(testHelper, err.Error(), "duplicate key value violates unique constraint")
 			},
 		},
 		{
