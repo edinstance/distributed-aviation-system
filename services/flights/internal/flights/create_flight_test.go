@@ -1,4 +1,4 @@
-package flights_test
+package flights
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
@@ -27,7 +26,7 @@ func TestCreateFlight(t *testing.T) {
 		dest        string
 		departure   time.Time
 		arrival     time.Time
-		repo        *helpers.FakeRepo
+		repo        *FakeRepo
 		expectError error
 	}{
 		{
@@ -37,7 +36,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			repo: &helpers.FakeRepo{
+			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return nil
 				},
@@ -51,7 +50,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "LHR",
 			departure:   arr,
 			arrival:     dep,
-			repo:        &helpers.FakeRepo{},
+			repo:        &FakeRepo{},
 			expectError: exceptions.ErrInvalidTimes,
 		},
 		{
@@ -61,7 +60,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "JFK",
 			departure:   dep,
 			arrival:     arr,
-			repo:        &helpers.FakeRepo{},
+			repo:        &FakeRepo{},
 			expectError: exceptions.ErrSameOriginAndDestination,
 		},
 		{
@@ -71,7 +70,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			repo: &helpers.FakeRepo{
+			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return repoErr
 				},
@@ -85,7 +84,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			repo: &helpers.FakeRepo{
+			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return repoErr
 				},
@@ -99,7 +98,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			repo: &helpers.FakeRepo{
+			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return repoErr
 				},
@@ -113,7 +112,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR1232",
 			departure: dep,
 			arrival:   arr,
-			repo: &helpers.FakeRepo{
+			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return repoErr
 				},
@@ -124,7 +123,7 @@ func TestCreateFlight(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := flights.NewFlightsService(tt.repo)
+			svc := NewFlightsService(tt.repo)
 
 			flight, err := svc.CreateFlight(
 				context.Background(),
