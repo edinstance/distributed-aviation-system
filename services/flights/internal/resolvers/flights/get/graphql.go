@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *FlightResolver) GetFlight(
+func (r *FlightResolver) GetFlightById(
 	ctx context.Context,
 	id string,
 ) (*models.Flight, error) {
@@ -20,13 +20,13 @@ func (r *FlightResolver) GetFlight(
 		return nil, errors.New("service not configured")
 	}
 
-	flightID, err := uuid.Parse(id)
+	flightId, err := uuid.Parse(id)
 	if err != nil {
 		logger.Error("Invalid flight ID format", "id", id, "err", err)
 		return nil, errors.New("invalid flight ID format")
 	}
 
-	flight, err := r.service.GetFlightByID(ctx, flightID)
+	flight, err := r.service.GetFlightByID(ctx, flightId)
 	if err != nil {
 		logger.Error("Failed to get flight", "id", id, "err", err)
 		return nil, err

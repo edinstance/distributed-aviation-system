@@ -72,7 +72,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		GetFlight          func(childComplexity int, id string) int
+		GetFlightByID      func(childComplexity int, id string) int
 		__resolve__service func(childComplexity int) int
 		__resolve_entities func(childComplexity int, representations []map[string]any) int
 	}
@@ -92,7 +92,7 @@ type MutationResolver interface {
 	CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time) (*models.Flight, error)
 }
 type QueryResolver interface {
-	GetFlight(ctx context.Context, id string) (*models.Flight, error)
+	GetFlightByID(ctx context.Context, id string) (*models.Flight, error)
 }
 
 type executableSchema struct {
@@ -193,17 +193,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.CreateFlight(childComplexity, args["number"].(string), args["origin"].(string), args["destination"].(string), args["departureTime"].(time.Time), args["arrivalTime"].(time.Time)), true
 
-	case "Query.getFlight":
-		if e.complexity.Query.GetFlight == nil {
+	case "Query.getFlightById":
+		if e.complexity.Query.GetFlightByID == nil {
 			break
 		}
 
-		args, err := ec.field_Query_getFlight_args(ctx, rawArgs)
+		args, err := ec.field_Query_getFlightById_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.GetFlight(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.GetFlightByID(childComplexity, args["id"].(string)), true
 	case "Query._service":
 		if e.complexity.Query.__resolve__service == nil {
 			break
@@ -485,7 +485,7 @@ func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawA
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getFlight_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_getFlightById_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
@@ -915,15 +915,15 @@ func (ec *executionContext) fieldContext_Mutation_createFlight(ctx context.Conte
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getFlight(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_getFlightById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_getFlight,
+		ec.fieldContext_Query_getFlightById,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetFlight(ctx, fc.Args["id"].(string))
+			return ec.resolvers.Query().GetFlightByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalOFlight2ᚖgithubᚗcomᚋedinstanceᚋdistributedᚑaviationᚑsystemᚋservicesᚋflightsᚋinternalᚋdatabaseᚋmodelsᚐFlight,
@@ -932,7 +932,7 @@ func (ec *executionContext) _Query_getFlight(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getFlight(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_getFlightById(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -969,7 +969,7 @@ func (ec *executionContext) fieldContext_Query_getFlight(ctx context.Context, fi
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getFlight_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_getFlightById_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2875,7 +2875,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "getFlight":
+		case "getFlightById":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -2884,7 +2884,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getFlight(ctx, field)
+				res = ec._Query_getFlightById(ctx, field)
 				return res
 			}
 

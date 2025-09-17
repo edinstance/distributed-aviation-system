@@ -29,9 +29,9 @@ func (r *mutationResolver) CreateFlight(ctx context.Context, number string, orig
 	)
 }
 
-// GetFlight is the resolver for the getFlight field.
-func (r *queryResolver) GetFlight(ctx context.Context, id string) (*models.Flight, error) {
-	return r.Resolver.GetFlightResolver.GetFlight(ctx, id)
+// GetFlightByID is the resolver for the getFlightById field.
+func (r *queryResolver) GetFlightByID(ctx context.Context, id string) (*models.Flight, error) {
+	return r.Resolver.GetFlightResolver.GetFlightById(ctx, id)
 }
 
 // Flight returns graphql1.FlightResolver implementation.
