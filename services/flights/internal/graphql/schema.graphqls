@@ -1,5 +1,9 @@
 scalar Time
 
+type Query {
+    getFlight(id: ID!): Flight
+}
+
 type Mutation {
     createFlight(
         number: String!
