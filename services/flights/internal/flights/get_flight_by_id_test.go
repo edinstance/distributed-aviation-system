@@ -9,11 +9,12 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/helpers"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestCreateFlight(t *testing.T) {
+func TestGetFlightById(t *testing.T) {
 	now := time.Now()
 	dep := now.Add(1 * time.Hour)
 	arr := dep.Add(2 * time.Hour)

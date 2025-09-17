@@ -21,7 +21,3 @@ type Service struct {
 func NewFlightsService(repo repository) *Service {
 	return &Service{Repo: repo}
 }
-
-func (s *Service) GetFlightByID(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
-	return s.Repo.GetFlightByID(ctx, id)
-}
