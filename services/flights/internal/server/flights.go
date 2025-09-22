@@ -23,7 +23,11 @@ type FlightsServer struct {
 
 // NewFlightsServer creates and returns a FlightsServer wired with resolvers for creating
 // and retrieving flights. The provided Postgres connection pool is used to construct the
-// flight repository and service which are injected into the create and get flight resolvers.
+// NewFlightsServer creates a FlightsServer wired with a flight repository and service
+// backed by the provided Postgres connection pool.
+//
+// The returned server contains create and get flight resolvers which share a single
+// flights service built from a repository constructed using the given pgxpool.Pool.
 func NewFlightsServer(pool *pgxpool.Pool) *FlightsServer {
 	logger.Debug("Creating new FlightsServer")
 	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))

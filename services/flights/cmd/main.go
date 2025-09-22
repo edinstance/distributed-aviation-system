@@ -18,6 +18,14 @@ import (
 	"golang.org/x/net/http2/h2c"
 )
 
+// main is the programme entry point for the Flights service.
+// 
+// It initialises configuration and logging, attempts to load a local .env file
+// (non-fatal), and opens the database connection pool (exits on failure). An
+// HTTP/2-over-cleartext server (h2c) is created with sensible timeouts and a
+// mux from the server package. The server is started in a goroutine and the
+// process listens for SIGINT/SIGTERM to perform a graceful shutdown with a
+// 10‑second timeout. If no port is configured, it defaults to :8081.
 func main() {
 
 	err := godotenv.Load()

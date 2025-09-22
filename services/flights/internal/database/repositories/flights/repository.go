@@ -16,7 +16,7 @@ type FlightRepository struct {
 }
 
 // NewFlightRepository returns a new FlightRepository backed by the provided *pgxpool.Pool.
-// The pool is stored using the package's DB interface to allow dependency injection and testing.
+// The pool is stored via the package DB interface to enable dependency injection and testing.
 func NewFlightRepository(pool *pgxpool.Pool) *FlightRepository {
 	return &FlightRepository{pool: pool}
 }

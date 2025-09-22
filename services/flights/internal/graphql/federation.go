@@ -132,6 +132,9 @@ func (ec *executionContext) resolveEntityGroup(
 	}
 }
 
+// isMulti reports whether the given GraphQL type should be resolved using the
+// multi-entity resolution path (batch resolution). Currently returns false for
+// all types.
 func isMulti(typeName string) bool {
 	switch typeName {
 	default:
@@ -198,6 +201,14 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
+// entityResolverNameForFlight determines which Flight entity resolver should be used for
+// the given representation and returns its name.
+//
+// It inspects the representation's key fields (currently "id") to decide a suitable
+// resolver. If a non-null key is present it returns the corresponding resolver name
+// ("findFlightByID"). If required key fields are missing or all key values are null
+// it returns an ErrTypeNotFound error describing the reason. Multiple key-check errors
+// are aggregated into the returned error message.
 func entityResolverNameForFlight(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys

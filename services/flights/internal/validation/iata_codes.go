@@ -12,7 +12,11 @@ var (
 	iataCodeRegex = regexp.MustCompile(`^[A-Z]{3}$`)
 )
 
-// ValidateAndNormalizeIATACode trims, upper-cases, and validates a 3-letter IATA code.
+// ValidateAndNormalizeIATACode normalises an IATA airport code by trimming
+// surrounding whitespace and converting to upper-case, then validates it must
+// consist of three ASCII letters. On success it returns the normalised code.
+// If the code is not a valid 3‑letter IATA code it returns an empty string and
+// exceptions.ErrInvalidIATACode.
 func ValidateAndNormalizeIATACode(code string) (string, error) {
 	normalized := strings.ToUpper(strings.TrimSpace(code))
 	if !iataCodeRegex.MatchString(normalized) {

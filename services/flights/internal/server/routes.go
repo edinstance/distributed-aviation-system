@@ -10,6 +10,10 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// NewMux creates and returns an *http.ServeMux pre-configured with the service's HTTP endpoints.
+// It registers the Flights connect/gRPC (and gRPC-Web) handler, the GraphQL endpoint at "/graphql",
+// a health check at "/health" and, when the environment is not "prod", the GraphQL Playground at "/playground".
+// The pool argument is the Postgres connection pool used to construct the Flights server and GraphQL handler.
 func NewMux(pool *pgxpool.Pool) *http.ServeMux {
 	mux := http.NewServeMux()
 

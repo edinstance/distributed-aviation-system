@@ -6,6 +6,10 @@ import (
 	"strings"
 )
 
+// ValidateRequiredInput checks that each entry in fields is present and non-empty.
+// It treats string values that are empty after trimming whitespace, and nil values, as missing.
+// If any fields are missing it returns an error listing their names (sorted, comma-separated);
+// otherwise it returns nil.
 func ValidateRequiredInput(fields map[string]any) error {
 	var missing []string
 	for name, val := range fields {
