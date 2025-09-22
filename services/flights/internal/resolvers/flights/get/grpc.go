@@ -6,6 +6,7 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models/converters"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
 	"github.com/google/uuid"
@@ -34,6 +35,14 @@ func (r *FlightResolver) GetFlightByIdGRPC(
 
 	flight, err := r.service.GetFlightByID(ctx, flightId)
 	if err != nil {
+		if errors.Is(err, exceptions.ErrNotFound) {
+			logger.Debug("Flight not found", "id", id)
+
+			resp := &v1.GetFlightByIdResponse{
+				Flight: nil,
+			}
+			return connect.NewResponse(resp), nil
+		}
 		logger.Error("Failed to get flight", "id", id, "err", err)
 		return nil, err
 	}

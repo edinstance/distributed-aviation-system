@@ -6,6 +6,7 @@ import (
 	"fmt"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 )
@@ -32,7 +33,7 @@ func (flightRepository *FlightRepository) GetFlightByID(ctx context.Context, id 
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, fmt.Errorf("flight with id %s not found", id)
+			return nil, exceptions.ErrNotFound
 		}
 		return nil, fmt.Errorf("get flight %s: %w", id, err)
 	}

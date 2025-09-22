@@ -21,7 +21,7 @@ func TestHealthHandler(testHelper *testing.T) {
 		testHelper.Fatalf("Health handler returned wrong status code: got %v want %v", responseWriter.Code, http.StatusOK)
 	}
 
-	expectedBody := `{"status":"ok"}`
+	expectedBody := `{"status":"UP"}`
 	if responseWriter.Body.String() != expectedBody {
 		testHelper.Errorf("handler returned unexpected body: got %v want %v",
 			responseWriter.Body.String(), expectedBody)

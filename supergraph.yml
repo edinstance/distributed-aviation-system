@@ -1,0 +1,6 @@
+federation_version: =2.3.2
+subgraphs:
+  flights:
+    routing_url: http://flights-service:8081/graphql
+    schema:
+      file: ./services/flights/internal/graphql/schema.graphqls

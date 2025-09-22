@@ -2,6 +2,7 @@ package flights
 
 import (
 	"context"
+	"fmt"
 	"regexp"
 	"testing"
 	"time"
@@ -60,7 +61,14 @@ func TestFlightRepositoryCreateFlight(testHelper *testing.T) {
 			expectErr:  true,
 			assertChecks: func(testHelper *testing.T, flight *models.Flight, err error, createdAt, updatedAt time.Time) {
 				require.Error(testHelper, err)
-				assert.Contains(testHelper, err.Error(), "duplicate key value violates unique constraint")
+
+				expected := fmt.Sprintf(
+					"flight with number %s at %s already exists",
+					flight.Number,
+					flight.DepartureTime.Format(time.RFC3339),
+				)
+
+				assert.Contains(testHelper, err.Error(), expected)
 			},
 		},
 		{
