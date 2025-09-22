@@ -16,7 +16,8 @@ type FlightResolver struct {
 }
 
 // NewCreateFlightResolver creates a new FlightResolver configured with the given FlightCreator.
-// NewCreateFlightResolver returns a new FlightResolver that delegates flight creation to the provided FlightCreator.
+// NewCreateFlightResolver returns a new FlightResolver configured with the given FlightCreator.
+// The returned resolver delegates flight creation to the provided service.
 func NewCreateFlightResolver(service FlightCreator) *FlightResolver {
 	return &FlightResolver{service: service}
 }

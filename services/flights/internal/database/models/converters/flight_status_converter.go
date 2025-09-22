@@ -5,7 +5,9 @@ import (
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
 )
 
-// ToProtoStatus converts a models.FlightStatus to its protobuf equivalent.
+// ToProtoStatus converts a models.FlightStatus to the v1 protobuf FlightStatus.
+// It maps known model statuses to their protobuf equivalents and returns
+// FLIGHT_STATUS_UNSPECIFIED for unknown or unsupported values.
 func ToProtoStatus(s models.FlightStatus) v1.FlightStatus {
 	switch s {
 	case models.FlightStatusScheduled:
@@ -25,7 +27,9 @@ func ToProtoStatus(s models.FlightStatus) v1.FlightStatus {
 	}
 }
 
-// FromProtoStatus converts a protobuf FlightStatus to the models.FlightStatus type.
+// FromProtoStatus converts a v1.FlightStatus protobuf enum to the corresponding
+// models.FlightStatus. Unknown or unspecified protobuf values map to
+// models.FlightStatusUnspecified.
 func FromProtoStatus(p v1.FlightStatus) models.FlightStatus {
 	switch p {
 	case v1.FlightStatus_FLIGHT_STATUS_SCHEDULED:

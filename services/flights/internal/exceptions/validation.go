@@ -25,7 +25,9 @@ var errorCodeMap = map[error]connect.Code{
 // MapErrorToGrpcCode returns the corresponding connect.Code for the provided error.
 // It checks the error against the package's sentinel errors in errorCodeMap using
 // errors.Is (so wrapped errors are matched). If no mapping is found it returns
-// connect.CodeInternal.
+// MapErrorToGrpcCode maps an error to the corresponding Connect gRPC code.
+// It returns a specific code for known sentinel validation errors (matching wrapped errors via errors.Is)
+// using the package's errorCodeMap, and falls back to connect.CodeInternal for unknown or nil errors.
 func MapErrorToGrpcCode(err error) connect.Code {
 	for e, code := range errorCodeMap {
 		if errors.Is(err, e) {

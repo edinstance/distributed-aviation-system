@@ -25,7 +25,15 @@ import (
 // configures transports and extensions used by the server. Configured transports
 // include OPTIONS, GET, POST, multipart form and WebSocket (with origins allowed
 // and a 10s keep-alive ping). Introspection is enabled and Automatic Persisted
-// Queries are backed by an LRU cache sized at 100 entries.
+// newGraphQLHandler creates and returns an http.Handler that serves the GraphQL API
+// for the flights service. It initialises the flights repository and service from
+// the provided database pool, constructs create/get flight resolvers, and builds
+// the executable schema.
+//
+// The returned handler is configured with HTTP transports (OPTIONS, GET, POST,
+// multipart form) and WebSocket support (permissive origin check, 10s keep-alive).
+// It also enables GraphQL introspection and Automatic Persisted Queries backed by
+// an LRU cache of 100 entries.
 func newGraphQLHandler(pool *pgxpool.Pool) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
 	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))
