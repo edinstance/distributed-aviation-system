@@ -13,6 +13,19 @@ type FakeRepo struct {
 	GetFlightFn    func(ctx context.Context, id uuid.UUID) (*models.Flight, error)
 }
 
+type FakeFlightsCache struct {
+	SaveFlightFn func(ctx context.Context, f *models.Flight) error
+	GetFlightFn  func(ctx context.Context, id uuid.UUID) (*models.Flight, error)
+}
+
+func (f FakeFlightsCache) GetFlight(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
+	return f.GetFlightFn(ctx, id)
+}
+
+func (f FakeFlightsCache) SetFlight(ctx context.Context, flight *models.Flight) error {
+	return f.SaveFlightFn(ctx, flight)
+}
+
 func (f *FakeRepo) GetFlightByID(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
 	return f.GetFlightFn(ctx, id)
 }

@@ -14,7 +14,7 @@ func (r *flightCache) SetFlight(ctx context.Context, flight *models.Flight) erro
 	data, err := json.Marshal(flight)
 
 	if err != nil {
-		return fmt.Errorf("error setting cache data: %w", err)
+		return fmt.Errorf("error converting data to json: %w", err)
 	}
 
 	return r.client.Set(ctx, key, data, r.ttl).Err()
