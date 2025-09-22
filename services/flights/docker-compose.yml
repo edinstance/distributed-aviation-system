@@ -9,7 +9,7 @@ services:
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-flights}"]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-flights}" ]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -35,6 +35,19 @@ services:
       flights-database:
         condition: service_healthy
 
+  flights-cache:
+    container_name: flights-cache
+    image: redis:8.2
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - aviation-network
+
   flights-service:
     build: .
     container_name: flights-service
@@ -42,16 +55,19 @@ services:
       - "8081:8081"
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgres://postgres:postgres@flights-database:5432/flights?sslmode=disable}
+      CACHE_URL: ${REDIS_URL:-redis://flights-cache:6379}
       ENVIRONMENT: "dev"
       PORT: 8081
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8081/health || exit 1"]
-      interval: 30s
+      test: [ "CMD-SHELL", "curl -f http://localhost:8081/health || exit 1" ]
+      interval: 10s
       timeout: 10s
       retries: 5
       start_period: 10s
     depends_on:
       flights-database:
+        condition: service_healthy
+      flights-cache:
         condition: service_healthy
     networks:
       - aviation-network

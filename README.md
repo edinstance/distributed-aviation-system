@@ -18,8 +18,8 @@ done in the [router.yml](router.yml) file and it uses this [supergraph](supergra
 The routers use a single federated graph or supergraph which is made from all of the individual services graphs or
 sub-graphs. The supergraph can be created using the [Apollo Rover CLI](https://www.apollographql.com/docs/rover).
 
-[!CAUTION]
-Before using the router make sure that the supergraph has been created or updated.
+> [!CAUTION]
+> Before using the router make sure that the supergraph has been created or updated.
 
 ### Rover installation
 

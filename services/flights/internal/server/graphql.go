@@ -8,6 +8,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	cacheRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/cache/repositories/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
@@ -17,26 +19,15 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/get"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
-// newGraphQLHandler creates and returns an HTTP handler serving the GraphQL API.
-// 
-// It wires the flights service and its resolvers into the executable schema and
-// configures transports and extensions used by the server. Configured transports
-// include OPTIONS, GET, POST, multipart form and WebSocket (with origins allowed
-// and a 10s keep-alive ping). Introspection is enabled and Automatic Persisted
-// newGraphQLHandler creates and returns an http.Handler that serves the GraphQL API
-// for the flights service. It initialises the flights repository and service from
-// the provided database pool, constructs create/get flight resolvers, and builds
-// the executable schema.
-//
-// The returned handler is configured with HTTP transports (OPTIONS, GET, POST,
-// multipart form) and WebSocket support (permissive origin check, 10s keep-alive).
-// It also enables GraphQL introspection and Automatic Persisted Queries backed by
-// an LRU cache of 100 entries.
-func newGraphQLHandler(pool *pgxpool.Pool) http.Handler {
+func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
-	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))
+	dbRepo := flightRepository.NewFlightRepository(pool)
+	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
+
+	flightService := flights.NewFlightsService(dbRepo, cacheRepo)
 	graphqlCreateFlightResolver := create.NewCreateFlightResolver(flightService)
 	graphqlGetFlightResolver := get.NewGetFlightResolver(flightService)
 
