@@ -27,6 +27,7 @@ func TestCreateFlight(t *testing.T) {
 		departure   time.Time
 		arrival     time.Time
 		repo        *FakeRepo
+		cache       *FakeFlightsCache
 		expectError error
 	}{
 		{
@@ -41,6 +42,11 @@ func TestCreateFlight(t *testing.T) {
 					return nil
 				},
 			},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
+				},
+			},
 			expectError: nil,
 		},
 		{
@@ -51,6 +57,11 @@ func TestCreateFlight(t *testing.T) {
 			departure:   arr,
 			arrival:     dep,
 			repo:        &FakeRepo{},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
+				},
+			},
 			expectError: exceptions.ErrInvalidTimes,
 		},
 		{
@@ -61,6 +72,11 @@ func TestCreateFlight(t *testing.T) {
 			departure:   dep,
 			arrival:     arr,
 			repo:        &FakeRepo{},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
+				},
+			},
 			expectError: exceptions.ErrSameOriginAndDestination,
 		},
 		{
@@ -73,6 +89,11 @@ func TestCreateFlight(t *testing.T) {
 			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return repoErr
+				},
+			},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
 				},
 			},
 			expectError: repoErr,
@@ -89,6 +110,11 @@ func TestCreateFlight(t *testing.T) {
 					return repoErr
 				},
 			},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
+				},
+			},
 			expectError: exceptions.ErrInvalidFlightNumber,
 		},
 		{
@@ -101,6 +127,11 @@ func TestCreateFlight(t *testing.T) {
 			repo: &FakeRepo{
 				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
 					return repoErr
+				},
+			},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
 				},
 			},
 			expectError: exceptions.ErrInvalidIATACode,
@@ -117,13 +148,18 @@ func TestCreateFlight(t *testing.T) {
 					return repoErr
 				},
 			},
+			cache: &FakeFlightsCache{
+				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
+					return nil
+				},
+			},
 			expectError: exceptions.ErrInvalidIATACode,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := NewFlightsService(tt.repo)
+			svc := NewFlightsService(tt.repo, tt.cache)
 
 			flight, err := svc.CreateFlight(
 				context.Background(),

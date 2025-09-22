@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/cache"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
@@ -35,7 +36,21 @@ func main() {
 	}
 	defer pool.Close()
 
-	mux := server.NewMux(pool)
+	cacheClient, err := cache.Init(config.App.CacheURL)
+	if err != nil {
+		logger.Error("Failed to initialise cache", "err", err)
+		cacheClient = nil
+	}
+
+	defer func() {
+		if cacheClient != nil {
+			if err := cacheClient.Close(); err != nil {
+				logger.Warn("Error closing Redis client", "err", err)
+			}
+		}
+	}()
+
+	mux := server.NewMux(pool, cacheClient)
 
 	port := config.App.Port
 	if port == "" {

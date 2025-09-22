@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"connectrpc.com/connect"
+	cacheRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/cache/repositories/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
@@ -13,6 +15,7 @@ import (
 	getFlightsResolver "github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/get"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 )
 
 // FlightsServer implements the FlightsServiceHandler interface
@@ -21,12 +24,13 @@ type FlightsServer struct {
 	getFlightsResolver   *getFlightsResolver.FlightResolver
 }
 
-// NewFlightsServer creates and returns a FlightsServer wired with resolvers for creating
-// and retrieving flights. The provided Postgres connection pool is used to construct the
-// flight repository and service which are injected into the create and get flight resolvers.
-func NewFlightsServer(pool *pgxpool.Pool) *FlightsServer {
+func NewFlightsServer(pool *pgxpool.Pool, client *redis.Client) *FlightsServer {
 	logger.Debug("Creating new FlightsServer")
-	flightService := flights.NewFlightsService(flightRepository.NewFlightRepository(pool))
+	dbRepo := flightRepository.NewFlightRepository(pool)
+	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
+
+	flightService := flights.NewFlightsService(dbRepo, cacheRepo)
+
 	return &FlightsServer{
 		createFlightResolver: createFlightsResolver.NewCreateFlightResolver(flightService),
 		getFlightsResolver:   getFlightsResolver.NewGetFlightResolver(flightService),

@@ -3,6 +3,7 @@ package flights
 import (
 	"context"
 
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/cache/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/google/uuid"
 )
@@ -13,11 +14,11 @@ type repository interface {
 }
 
 type Service struct {
-	Repo repository
+	Repo  repository
+	Cache flights.FlightCacheRepository
 }
 
 // NewFlightsService returns a new *Service that uses the provided repository for flight persistence.
-// The returned Service's Repo field is set to the supplied repository.
-func NewFlightsService(repo repository) *Service {
-	return &Service{Repo: repo}
+func NewFlightsService(repo repository, cache flights.FlightCacheRepository) *Service {
+	return &Service{Repo: repo, Cache: cache}
 }

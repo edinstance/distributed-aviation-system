@@ -9,6 +9,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// the pool is closed and an error is returned. Errors returned wrap the underlying cause.
 func Init(databaseURL string) (*pgxpool.Pool, error) {
 
 	if databaseURL == "" {
