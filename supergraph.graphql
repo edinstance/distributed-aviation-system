@@ -1,0 +1,82 @@
+schema
+  @link(url: "https://specs.apollo.dev/link/v1.0")
+  @link(url: "https://specs.apollo.dev/join/v0.3", for: EXECUTION)
+{
+  query: Query
+  mutation: Mutation
+}
+
+directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
+
+directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+directive @join__graph(name: String!, url: String!) on ENUM_VALUE
+
+directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
+
+directive @join__type(graph: join__Graph!, key: join__FieldSet, extension: Boolean! = false, resolvable: Boolean! = true, isInterfaceObject: Boolean! = false) repeatable on OBJECT | INTERFACE | UNION | ENUM | INPUT_OBJECT | SCALAR
+
+directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on UNION
+
+directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
+
+type Flight
+  @join__type(graph: FLIGHTS, key: "id")
+{
+  id: ID!
+  number: String!
+  origin: String!
+  destination: String!
+  departureTime: Time!
+  arrivalTime: Time!
+  status: FlightStatus!
+  createdAt: Time!
+  updatedAt: Time!
+}
+
+enum FlightStatus
+  @join__type(graph: FLIGHTS)
+{
+  SCHEDULED @join__enumValue(graph: FLIGHTS)
+  DELAYED @join__enumValue(graph: FLIGHTS)
+  ARRIVED @join__enumValue(graph: FLIGHTS)
+  IN_PROGRESS @join__enumValue(graph: FLIGHTS)
+  DEPARTED @join__enumValue(graph: FLIGHTS)
+  CANCELLED @join__enumValue(graph: FLIGHTS)
+  UNSPECIFIED @join__enumValue(graph: FLIGHTS)
+}
+
+scalar join__FieldSet
+
+enum join__Graph {
+  FLIGHTS @join__graph(name: "flights", url: "http://flights-service:8081/graphql")
+}
+
+scalar link__Import
+
+enum link__Purpose {
+  """
+  `SECURITY` features provide metadata necessary to securely resolve fields.
+  """
+  SECURITY
+
+  """
+  `EXECUTION` features provide metadata necessary for operation execution.
+  """
+  EXECUTION
+}
+
+type Mutation
+  @join__type(graph: FLIGHTS)
+{
+  createFlight(number: String!, origin: String!, destination: String!, departureTime: Time!, arrivalTime: Time!): Flight!
+}
+
+type Query
+  @join__type(graph: FLIGHTS)
+{
+  getFlightById(id: ID!): Flight
+}
+
+scalar Time
+  @join__type(graph: FLIGHTS)
