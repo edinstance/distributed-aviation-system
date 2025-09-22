@@ -36,19 +36,19 @@ func main() {
 	}
 	defer pool.Close()
 
-	cache_client, err := cache.Init(config.App.CacheURL)
+	cacheClient, err := cache.Init(config.App.CacheURL)
 	if err != nil {
 		logger.Error("Failed to initialise cache", "err", err)
 		os.Exit(1)
 	}
 
 	defer func() {
-		if err := cache_client.Close(); err != nil {
+		if err := cacheClient.Close(); err != nil {
 			logger.Warn("Error closing Redis client", "err", err)
 		}
 	}()
 
-	mux := server.NewMux(pool, cache_client)
+	mux := server.NewMux(pool, cacheClient)
 
 	port := config.App.Port
 	if port == "" {
