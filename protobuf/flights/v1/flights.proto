@@ -1,0 +1,54 @@
+syntax = "proto3";
+
+package flights.v1;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1;v1";
+
+service FlightsService {
+  rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
+  rpc GetFlightById(GetFlightByIdRequest) returns (GetFlightByIdResponse);
+}
+
+enum FlightStatus {
+  FLIGHT_STATUS_UNSPECIFIED = 0;
+  FLIGHT_STATUS_SCHEDULED = 1;
+  FLIGHT_STATUS_DELAYED = 2;
+  FLIGHT_STATUS_ARRIVED = 3;
+  FLIGHT_STATUS_IN_PROGRESS = 4;
+  FLIGHT_STATUS_DEPARTED = 5;
+  FLIGHT_STATUS_CANCELLED = 6;
+}
+
+message Flight {
+  string id = 1;
+  string number = 2;
+  string origin = 3;
+  string destination = 4;
+  google.protobuf.Timestamp departure_time = 5;
+  google.protobuf.Timestamp arrival_time = 6;
+  FlightStatus status = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message CreateFlightRequest {
+  string number = 1;
+  string origin = 2;
+  string destination = 3;
+  google.protobuf.Timestamp departure_time = 4;
+  google.protobuf.Timestamp arrival_time = 5;
+}
+
+message CreateFlightResponse {
+  Flight flight = 1;
+}
+
+message GetFlightByIdRequest{
+  string id = 1;
+}
+
+message GetFlightByIdResponse {
+  Flight flight = 1;
+}

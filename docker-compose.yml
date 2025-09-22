@@ -1,0 +1,28 @@
+services:
+  apollo-router:
+    image: ghcr.io/apollographql/router:v2.6.2
+    container_name: graphql-router
+    volumes:
+      - ./supergraph.graphql:/dist/supergraph.graphql
+      - ./router.yml:/dist/router.yml
+    command:
+      [
+        "--supergraph",
+        "/dist/supergraph.graphql",
+        "--config",
+        "/dist/router.yml",
+        "--hot-reload"
+      ]
+    ports:
+      - "4000:4000"
+      - "8088:8088"
+    networks:
+      - aviation-network
+
+include:
+  - ./services/flights/docker-compose.yml
+
+networks:
+  aviation-network:
+    name: aviation-network
+    driver: bridge

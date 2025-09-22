@@ -1,0 +1,37 @@
+scalar Time
+
+type Query {
+    getFlightById(id: ID!): Flight
+}
+
+type Mutation {
+    createFlight(
+        number: String!
+        origin: String!
+        destination: String!
+        departureTime: Time!
+        arrivalTime: Time!
+    ): Flight!
+}
+
+enum FlightStatus {
+    SCHEDULED
+    DELAYED
+    ARRIVED
+    IN_PROGRESS
+    DEPARTED
+    CANCELLED
+    UNSPECIFIED
+}
+
+type Flight @key(fields: "id") {
+    id: ID!
+    number: String!
+    origin: String!
+    destination: String!
+    departureTime: Time!
+    arrivalTime: Time!
+    status: FlightStatus!
+    createdAt: Time!
+    updatedAt: Time!
+}
