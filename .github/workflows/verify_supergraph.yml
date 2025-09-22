@@ -1,0 +1,28 @@
+name: Verify Supergraph
+
+on:
+  pull_request:
+
+jobs:
+  verify_supergraph:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        # This fetches the repository's code and places it in the working directory of the workflow runner.
+
+      - name: Install Rover CLI
+        uses: apollographql/rover-actions/install-rover-cli@v1
+        with:
+          version: '0.35.0'
+
+
+      - name: Generate supergraph
+        run: |
+          rover supergraph compose --config ./supergraph.yml --output supergraph.generated.graphql
+
+      - name: Compare to committed version
+        run: |
+          diff -u supergraph.graphql supergraph.generated.graphql || \
+          (echo "supergraph.graphql is out of date. Run 'rover supergraph compose --config ./supergraph.yml --output supergraph.graphql' and commit." && exit 1)
