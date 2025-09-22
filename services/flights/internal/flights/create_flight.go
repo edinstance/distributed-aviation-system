@@ -56,13 +56,12 @@ func (s *Service) CreateFlight(
 	}
 
 	if err := s.Repo.CreateFlight(ctx, flight); err != nil {
-		logger.Warn("Failed to create flight in database", "flight_id", flight.ID, "err", err)
+		logger.Error("Failed to create flight in database", "flight_id", flight.ID, "err", err)
 		return nil, err
 	}
 
 	if err := s.Cache.SetFlight(ctx, flight); err != nil {
 		logger.Warn("Failed to cache flight", "flight_id", flight.ID, "err", err)
-		return nil, err
 	}
 
 	return flight, nil
