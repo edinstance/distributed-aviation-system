@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"time"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 )
@@ -10,6 +11,8 @@ type Config struct {
 	Port        string
 	Environment string
 	DatabaseURL string
+	CacheURL    string
+	CacheTTL    time.Duration
 }
 
 var App Config
@@ -21,6 +24,8 @@ func Init() {
 		Port:        getEnv("PORT", "8081"),
 		Environment: getEnv("ENVIRONMENT", "development"),
 		DatabaseURL: mustGetEnv("DATABASE_URL"),
+		CacheURL:    mustGetEnv("CACHE_URL"),
+		CacheTTL:    15 * time.Minute,
 	}
 }
 
