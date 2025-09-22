@@ -24,6 +24,9 @@ func Init(cacheURL string) (*redis.Client, error) {
 
 	if err := client.Ping(ctx).Err(); err != nil {
 		logger.Error("Could not connect to Redis", "err", err)
+
+		_ = client.Close()
+
 		return nil, fmt.Errorf("could not connect to Redis: %w", err)
 	}
 
