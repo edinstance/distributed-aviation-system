@@ -20,7 +20,7 @@ jobs:
 
       - name: Generate supergraph
         run: |
-          rover supergraph compose --config ./supergraph.yml --output supergraph.generated.graphql
+          rover supergraph compose --config ./supergraph.yml --output supergraph.generated.graphql --elv2-license accept
 
       - name: Compare to committed version
         run: |
