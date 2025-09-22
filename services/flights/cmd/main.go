@@ -39,12 +39,14 @@ func main() {
 	cacheClient, err := cache.Init(config.App.CacheURL)
 	if err != nil {
 		logger.Error("Failed to initialise cache", "err", err)
-		os.Exit(1)
+		cacheClient = nil
 	}
 
 	defer func() {
-		if err := cacheClient.Close(); err != nil {
-			logger.Warn("Error closing Redis client", "err", err)
+		if cacheClient != nil {
+			if err := cacheClient.Close(); err != nil {
+				logger.Warn("Error closing Redis client", "err", err)
+			}
 		}
 	}()
 
