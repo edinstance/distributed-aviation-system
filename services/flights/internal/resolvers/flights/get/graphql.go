@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/google/uuid"
 )
@@ -28,6 +29,11 @@ func (r *FlightResolver) GetFlightById(
 
 	flight, err := r.service.GetFlightByID(ctx, flightId)
 	if err != nil {
+		if errors.Is(err, exceptions.ErrNotFound) {
+			logger.Debug("Flight not found", "id", id)
+			return nil, nil
+		}
+
 		logger.Error("Failed to get flight", "id", id, "err", err)
 		return nil, err
 	}
