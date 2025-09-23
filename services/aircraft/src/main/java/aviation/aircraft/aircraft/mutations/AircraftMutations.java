@@ -1,6 +1,6 @@
 package aviation.aircraft.aircraft.mutations;
 
-import aviation.aircraft.aircraft.dto.CreateAircraftDto;
+import aviation.aircraft.aircraft.dto.CreateAircraftInput;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.mapper.CreateAircraftMapper;
 import aviation.aircraft.aircraft.services.AircraftService;
@@ -18,7 +18,7 @@ public class AircraftMutations {
   }
 
   @DgsMutation
-  public AircraftEntity createAircraft(@InputArgument final CreateAircraftDto input) {
+  public AircraftEntity createAircraft(@InputArgument CreateAircraftInput input) {
     return aircraftService.createAircraft(CreateAircraftMapper.toEntity(input));
   }
 }

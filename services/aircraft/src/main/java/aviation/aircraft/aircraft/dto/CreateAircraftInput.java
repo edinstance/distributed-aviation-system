@@ -6,7 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class CreateAircraftDto {
+public class CreateAircraftInput {
   private String registration;
   private String manufacturer;
   private String model;
@@ -14,12 +14,12 @@ public class CreateAircraftDto {
   private int capacity;
   private AircraftStatus status;
 
-  public CreateAircraftDto() {
+  public CreateAircraftInput() {
   }
 
-  public CreateAircraftDto(String registration, String manufacturer,
-                           String model, int yearOfManufacture,
-                           int capacity, AircraftStatus status) {
+  public CreateAircraftInput(String registration, String manufacturer,
+                             String model, int yearOfManufacture,
+                             int capacity, AircraftStatus status) {
     this.registration = registration;
     this.manufacturer = manufacturer;
     this.model = model;

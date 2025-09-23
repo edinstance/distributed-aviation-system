@@ -44,7 +44,7 @@ public class AircraftEntity {
   public AircraftEntity() {
   }
 
-  public AircraftEntity( String registration,
+  public AircraftEntity(String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,
                         AircraftStatus status) {
