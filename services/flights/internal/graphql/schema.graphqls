@@ -32,6 +32,11 @@ type Flight @key(fields: "id") {
     departureTime: Time!
     arrivalTime: Time!
     status: FlightStatus!
+    aircraft: Aircraft
     createdAt: Time!
     updatedAt: Time!
+}
+
+extend type Aircraft @key(fields: "id") {
+    id: ID! @external
 }
