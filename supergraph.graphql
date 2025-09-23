@@ -20,6 +20,38 @@ directive @join__unionMember(graph: join__Graph!, member: String!) repeatable on
 
 directive @link(url: String, as: String, for: link__Purpose, import: [link__Import]) repeatable on SCHEMA
 
+type Aircraft
+  @join__type(graph: AIRCRAFT, key: "id")
+{
+  id: ID!
+  registration: String!
+  manufacturer: String!
+  model: String!
+  yearOfManufacture: Int!
+  capacity: Int!
+  status: AircraftStatus!
+}
+
+enum AircraftStatus
+  @join__type(graph: AIRCRAFT)
+{
+  AVAILABLE @join__enumValue(graph: AIRCRAFT)
+  IN_SERVICE @join__enumValue(graph: AIRCRAFT)
+  MAINTENANCE @join__enumValue(graph: AIRCRAFT)
+  GROUNDED @join__enumValue(graph: AIRCRAFT)
+}
+
+input CreateAircraftInput
+  @join__type(graph: AIRCRAFT)
+{
+  registration: String!
+  manufacturer: String!
+  model: String!
+  yearOfManufacture: Int!
+  capacity: Int!
+  status: AircraftStatus!
+}
+
 type Flight
   @join__type(graph: FLIGHTS, key: "id")
 {
@@ -49,6 +81,7 @@ enum FlightStatus
 scalar join__FieldSet
 
 enum join__Graph {
+  AIRCRAFT @join__graph(name: "aircraft", url: "http://aircraft-service:8080/graphql")
   FLIGHTS @join__graph(name: "flights", url: "http://flights-service:8081/graphql")
 }
 
@@ -67,15 +100,18 @@ enum link__Purpose {
 }
 
 type Mutation
+  @join__type(graph: AIRCRAFT)
   @join__type(graph: FLIGHTS)
 {
-  createFlight(number: String!, origin: String!, destination: String!, departureTime: Time!, arrivalTime: Time!): Flight!
+  createAircraft(input: CreateAircraftInput): Aircraft! @join__field(graph: AIRCRAFT)
+  createFlight(number: String!, origin: String!, destination: String!, departureTime: Time!, arrivalTime: Time!): Flight! @join__field(graph: FLIGHTS)
 }
 
 type Query
+  @join__type(graph: AIRCRAFT)
   @join__type(graph: FLIGHTS)
 {
-  getFlightById(id: ID!): Flight
+  getFlightById(id: ID!): Flight @join__field(graph: FLIGHTS)
 }
 
 scalar Time

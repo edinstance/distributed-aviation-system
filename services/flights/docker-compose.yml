@@ -1,7 +1,7 @@
 services:
   flights-database:
-    container_name: flights-database
     image: postgres:17.6
+    container_name: flights-database
     environment:
       POSTGRES_DB: flights
       POSTGRES_USER: postgres
@@ -36,8 +36,8 @@ services:
         condition: service_healthy
 
   flights-cache:
-    container_name: flights-cache
     image: redis:8.2
+    container_name: flights-cache
     ports:
       - "6379:6379"
     healthcheck:

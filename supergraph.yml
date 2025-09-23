@@ -4,3 +4,7 @@ subgraphs:
     routing_url: http://flights-service:8081/graphql
     schema:
       file: ./services/flights/internal/graphql/schema.graphqls
+  aircraft:
+    routing_url: http://aircraft-service:8080/graphql
+    schema:
+      file: ./services/aircraft/src/main/resources/schema/schema.graphqls
