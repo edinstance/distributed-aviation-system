@@ -29,8 +29,6 @@ message Flight {
   google.protobuf.Timestamp departure_time = 5;
   google.protobuf.Timestamp arrival_time = 6;
   FlightStatus status = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
 }
 
 message CreateFlightRequest {

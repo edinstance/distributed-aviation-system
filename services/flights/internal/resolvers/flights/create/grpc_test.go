@@ -191,8 +191,6 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 	arr := dep.Add(3 * time.Hour)
 
 	flightID := uuid.New()
-	createdAt := time.Now().Add(-time.Hour)
-	updatedAt := time.Now()
 
 	f := &fakeService{
 		createFn: func(ctx context.Context, number, origin, dest string, depTime, arrTime time.Time) (*models.Flight, error) {
@@ -204,8 +202,6 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 				DepartureTime: depTime,
 				ArrivalTime:   arrTime,
 				Status:        models.FlightStatusScheduled,
-				CreatedAt:     createdAt,
-				UpdatedAt:     updatedAt,
 			}, nil
 		},
 	}
