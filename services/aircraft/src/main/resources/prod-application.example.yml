@@ -5,16 +5,16 @@ spring:
     active: prod
 
   datasource:
-    url: jdbc:postgresql://0.0.0.0:5433/aircraft
-    username: postgres
-    password: postgres
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
   liquibase:
-    change-log: classpath:db/migration/db.changelog-master.xml
-    enabled: false
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: ${LIQUIBASE_ENABLED}
 
 redis:
-  url: redis://localhost:6380
+  url: ${CACHE_URL}
 
 # Actuator config
 management:
@@ -30,3 +30,6 @@ dgs:
     path: "/graphql"
     introspection:
       enabled: true
+
+server:
+  port: ${PORT:8080}
