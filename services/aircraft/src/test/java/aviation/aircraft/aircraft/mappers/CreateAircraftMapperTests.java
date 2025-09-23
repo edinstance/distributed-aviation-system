@@ -1,5 +1,8 @@
 package aviation.aircraft.aircraft.mappers;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import aviation.aircraft.aircraft.dto.CreateAircraftInput;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.mapper.CreateAircraftMapper;
@@ -21,12 +24,12 @@ public class CreateAircraftMapperTests {
 
     AircraftEntity entity = CreateAircraftMapper.toEntity(createAircraftInput);
 
-    assert entity.getId() == null;
-    assert entity.getRegistration().equals(createAircraftInput.getRegistration());
-    assert entity.getManufacturer().equals(createAircraftInput.getManufacturer());
-    assert entity.getModel().equals(createAircraftInput.getModel());
-    assert entity.getYearOfManufacture() == createAircraftInput.getYearOfManufacture();
-    assert entity.getCapacity() == createAircraftInput.getCapacity();
-    assert entity.getStatus().equals(createAircraftInput.getStatus());
+    assertNull(entity.getId());
+    assertEquals(createAircraftInput.getRegistration(), entity.getRegistration());
+    assertEquals(createAircraftInput.getManufacturer(), entity.getManufacturer());
+    assertEquals(createAircraftInput.getModel(), entity.getModel());
+    assertEquals(createAircraftInput.getYearOfManufacture(), entity.getYearOfManufacture());
+    assertEquals(createAircraftInput.getCapacity(), entity.getCapacity());
+    assertEquals(createAircraftInput.getStatus(), entity.getStatus());
   }
 }
