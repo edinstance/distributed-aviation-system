@@ -4,7 +4,6 @@ import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.exceptions.DuplicateAircraftException;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
 import aviation.aircraft.common.config.AircraftLogger;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -42,7 +41,7 @@ public class AircraftService {
               objectMapper.writeValueAsString(aircraft),
               SetParams.setParams().ex(900));
 
-    } catch (JsonProcessingException e) {
+    } catch (Exception e) {
       AircraftLogger.error("Error while saving aircraft to cache", e);
     }
 
