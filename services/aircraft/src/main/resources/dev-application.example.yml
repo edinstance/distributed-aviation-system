@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: aircraft
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5433/aircraft
+    username: postgres
+    password: postgres
+
+  liquibase:
+    change-log: classpath:db/migration/db.changelog-master.xml
+    enabled: true
+
+redis:
+  url: redis://localhost:6380
+
+# Actuator config
+management:
+  endpoints:
+    web:
+      base-path: "/details"
+    jmx:
+      exposure:
+        include: "health"
+
+dgs:
+  graphql:
+    path: "/graphql"
+    introspection:
+      enabled: true

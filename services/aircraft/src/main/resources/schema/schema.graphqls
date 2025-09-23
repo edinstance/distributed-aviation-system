@@ -1,0 +1,30 @@
+
+type Mutation {
+    createAircraft(input:CreateAircraftInput): Aircraft!
+}
+
+enum AircraftStatus {
+    AVAILABLE
+    IN_SERVICE
+    MAINTENANCE
+    GROUNDED
+}
+
+type Aircraft @key(fields: "id") {
+    id: ID!
+    registration: String!
+    manufacturer: String!
+    model: String!
+    yearOfManufacture: Int!
+    capacity: Int!
+    status: AircraftStatus!
+}
+
+input CreateAircraftInput {
+    registration: String!
+    manufacturer: String!
+    model: String!
+    yearOfManufacture: Int!
+    capacity: Int!
+    status: AircraftStatus!
+}
