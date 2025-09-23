@@ -33,8 +33,6 @@ type Flight @key(fields: "id") {
     arrivalTime: Time!
     status: FlightStatus!
     aircraft: Aircraft
-    createdAt: Time!
-    updatedAt: Time!
 }
 
 extend type Aircraft @key(fields: "id") {

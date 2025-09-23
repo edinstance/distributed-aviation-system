@@ -63,14 +63,12 @@ type ComplexityRoot struct {
 	Flight struct {
 		Aircraft      func(childComplexity int) int
 		ArrivalTime   func(childComplexity int) int
-		CreatedAt     func(childComplexity int) int
 		DepartureTime func(childComplexity int) int
 		Destination   func(childComplexity int) int
 		ID            func(childComplexity int) int
 		Number        func(childComplexity int) int
 		Origin        func(childComplexity int) int
 		Status        func(childComplexity int) int
-		UpdatedAt     func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -153,12 +151,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Flight.ArrivalTime(childComplexity), true
-	case "Flight.createdAt":
-		if e.complexity.Flight.CreatedAt == nil {
-			break
-		}
-
-		return e.complexity.Flight.CreatedAt(childComplexity), true
 	case "Flight.departureTime":
 		if e.complexity.Flight.DepartureTime == nil {
 			break
@@ -195,12 +187,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Flight.Status(childComplexity), true
-	case "Flight.updatedAt":
-		if e.complexity.Flight.UpdatedAt == nil {
-			break
-		}
-
-		return e.complexity.Flight.UpdatedAt(childComplexity), true
 
 	case "Mutation.createFlight":
 		if e.complexity.Mutation.CreateFlight == nil {
@@ -637,10 +623,6 @@ func (ec *executionContext) fieldContext_Entity_findFlightByID(ctx context.Conte
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Flight_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Flight_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -883,60 +865,6 @@ func (ec *executionContext) fieldContext_Flight_aircraft(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _Flight_createdAt(ctx context.Context, field graphql.CollectedField, obj *models.Flight) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Flight_createdAt,
-		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
-		nil,
-		ec.marshalNTime2timeᚐTime,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Flight_createdAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Flight",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Flight_updatedAt(ctx context.Context, field graphql.CollectedField, obj *models.Flight) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Flight_updatedAt,
-		func(ctx context.Context) (any, error) { return obj.UpdatedAt, nil },
-		nil,
-		ec.marshalNTime2timeᚐTime,
-		true,
-		true,
-	)
-}
-
-func (ec *executionContext) fieldContext_Flight_updatedAt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Flight",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Time does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_createFlight(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -978,10 +906,6 @@ func (ec *executionContext) fieldContext_Mutation_createFlight(ctx context.Conte
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Flight_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Flight_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -1041,10 +965,6 @@ func (ec *executionContext) fieldContext_Query_getFlightById(ctx context.Context
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
-			case "createdAt":
-				return ec.fieldContext_Flight_createdAt(ctx, field)
-			case "updatedAt":
-				return ec.fieldContext_Flight_updatedAt(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -2940,16 +2860,6 @@ func (ec *executionContext) _Flight(ctx context.Context, sel ast.SelectionSet, o
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-		case "createdAt":
-			out.Values[i] = ec._Flight_createdAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
-		case "updatedAt":
-			out.Values[i] = ec._Flight_updatedAt(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				atomic.AddUint32(&out.Invalids, 1)
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
