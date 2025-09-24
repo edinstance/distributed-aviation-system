@@ -4,7 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,9 +37,9 @@ public class CreateAircraftTests extends SetupServiceTests {
     verify(aircraftRepository).findByRegistration(aircraft.getRegistration());
     verify(aircraftRepository).save(aircraft);
 
-    verify(jedis).set(
+    verify(jedis).setex(
             startsWith("aircraft:"),
-            anyString(),
+            anyLong(),
             any()
     );
   }
@@ -51,5 +51,18 @@ public class CreateAircraftTests extends SetupServiceTests {
     assertThrows(DuplicateAircraftException.class, () -> aircraftService.createAircraft(aircraft));
 
     verify(aircraftRepository, times(0)).save(aircraft);
+  }
+
+  @Test
+  public void testCreateAircraftCacheError() {
+    when(aircraftRepository.findByRegistration(aircraft.getRegistration())).thenReturn(Optional.empty());
+    when(aircraftRepository.save(any(AircraftEntity.class))).thenAnswer(inv -> inv.getArgument(0));
+    when(jedisPool.getResource()).thenReturn(jedis);
+    when(jedis.setex(startsWith("aircraft:"), anyLong(), any()))
+            .thenThrow(new RuntimeException("Redis cache error"));
+
+    AircraftEntity result = aircraftService.createAircraft(aircraft);
+
+    assertNotNull(result);
   }
 }

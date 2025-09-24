@@ -27,6 +27,9 @@ public class SetupServiceTests {
   @Mock
   public Jedis jedis;
 
+  @Spy
+  public ObjectMapper objectMapper = new ObjectMapper();
+
   @InjectMocks
   public AircraftService aircraftService;
 
