@@ -38,7 +38,7 @@ public class AircraftService {
 
     try (Jedis jedis = jedisPool.getResource()) {
       jedis.set("aircraft:" + savedAircraft.getId().toString(),
-              objectMapper.writeValueAsString(aircraft),
+              objectMapper.writeValueAsString(savedAircraft),
               SetParams.setParams().ex(900));
 
     } catch (Exception e) {
