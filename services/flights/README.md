@@ -15,6 +15,7 @@ The service requires the following env vars:
 
 - `PORT`: The port the service will listen on (e.g. `8081`)
 - `DATABASE_URL`: Postgres connection string in the form `postgres://user:pass@host:5432/dbname?sslmode=disable`
+- `CACHE_URL`: Redis connection string in the form of `redis://host:6379`
 - `ENVIRONMENT`: `dev`, `staging`, or `prod` (controls logging/telemetry)
 
 See [.env.example](.env.example) for a template.
@@ -44,7 +45,7 @@ docker run -d \
 
 ### 3. Run Migrations
 
-Migrations are stored in `migrations/` and are applied
+Migrations are stored in the [migrations](migrations) folder and are applied
 using [golang-migrate](https://github.com/golang-migrate/migrate).
 They must be applied in order — use `migrate` to handle that automatically.
 
