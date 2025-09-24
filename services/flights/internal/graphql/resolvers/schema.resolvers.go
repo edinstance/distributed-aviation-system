@@ -6,12 +6,13 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	graphql1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql/model"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"github.com/google/uuid"
 )
 
 // ID is the resolver for the id field.
@@ -21,7 +22,15 @@ func (r *flightResolver) ID(ctx context.Context, obj *models.Flight) (string, er
 
 // Aircraft is the resolver for the aircraft field.
 func (r *flightResolver) Aircraft(ctx context.Context, obj *models.Flight) (*model.Aircraft, error) {
-	panic(fmt.Errorf("not implemented: Aircraft - aircraft"))
+	if obj.AircraftID == uuid.Nil {
+		logger.Info("the flight does not have an aircraft id")
+		return nil, nil
+	}
+	logger.Debug("the flight had an aircraft id: ", obj.AircraftID)
+
+	return &model.Aircraft{
+		ID: obj.AircraftID.String(),
+	}, nil
 }
 
 // CreateFlight is the resolver for the createFlight field.

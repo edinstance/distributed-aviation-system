@@ -13,7 +13,7 @@ import (
 
 func (flightRepository *FlightRepository) GetFlightByID(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
 	const query = `
-        SELECT id, number, origin, destination, departure_time, arrival_time, status, created_at, updated_at
+        SELECT id, number, origin, destination, departure_time, arrival_time, status, aircraft_id, created_at, updated_at
         FROM flights
         WHERE id = $1
     `
@@ -27,6 +27,7 @@ func (flightRepository *FlightRepository) GetFlightByID(ctx context.Context, id 
 		&flight.DepartureTime,
 		&flight.ArrivalTime,
 		&flight.Status,
+		&flight.AircraftID,
 		&flight.CreatedAt,
 		&flight.UpdatedAt,
 	)
