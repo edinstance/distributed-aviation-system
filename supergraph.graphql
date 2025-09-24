@@ -10,6 +10,7 @@ directive @join__enumValue(graph: join__Graph!) repeatable on ENUM_VALUE
 
 directive @join__field(graph: join__Graph, requires: join__FieldSet, provides: join__FieldSet, type: String, external: Boolean, override: String, usedOverridden: Boolean) repeatable on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
+
 directive @join__graph(name: String!, url: String!) on ENUM_VALUE
 
 directive @join__implements(graph: join__Graph!, interface: String!) repeatable on OBJECT | INTERFACE
@@ -22,14 +23,15 @@ directive @link(url: String, as: String, for: link__Purpose, import: [link__Impo
 
 type Aircraft
   @join__type(graph: AIRCRAFT, key: "id")
+  @join__type(graph: FLIGHTS, key: "id")
 {
   id: ID!
-  registration: String!
-  manufacturer: String!
-  model: String!
-  yearOfManufacture: Int!
-  capacity: Int!
-  status: AircraftStatus!
+  registration: String! @join__field(graph: AIRCRAFT)
+  manufacturer: String! @join__field(graph: AIRCRAFT)
+  model: String! @join__field(graph: AIRCRAFT)
+  yearOfManufacture: Int! @join__field(graph: AIRCRAFT)
+  capacity: Int! @join__field(graph: AIRCRAFT)
+  status: AircraftStatus! @join__field(graph: AIRCRAFT)
 }
 
 enum AircraftStatus
@@ -62,8 +64,7 @@ type Flight
   departureTime: Time!
   arrivalTime: Time!
   status: FlightStatus!
-  createdAt: Time!
-  updatedAt: Time!
+  aircraft: Aircraft
 }
 
 enum FlightStatus
@@ -111,6 +112,7 @@ type Query
   @join__type(graph: AIRCRAFT)
   @join__type(graph: FLIGHTS)
 {
+  getAircraftById(input: ID!): Aircraft! @join__field(graph: AIRCRAFT)
   getFlightById(id: ID!): Flight @join__field(graph: FLIGHTS)
 }
 
