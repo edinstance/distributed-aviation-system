@@ -1,4 +1,8 @@
 
+type Query {
+    getAircraftById(input: ID!): Aircraft!
+}
+
 type Mutation {
     createAircraft(input:CreateAircraftInput): Aircraft!
 }
