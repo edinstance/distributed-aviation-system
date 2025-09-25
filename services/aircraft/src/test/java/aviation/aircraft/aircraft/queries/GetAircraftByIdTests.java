@@ -12,7 +12,7 @@ public class GetAircraftByIdTests extends SetupQueriesTests {
   public void testGetAircraftById() {
     when(aircraftService.getAircraftById(aircraftId)).thenReturn(aircraftEntity);
 
-    AircraftEntity result = aircraftQueries.getAircraftById(aircraftId);
+    AircraftEntity result = aircraftQueries.getAircraftById(aircraftId.toString());
 
     assertNotNull(result);
   }

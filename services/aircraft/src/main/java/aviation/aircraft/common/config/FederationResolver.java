@@ -8,10 +8,16 @@ import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A dgs federation resolver.
+ */
 @DgsComponent
 public class FederationResolver extends DefaultDgsFederationResolver {
   private final Map<Class<?>, String> types = new HashMap<>();
 
+  /**
+   * The initialisation method.
+   */
   @PostConstruct
   public void init() {
     types.put(AircraftEntity.class, "Aircraft");

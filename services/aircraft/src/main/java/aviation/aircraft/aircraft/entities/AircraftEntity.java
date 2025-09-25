@@ -12,6 +12,9 @@ import java.util.UUID;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * An entity for storing aircraft details.
+ */
 @Entity
 @Getter
 @Setter
@@ -41,9 +44,22 @@ public class AircraftEntity {
   @Column(name = "status", nullable = false)
   private AircraftStatus status;
 
+  /**
+   * The default constructor.
+   */
   public AircraftEntity() {
   }
 
+  /**
+   * A constructor with everything apart from id.
+   *
+   * @param registration the aircraft's registration number.
+   * @param manufacturer the aircraft's manufacturer.
+   * @param model the aircraft's model.
+   * @param yearOfManufacture the year the aircraft was manufactured.
+   * @param capacity the capacity of the aircraft.
+   * @param status the current status of the aircraft.
+   */
   public AircraftEntity(String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,
@@ -56,6 +72,17 @@ public class AircraftEntity {
     this.status = status;
   }
 
+  /**
+   * A constructor with all fields.
+   *
+   * @param id the aircraft's id.
+   * @param registration the aircraft's registration number.
+   * @param manufacturer the aircraft's manufacturer.
+   * @param model the aircraft's model.
+   * @param yearOfManufacture the year the aircraft was manufactured.
+   * @param capacity the capacity of the aircraft.
+   * @param status the current status of the aircraft.
+   */
   public AircraftEntity(UUID id, String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,

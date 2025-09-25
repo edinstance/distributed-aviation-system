@@ -6,12 +6,20 @@ import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+/**
+ * The cache configuration.
+ */
 @Configuration
 public class CacheConfig {
 
   @Value("${redis.url}")
   private String redisUrl;
 
+  /**
+   * A spring bean for the cache pool.
+   *
+   * @return the cache pool.
+   */
   @Bean
   public JedisPool jedisPool() {
     JedisPoolConfig poolConfig = new JedisPoolConfig();

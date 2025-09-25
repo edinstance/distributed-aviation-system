@@ -1,7 +1,5 @@
 package aviation.aircraft.aircraft.services;
 
-import static org.mockito.Mockito.spy;
-
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
 import aviation.aircraft.aircraft.types.AircraftStatus;

@@ -1,7 +1,7 @@
 package aviation.aircraft.entityFetchers;
 
 import aviation.aircraft.aircraft.entities.AircraftEntity;
-import aviation.aircraft.aircraft.entityFetchers.AircraftEntityFetcher;
+import aviation.aircraft.aircraft.entityfetchers.AircraftEntityFetcher;
 import aviation.aircraft.aircraft.services.AircraftService;
 import aviation.aircraft.aircraft.types.AircraftStatus;
 import java.util.UUID;

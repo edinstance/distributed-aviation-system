@@ -5,7 +5,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import aviation.aircraft.aircraft.entities.AircraftEntity;
-import aviation.aircraft.aircraft.mapper.CreateAircraftMapper;
 import org.junit.jupiter.api.Test;
 
 public class CreateAircraftTests extends SetupMutationTests {
