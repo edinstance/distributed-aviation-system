@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
 
-public class AircraftEntityFetcherTests extends SetupEntityFetchersTests{
+public class AircraftEntityFetcherTests extends SetupEntityFetchersTests {
 
   @Test
   public void testFetchAircraftSuccess() {

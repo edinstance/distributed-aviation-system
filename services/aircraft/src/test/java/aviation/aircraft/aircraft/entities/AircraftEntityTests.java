@@ -78,44 +78,44 @@ public class AircraftEntityTests {
   }
 
   @Test
-  public void testAircraftIdMethods(){
+  public void testAircraftIdMethods() {
     UUID newId = UUID.randomUUID();
     aircraftEntity.setId(newId);
     assertEquals(newId, aircraftEntity.getId());
   }
 
   @Test
-  public void testAircraftRegistrationMethods(){
+  public void testAircraftRegistrationMethods() {
     aircraftEntity.setRegistration("New Registration");
     assertEquals("New Registration", aircraftEntity.getRegistration());
   }
 
   @Test
-  public void testAircraftManufacturerMethods(){
+  public void testAircraftManufacturerMethods() {
     aircraftEntity.setManufacturer("New Manufacturer");
     assertEquals("New Manufacturer", aircraftEntity.getManufacturer());
   }
 
   @Test
-  public void testAircraftModelMethods(){
+  public void testAircraftModelMethods() {
     aircraftEntity.setModel("New Model");
     assertEquals("New Model", aircraftEntity.getModel());
   }
 
   @Test
-  public void testAircraftYearOfManufactureMethods(){
+  public void testAircraftYearOfManufactureMethods() {
     aircraftEntity.setYearOfManufacture(2021);
     assertEquals(2021, aircraftEntity.getYearOfManufacture());
   }
 
   @Test
-  public void testAircraftCapacityMethods(){
+  public void testAircraftCapacityMethods() {
     aircraftEntity.setCapacity(60);
     assertEquals(60, aircraftEntity.getCapacity());
   }
 
   @Test
-  public void testAircraftStatusMethods(){
+  public void testAircraftStatusMethods() {
     aircraftEntity.setStatus(AircraftStatus.IN_SERVICE);
     assertEquals(AircraftStatus.IN_SERVICE, aircraftEntity.getStatus());
   }

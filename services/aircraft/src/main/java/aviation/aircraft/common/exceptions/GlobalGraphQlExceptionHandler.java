@@ -10,8 +10,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import org.springframework.stereotype.Component;
 
+/**
+ * A global graphql exception handler that controls how exceptions are sent to the client.
+ */
 @Component
-public class GlobalGraphQLExceptionHandler implements DataFetcherExceptionHandler {
+public class GlobalGraphQlExceptionHandler implements DataFetcherExceptionHandler {
 
   @Override
   public CompletableFuture<DataFetcherExceptionHandlerResult> handleException(
