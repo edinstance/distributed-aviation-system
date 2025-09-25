@@ -73,13 +73,11 @@ export ENVIRONMENT=dev
 export DATABASE_URL="jdbc:postgresql://localhost:5432/aircraft"
 export DATABASE_USERNAME=postgres
 export DATABASE_PASSWORD=postgres
-export LIQUIBASE_ENABLED-true
+export LIQUIBASE_ENABLED=true
 export CACHE_URL=redis://localhost:6380
 
 # Run the service
 mvn spring-boot:run
-```
-
 The service will start on `http://localhost:8080`
 
 ## Building
