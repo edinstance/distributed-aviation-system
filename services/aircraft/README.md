@@ -140,6 +140,20 @@ The service exposes a graphql endpoint and HTTP routes:
 
 ## Development
 
+### Code Quality
+
+#### Formatting
+
+#### Linting
+
+This project uses [checkstyle](https://checkstyle.sourceforge.io) with the Google Checkstyle configuration which is in [this folder](config).:
+
+```bash
+
+# Run linter
+mvn checkstyle:checkstyle
+```
+
 ### Testing
 
 ```bash
