@@ -111,7 +111,7 @@ type Query
   @join__type(graph: AIRCRAFT)
   @join__type(graph: FLIGHTS)
 {
-  getAircraftById(input: ID!): Aircraft! @join__field(graph: AIRCRAFT)
+  getAircraftById(input: ID!): Aircraft @join__field(graph: AIRCRAFT)
   getFlightById(id: ID!): Flight @join__field(graph: FLIGHTS)
 }
 
