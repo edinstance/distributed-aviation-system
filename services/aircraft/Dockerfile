@@ -7,6 +7,7 @@ WORKDIR /app
 # Copy the project files
 COPY pom.xml .
 COPY src ./src
+COPY config ./config
 
 # Set property files
 RUN mv src/main/resources/prod-application.example.yml src/main/resources/application.yml

@@ -67,8 +67,6 @@ func (r *FlightResolver) CreateFlightGRPC(
 			DepartureTime: timestamppb.New(flight.DepartureTime),
 			ArrivalTime:   timestamppb.New(flight.ArrivalTime),
 			Status:        converters.ToProtoStatus(flight.Status),
-			CreatedAt:     timestamppb.New(flight.CreatedAt),
-			UpdatedAt:     timestamppb.New(flight.UpdatedAt),
 		},
 	}
 

@@ -2,7 +2,7 @@ spring:
   application:
     name: aircraft
   profiles:
-    active: prod
+    active: ${ENVIRONMENT}
 
   datasource:
     url: ${DATABASE_URL}
