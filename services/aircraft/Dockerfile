@@ -33,9 +33,11 @@ HEALTHCHECK CMD curl -sSf http://127.0.0.1:8080/details/health | jq '.status' | 
 COPY --from=build /app/target/*.jar ./app.jar
 
 ENV PORT=8080
+ENV GRPC_PORT=9090
 
 # Expose the applications port
 EXPOSE ${PORT}
+EXPOSE ${GRPC_PORT}
 
 # Command to run the application
 CMD ["java", "-jar", "app.jar"]
