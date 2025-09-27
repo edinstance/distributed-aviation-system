@@ -1,28 +1,29 @@
-package aviation.aircraft.entityFetchers;
+package aviation.aircraft.aircraft.entityFetchers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.when;
 
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 public class AircraftEntityFetcherTests extends SetupEntityFetchersTests {
 
   @Test
   public void testFetchAircraftSuccess() {
-    when(aircraftService.getAircraftById(aircraftId)).thenReturn(aircraftEntity);
+    when(aircraftService.getAircraftById(aircraftId)).thenReturn(Optional.of(aircraftEntity));
 
     Map<String, Object> values = new HashMap<>();
     values.put("id", aircraftId.toString());
 
-    AircraftEntity result = aircraftEntityFetcher.fetchAircraft(values);
+    Optional<AircraftEntity> result = aircraftEntityFetcher.fetchAircraft(values);
 
-    assertNotNull(result);
-    assertEquals(aircraftId, result.getId());
+    assertTrue(result.isPresent());
+    assertEquals(aircraftId, result.get().getId());
   }
 
   @Test
@@ -30,8 +31,8 @@ public class AircraftEntityFetcherTests extends SetupEntityFetchersTests {
     Map<String, Object> values = new HashMap<>();
     values.put("id", null);
 
-    AircraftEntity result = aircraftEntityFetcher.fetchAircraft(values);
+    Optional<AircraftEntity> result = aircraftEntityFetcher.fetchAircraft(values);
 
-    assertNull(result);
+    assertFalse(result.isPresent());
   }
 }

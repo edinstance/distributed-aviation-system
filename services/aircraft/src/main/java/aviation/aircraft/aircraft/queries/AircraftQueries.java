@@ -5,6 +5,7 @@ import aviation.aircraft.aircraft.services.AircraftService;
 import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -31,10 +32,11 @@ public class AircraftQueries {
    * A query to get an aircraft by its id.
    *
    * @param input the id input.
+   *
    * @return the found aircraft.
    */
   @DgsQuery
-  public AircraftEntity getAircraftById(@InputArgument String input) {
+  public Optional<AircraftEntity> getAircraftById(@InputArgument String input) {
     return aircraftService.getAircraftById(UUID.fromString(input));
   }
 }

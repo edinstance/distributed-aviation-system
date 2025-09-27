@@ -5,6 +5,7 @@ import aviation.aircraft.aircraft.exceptions.DuplicateAircraftException;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
 import aviation.aircraft.common.config.AircraftLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
@@ -73,37 +74,37 @@ public class AircraftService {
    *
    * @return the found aircraft.
    */
-  public AircraftEntity getAircraftById(final UUID id) {
+  public Optional<AircraftEntity> getAircraftById(final UUID id) {
     String key = "aircraft:" + id;
 
     try (Jedis jedis = jedisPool.getResource()) {
       String json = jedis.get(key);
       if (json != null) {
         jedis.expire(key, CACHE_TTL_SECONDS);
-        return objectMapper.readValue(json, AircraftEntity.class);
+        return Optional.of(objectMapper.readValue(json, AircraftEntity.class));
       }
     } catch (Exception e) {
       AircraftLogger.error("Error reading value from the cache", e);
     }
 
     try {
-      return aircraftRepository.findById(id)
-              .map(foundAircraft -> {
-                try (Jedis jedis = jedisPool.getResource()) {
+      return Optional.of(aircraftRepository.findById(id)
+                      .map(foundAircraft -> {
+                        try (Jedis jedis = jedisPool.getResource()) {
 
-                  jedis.setex(key, CACHE_TTL_SECONDS,
-                          objectMapper.writeValueAsString(foundAircraft));
+                          jedis.setex(key, CACHE_TTL_SECONDS,
+                                  objectMapper.writeValueAsString(foundAircraft));
 
-                } catch (Exception cacheEx) {
-                  AircraftLogger.error("Error writing value to cache", cacheEx);
-                }
-                return foundAircraft;
-              })
-              .orElse(null);
+                        } catch (Exception cacheEx) {
+                          AircraftLogger.error("Error writing value to cache", cacheEx);
+                        }
+                        return foundAircraft;
+                      }))
+              .orElse(Optional.empty());
 
     } catch (Exception e) {
       AircraftLogger.error("Error fetching Aircraft from DB", e);
-      return null;
+      return Optional.empty();
     }
   }
 }

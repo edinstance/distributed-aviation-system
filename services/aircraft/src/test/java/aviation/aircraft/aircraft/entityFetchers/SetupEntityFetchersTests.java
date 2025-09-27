@@ -1,4 +1,4 @@
-package aviation.aircraft.entityFetchers;
+package aviation.aircraft.aircraft.entityFetchers;
 
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.entityfetchers.AircraftEntityFetcher;
