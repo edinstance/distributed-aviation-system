@@ -28,3 +28,5 @@ func (c *AircraftClient) ValidateAircraftExists(ctx context.Context, aircraftID 
 
 	return nil
 }
+
+var _ AircraftValidator = (*AircraftClient)(nil)

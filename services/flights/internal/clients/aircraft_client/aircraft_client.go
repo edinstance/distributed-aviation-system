@@ -1,13 +1,19 @@
 package aircraft_client
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	aircraftv1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/aircraft/v1"
+	"github.com/google/uuid"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+type AircraftValidator interface {
+	ValidateAircraftExists(ctx context.Context, aircraftID uuid.UUID) error
+}
 
 type AircraftClient struct {
 	conn   *grpc.ClientConn
