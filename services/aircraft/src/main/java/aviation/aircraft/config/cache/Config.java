@@ -1,4 +1,4 @@
-package aviation.aircraft.config;
+package aviation.aircraft.config.cache;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -10,7 +10,7 @@ import redis.clients.jedis.JedisPoolConfig;
  * The cache configuration.
  */
 @Configuration
-public class CacheConfig {
+public class Config {
 
   @Value("${redis.url}")
   private String redisUrl;
