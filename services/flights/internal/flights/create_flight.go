@@ -13,13 +13,14 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *Service) CreateFlight(
+func (service *Service) CreateFlight(
 	ctx context.Context,
 	number string,
 	origin string,
 	destination string,
 	departure time.Time,
 	arrival time.Time,
+	aircraftId uuid.UUID,
 ) (*models.Flight, error) {
 
 	if !arrival.After(departure) {
@@ -46,6 +47,12 @@ func (s *Service) CreateFlight(
 		return nil, exceptions.ErrSameOriginAndDestination
 	}
 
+	validationErr := service.AircraftClient.ValidateAircraftExists(ctx, aircraftId)
+	if validationErr != nil {
+		logger.Error("Aircraft does not exist", "aircraft_id", aircraftId, "err", validationErr)
+		return nil, validationErr
+	}
+
 	flight := &models.Flight{
 		ID:            uuid.New(),
 		Number:        normalizedNumber,
@@ -54,14 +61,15 @@ func (s *Service) CreateFlight(
 		DepartureTime: departure,
 		ArrivalTime:   arrival,
 		Status:        models.FlightStatusScheduled,
+		AircraftID:    aircraftId,
 	}
 
-	if err := s.Repo.CreateFlight(ctx, flight); err != nil {
+	if err := service.Repo.CreateFlight(ctx, flight); err != nil {
 		logger.Error("Failed to create flight in database", "flight_id", flight.ID, "err", err)
 		return nil, err
 	}
 
-	if err := s.Cache.SetFlight(ctx, flight); err != nil {
+	if err := service.Cache.SetFlight(ctx, flight); err != nil {
 		logger.Warn("Failed to cache flight", "flight_id", flight.ID, "err", err)
 	}
 
