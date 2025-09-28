@@ -1,4 +1,4 @@
-package aviation.aircraft.common.config;
+package aviation.aircraft.config;
 
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import com.netflix.graphql.dgs.DgsComponent;

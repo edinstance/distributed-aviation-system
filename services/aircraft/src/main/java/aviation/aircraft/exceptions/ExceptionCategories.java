@@ -1,4 +1,4 @@
-package aviation.aircraft.common.exceptions;
+package aviation.aircraft.exceptions;
 
 /**
  * An enum for managing exception categories.

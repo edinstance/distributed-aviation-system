@@ -3,7 +3,7 @@ package aviation.aircraft.aircraft.services;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.exceptions.DuplicateAircraftException;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
-import aviation.aircraft.common.config.AircraftLogger;
+import aviation.aircraft.config.AircraftLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Optional;
 import java.util.UUID;

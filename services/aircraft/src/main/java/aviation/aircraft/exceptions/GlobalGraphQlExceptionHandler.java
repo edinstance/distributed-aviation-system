@@ -1,4 +1,4 @@
-package aviation.aircraft.common.exceptions;
+package aviation.aircraft.exceptions;
 
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;

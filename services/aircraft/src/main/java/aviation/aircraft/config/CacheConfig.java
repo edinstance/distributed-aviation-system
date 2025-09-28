@@ -1,4 +1,4 @@
-package aviation.aircraft.common.config;
+package aviation.aircraft.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
