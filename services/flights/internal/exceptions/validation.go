@@ -2,6 +2,7 @@ package exceptions
 
 import (
 	"errors"
+	"fmt"
 
 	"connectrpc.com/connect"
 )
@@ -12,7 +13,12 @@ var (
 	ErrSameOriginAndDestination = errors.New("duplicate origin and destination code")
 	ErrInvalidTimes             = errors.New("arrival must be after departure")
 	ErrInvalidInput             = errors.New("invalid input")
+	ErrAircraftNotFound         = errors.New("aircraft not found")
 )
+
+func AircraftNotFound(id any) error {
+	return fmt.Errorf("%w: aircraft with id=%v was not found", ErrAircraftNotFound, id)
+}
 
 var errorCodeMap = map[error]connect.Code{
 	ErrInvalidInput:             connect.CodeInvalidArgument,
@@ -20,6 +26,8 @@ var errorCodeMap = map[error]connect.Code{
 	ErrInvalidFlightNumber:      connect.CodeInvalidArgument,
 	ErrInvalidIATACode:          connect.CodeInvalidArgument,
 	ErrSameOriginAndDestination: connect.CodeInvalidArgument,
+	ErrAircraftNotFound:         connect.CodeNotFound,
+	ErrNotFound:                 connect.CodeNotFound,
 }
 
 // MapErrorToGrpcCode returns the corresponding connect.Code for the provided error.

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	aircraftv1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/aircraft/v1"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -23,7 +24,7 @@ func (m *mockAircraftServiceClient) GetAircraftById(ctx context.Context, in *air
 // ensure mock satisfies interface at compile time
 var _ aircraftv1.AircraftServiceClient = (*mockAircraftServiceClient)(nil)
 
-func TestValidateAircraftExists_Success(t *testing.T) {
+func TestValidateAircraftExistsSuccess(t *testing.T) {
 	id := uuid.New()
 	c := &AircraftClient{client: &mockAircraftServiceClient{resp: &aircraftv1.GetAircraftByIdResponse{Aircraft: &aircraftv1.Aircraft{Id: id.String()}}}}
 
@@ -35,7 +36,7 @@ func TestValidateAircraftExists_Success(t *testing.T) {
 	}
 }
 
-func TestValidateAircraftExists_NotFound(t *testing.T) {
+func TestValidateAircraftExistsNotFound(t *testing.T) {
 	id := uuid.New()
 	c := &AircraftClient{client: &mockAircraftServiceClient{resp: &aircraftv1.GetAircraftByIdResponse{Aircraft: nil}}}
 
@@ -43,12 +44,12 @@ func TestValidateAircraftExists_NotFound(t *testing.T) {
 	defer cancel()
 
 	err := c.ValidateAircraftExists(ctx, id)
-	if err == nil {
-		t.Fatalf("expected error, got nil")
+	if !errors.Is(err, exceptions.ErrAircraftNotFound) {
+		t.Fatalf("expected ErrAircraftNotFound, got %v", err)
 	}
 }
 
-func TestValidateAircraftExists_DownstreamError(t *testing.T) {
+func TestValidateAircraftExistsDownstreamError(t *testing.T) {
 	id := uuid.New()
 	c := &AircraftClient{client: &mockAircraftServiceClient{err: errors.New("downstream error")}}
 
@@ -58,5 +59,8 @@ func TestValidateAircraftExists_DownstreamError(t *testing.T) {
 	err := c.ValidateAircraftExists(ctx, id)
 	if err == nil {
 		t.Fatalf("expected error, got nil")
+	}
+	if !errors.Is(err, exceptions.ErrDownstreamClientDown) {
+		t.Fatalf("expected ErrDownstreamClientDown, got %v", err)
 	}
 }
