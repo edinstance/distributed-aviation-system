@@ -8,7 +8,8 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation/flight_number"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation/iata_codes"
 	"github.com/google/uuid"
 )
 
@@ -26,17 +27,17 @@ func (s *Service) CreateFlight(
 			exceptions.ErrInvalidTimes, departure, arrival)
 	}
 
-	normalizedNumber, err := validation.ValidateAndNormalizeFlightNumber(number)
+	normalizedNumber, err := flight_number.ValidateAndNormalizeFlightNumber(number)
 	if err != nil {
 		return nil, err
 	}
 
-	normalizedOrigin, err := validation.ValidateAndNormalizeIATACode(origin)
+	normalizedOrigin, err := iata_codes.ValidateAndNormalizeIATACode(origin)
 	if err != nil {
 		return nil, err
 	}
 
-	normalizedDestination, err := validation.ValidateAndNormalizeIATACode(destination)
+	normalizedDestination, err := iata_codes.ValidateAndNormalizeIATACode(destination)
 	if err != nil {
 		return nil, err
 	}

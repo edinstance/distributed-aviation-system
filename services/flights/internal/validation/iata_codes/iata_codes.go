@@ -1,4 +1,4 @@
-package validation
+package iata_codes
 
 import (
 	"regexp"

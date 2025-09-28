@@ -1,4 +1,4 @@
-package validation
+package flight_number
 
 import (
 	"errors"
