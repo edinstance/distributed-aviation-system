@@ -19,35 +19,35 @@ import (
 )
 
 // FlightsServer implements the FlightsServiceHandler interface
-type FlightsServer struct {
+type GrpcFlightsServer struct {
 	createFlightResolver *createFlightsResolver.FlightResolver
 	getFlightsResolver   *getFlightsResolver.FlightResolver
 }
 
-func NewFlightsServer(pool *pgxpool.Pool, client *redis.Client) *FlightsServer {
+func NewGrpcFlightsServer(pool *pgxpool.Pool, client *redis.Client) *GrpcFlightsServer {
 	logger.Debug("Creating new FlightsServer")
 	dbRepo := flightRepository.NewFlightRepository(pool)
 	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
 
 	flightService := flights.NewFlightsService(dbRepo, cacheRepo)
 
-	return &FlightsServer{
+	return &GrpcFlightsServer{
 		createFlightResolver: createFlightsResolver.NewCreateFlightResolver(flightService),
 		getFlightsResolver:   getFlightsResolver.NewGetFlightResolver(flightService),
 	}
 }
 
 // Ensure FlightsServer implements the interface
-var _ v1connect.FlightsServiceHandler = (*FlightsServer)(nil)
+var _ v1connect.FlightsServiceHandler = (*GrpcFlightsServer)(nil)
 
-func (s *FlightsServer) CreateFlight(
+func (s *GrpcFlightsServer) CreateFlight(
 	ctx context.Context,
 	req *connect.Request[v1.CreateFlightRequest],
 ) (*connect.Response[v1.CreateFlightResponse], error) {
 	return s.createFlightResolver.CreateFlightGRPC(ctx, req)
 }
 
-func (s *FlightsServer) GetFlightById(
+func (s *GrpcFlightsServer) GetFlightById(
 	ctx context.Context,
 	c *connect.Request[v1.GetFlightByIdRequest],
 ) (*connect.Response[v1.GetFlightByIdResponse], error) {
