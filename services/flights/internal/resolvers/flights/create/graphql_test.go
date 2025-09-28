@@ -20,8 +20,9 @@ func (m *MockFlightService) CreateFlight(
 	ctx context.Context,
 	number, origin, dest string,
 	dep, arr time.Time,
+	aircraftId uuid.UUID,
 ) (*models.Flight, error) {
-	args := m.Called(ctx, number, origin, dest, dep, arr)
+	args := m.Called(ctx, number, origin, dest, dep, arr, aircraftId)
 	if args.Get(0) == nil {
 		return nil, args.Error(1)
 	}
@@ -34,6 +35,8 @@ func TestFlightResolver_CreateFlight(t *testing.T) {
 	destination := "JFK"
 	departureTime := time.Date(2024, 12, 15, 10, 0, 0, 0, time.UTC)
 	arrivalTime := time.Date(2024, 12, 15, 15, 0, 0, 0, time.UTC)
+	aircraftId := uuid.New()
+
 	expectedFlight := &models.Flight{
 		ID:            uuid.New(),
 		Number:        number,
@@ -42,6 +45,7 @@ func TestFlightResolver_CreateFlight(t *testing.T) {
 		DepartureTime: departureTime,
 		ArrivalTime:   arrivalTime,
 		Status:        models.FlightStatusScheduled,
+		AircraftID:    aircraftId,
 	}
 
 	tests := []struct {
@@ -55,7 +59,7 @@ func TestFlightResolver_CreateFlight(t *testing.T) {
 			name: "success",
 			serviceSetup: func(m *MockFlightService) {
 				m.On("CreateFlight",
-					mock.Anything, number, origin, destination, departureTime, arrivalTime,
+					mock.Anything, number, origin, destination, departureTime, arrivalTime, aircraftId,
 				).Return(expectedFlight, nil)
 			},
 			expectErr:      false,
@@ -73,7 +77,7 @@ func TestFlightResolver_CreateFlight(t *testing.T) {
 			name: "service returns error",
 			serviceSetup: func(m *MockFlightService) {
 				m.On("CreateFlight",
-					mock.Anything, number, origin, destination, departureTime, arrivalTime,
+					mock.Anything, number, origin, destination, departureTime, arrivalTime, aircraftId,
 				).Return(nil, errors.New("db error"))
 			},
 			expectErr:     true,
@@ -101,6 +105,7 @@ func TestFlightResolver_CreateFlight(t *testing.T) {
 				destination,
 				departureTime,
 				arrivalTime,
+				aircraftId,
 			)
 
 			if tc.expectErr {

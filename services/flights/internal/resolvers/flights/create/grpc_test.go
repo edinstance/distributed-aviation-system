@@ -15,13 +15,13 @@ import (
 )
 
 type fakeService struct {
-	createFn func(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error)
+	createFn func(ctx context.Context, number, origin, dest string, dep, arr time.Time, aircraftId uuid.UUID) (*models.Flight, error)
 }
 
 func (f *fakeService) CreateFlight(
-	ctx context.Context, number, origin, dest string, dep, arr time.Time,
+	ctx context.Context, number, origin, dest string, dep, arr time.Time, aircraftId uuid.UUID,
 ) (*models.Flight, error) {
-	return f.createFn(ctx, number, origin, dest, dep, arr)
+	return f.createFn(ctx, number, origin, dest, dep, arr, aircraftId)
 }
 
 func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
@@ -29,7 +29,7 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 	arr := dep.Add(2 * time.Hour)
 
 	f := &fakeService{
-		createFn: func(ctx context.Context, number, origin, dest string, dep, arr time.Time) (*models.Flight, error) {
+		createFn: func(ctx context.Context, number, origin, dest string, dep, arr time.Time, aircraftId uuid.UUID) (*models.Flight, error) {
 			switch {
 			case number == "":
 				return nil, exceptions.ErrInvalidInput
@@ -190,18 +190,19 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 	dep := time.Date(2025, 2, 1, 10, 0, 0, 0, time.UTC)
 	arr := dep.Add(3 * time.Hour)
 
-	flightID := uuid.New()
+	flightId := uuid.New()
 
 	f := &fakeService{
-		createFn: func(ctx context.Context, number, origin, dest string, depTime, arrTime time.Time) (*models.Flight, error) {
+		createFn: func(ctx context.Context, number, origin, dest string, depTime, arrTime time.Time, aircraftId uuid.UUID) (*models.Flight, error) {
 			return &models.Flight{
-				ID:            flightID,
+				ID:            flightId,
 				Number:        number,
 				Origin:        origin,
 				Destination:   dest,
 				DepartureTime: depTime,
 				ArrivalTime:   arrTime,
 				Status:        models.FlightStatusScheduled,
+				AircraftID:    aircraftId,
 			}, nil
 		},
 	}
@@ -214,6 +215,7 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 		Destination:   "LGW",
 		DepartureTime: timestamppb.New(dep),
 		ArrivalTime:   timestamppb.New(arr),
+		AircraftId:    uuid.NewString(),
 	})
 
 	resp, err := resolver.CreateFlightGRPC(context.Background(), req)
@@ -225,8 +227,8 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 	}
 
 	got := resp.Msg.Flight
-	if got.Id != flightID.String() {
-		testingHelper.Errorf("expected id %s, got %s", flightID, got.Id)
+	if got.Id != flightId.String() {
+		testingHelper.Errorf("expected id %s, got %s", flightId, got.Id)
 	}
 	if got.Number != "XY789" || got.Origin != "LHR" || got.Destination != "LGW" {
 		testingHelper.Errorf("unexpected flight details: %+v", got)
@@ -241,7 +243,7 @@ func TestCreateFlightGRPCServiceError(testingHelper *testing.T) {
 	arr := dep.Add(1 * time.Hour)
 
 	f := &fakeService{
-		createFn: func(ctx context.Context, number, origin, dest string, depTime, arrTime time.Time) (*models.Flight, error) {
+		createFn: func(ctx context.Context, number, origin, dest string, depTime, arrTime time.Time, aircraftId uuid.UUID) (*models.Flight, error) {
 			return nil, errors.New("db failure")
 		},
 	}
@@ -253,6 +255,7 @@ func TestCreateFlightGRPCServiceError(testingHelper *testing.T) {
 		Destination:   "LGW",
 		DepartureTime: timestamppb.New(dep),
 		ArrivalTime:   timestamppb.New(arr),
+		AircraftId:    uuid.NewString(),
 	})
 
 	resp, err := resolver.CreateFlightGRPC(context.Background(), req)
