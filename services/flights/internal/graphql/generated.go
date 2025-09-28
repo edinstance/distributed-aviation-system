@@ -72,7 +72,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		CreateFlight func(childComplexity int, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time) int
+		CreateFlight func(childComplexity int, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time, aircraftID string) int
 	}
 
 	Query struct {
@@ -95,7 +95,7 @@ type FlightResolver interface {
 	Aircraft(ctx context.Context, obj *models.Flight) (*model.Aircraft, error)
 }
 type MutationResolver interface {
-	CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time) (*models.Flight, error)
+	CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time, aircraftID string) (*models.Flight, error)
 }
 type QueryResolver interface {
 	GetFlightByID(ctx context.Context, id string) (*models.Flight, error)
@@ -198,7 +198,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateFlight(childComplexity, args["number"].(string), args["origin"].(string), args["destination"].(string), args["departureTime"].(time.Time), args["arrivalTime"].(time.Time)), true
+		return e.complexity.Mutation.CreateFlight(childComplexity, args["number"].(string), args["origin"].(string), args["destination"].(string), args["departureTime"].(time.Time), args["arrivalTime"].(time.Time), args["aircraftId"].(string)), true
 
 	case "Query.getFlightById":
 		if e.complexity.Query.GetFlightByID == nil {
@@ -467,6 +467,11 @@ func (ec *executionContext) field_Mutation_createFlight_args(ctx context.Context
 		return nil, err
 	}
 	args["arrivalTime"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "aircraftId", ec.unmarshalNID2string)
+	if err != nil {
+		return nil, err
+	}
+	args["aircraftId"] = arg5
 	return args, nil
 }
 
@@ -873,7 +878,7 @@ func (ec *executionContext) _Mutation_createFlight(ctx context.Context, field gr
 		ec.fieldContext_Mutation_createFlight,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateFlight(ctx, fc.Args["number"].(string), fc.Args["origin"].(string), fc.Args["destination"].(string), fc.Args["departureTime"].(time.Time), fc.Args["arrivalTime"].(time.Time))
+			return ec.resolvers.Mutation().CreateFlight(ctx, fc.Args["number"].(string), fc.Args["origin"].(string), fc.Args["destination"].(string), fc.Args["departureTime"].(time.Time), fc.Args["arrivalTime"].(time.Time), fc.Args["aircraftId"].(string))
 		},
 		nil,
 		ec.marshalNFlight2ᚖgithubᚗcomᚋedinstanceᚋdistributedᚑaviationᚑsystemᚋservicesᚋflightsᚋinternalᚋdatabaseᚋmodelsᚐFlight,

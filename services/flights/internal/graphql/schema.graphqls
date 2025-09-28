@@ -11,6 +11,7 @@ type Mutation {
         destination: String!
         departureTime: Time!
         arrivalTime: Time!
+        aircraftId: ID!
     ): Flight!
 }
 
