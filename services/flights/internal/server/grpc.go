@@ -5,6 +5,7 @@ import (
 
 	"connectrpc.com/connect"
 	cacheRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/cache/repositories/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/clients/aircraft_client"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
@@ -28,8 +29,14 @@ func NewGrpcFlightsServer(pool *pgxpool.Pool, client *redis.Client) *GrpcFlights
 	logger.Debug("Creating new FlightsServer")
 	dbRepo := flightRepository.NewFlightRepository(pool)
 	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
+	aircraftClient, aircraftClientErr := aircraft_client.NewAircraftClient(config.App.AircraftServiceGrpcUrl)
 
-	flightService := flights.NewFlightsService(dbRepo, cacheRepo)
+	if aircraftClientErr != nil {
+		logger.Error("Failed to create aircraft client", "err", aircraftClientErr)
+		return nil
+	}
+
+	flightService := flights.NewFlightsService(dbRepo, cacheRepo, aircraftClient)
 
 	return &GrpcFlightsServer{
 		createFlightResolver: createFlightsResolver.NewCreateFlightResolver(flightService),

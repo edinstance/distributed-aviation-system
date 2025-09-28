@@ -15,8 +15,8 @@ func NewMux(pool *pgxpool.Pool, client *redis.Client) *http.ServeMux {
 	mux := http.NewServeMux()
 
 	// Register Connect/gRPC/gRPC-Web handlers
-	grpcflightsServer := NewGrpcFlightsServer(pool, client)
-	flightPath, flightHandler := v1connect.NewFlightsServiceHandler(grpcflightsServer)
+	grpcFlightsServer := NewGrpcFlightsServer(pool, client)
+	flightPath, flightHandler := v1connect.NewFlightsServiceHandler(grpcFlightsServer)
 	mux.Handle(flightPath, flightHandler)
 
 	// GraphQL handlers
