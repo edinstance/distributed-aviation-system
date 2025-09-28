@@ -104,7 +104,7 @@ type Mutation
   @join__type(graph: FLIGHTS)
 {
   createAircraft(input: CreateAircraftInput): Aircraft! @join__field(graph: AIRCRAFT)
-  createFlight(number: String!, origin: String!, destination: String!, departureTime: Time!, arrivalTime: Time!): Flight! @join__field(graph: FLIGHTS)
+  createFlight(number: String!, origin: String!, destination: String!, departureTime: Time!, arrivalTime: Time!, aircraftId: ID!): Flight! @join__field(graph: FLIGHTS)
 }
 
 type Query
