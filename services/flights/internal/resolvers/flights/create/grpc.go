@@ -9,6 +9,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
+	"github.com/google/uuid"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -33,6 +34,12 @@ func (r *FlightResolver) CreateFlightGRPC(
 	departureTS := req.Msg.GetDepartureTime()
 	arrivalTS := req.Msg.GetArrivalTime()
 
+	aircraftId, idErr := uuid.Parse(req.Msg.GetAircraftId())
+
+	if idErr != nil {
+		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("invalid aircraft ID"))
+	}
+
 	if departureTS == nil || arrivalTS == nil {
 		return nil, connect.NewError(connect.CodeInvalidArgument, errors.New("missing required timestamp(s)"))
 	}
@@ -51,6 +58,7 @@ func (r *FlightResolver) CreateFlightGRPC(
 		dest,
 		departureTS.AsTime(),
 		arrivalTS.AsTime(),
+		aircraftId,
 	)
 
 	if err != nil {
@@ -67,8 +75,7 @@ func (r *FlightResolver) CreateFlightGRPC(
 			DepartureTime: timestamppb.New(flight.DepartureTime),
 			ArrivalTime:   timestamppb.New(flight.ArrivalTime),
 			Status:        converters.ToProtoStatus(flight.Status),
-			CreatedAt:     timestamppb.New(flight.CreatedAt),
-			UpdatedAt:     timestamppb.New(flight.UpdatedAt),
+			AircraftId:    flight.AircraftID.String(),
 		},
 	}
 

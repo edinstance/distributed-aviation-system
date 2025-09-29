@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
 func TestFlightGrpcResolverGetFlight(t *testing.T) {
@@ -122,7 +121,6 @@ func TestFlightGrpcResolverGetFlight(t *testing.T) {
 				assert.Equal(t, expectedFlight.Destination, got.Destination)
 				assert.True(t, got.DepartureTime.AsTime().Equal(expectedFlight.DepartureTime))
 				assert.True(t, got.ArrivalTime.AsTime().Equal(expectedFlight.ArrivalTime))
-				assert.Equal(t, timestamppb.New(expectedFlight.CreatedAt).AsTime().IsZero(), true) // created/updated might be zero in mock
 			}
 		})
 	}

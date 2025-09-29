@@ -58,8 +58,7 @@ func (r *FlightResolver) GetFlightByIdGRPC(
 			DepartureTime: timestamppb.New(flight.DepartureTime),
 			ArrivalTime:   timestamppb.New(flight.ArrivalTime),
 			Status:        converters.ToProtoStatus(flight.Status),
-			CreatedAt:     timestamppb.New(flight.CreatedAt),
-			UpdatedAt:     timestamppb.New(flight.UpdatedAt),
+			AircraftId:    flight.AircraftID.String(),
 		},
 	}
 	return connect.NewResponse(resp), nil

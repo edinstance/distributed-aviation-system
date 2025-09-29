@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package aircraft.v1;
+
+option go_package = "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/aircraft/v1;aircraftv1";
+
+option java_package = "aviation.aircraft.grpc.generated.v1";
+option java_multiple_files = true;
+
+service AircraftService {
+  rpc GetAircraftById(GetAircraftByIdRequest) returns (GetAircraftByIdResponse);
+}
+
+message GetAircraftByIdRequest {
+  string id = 1;
+}
+
+message GetAircraftByIdResponse {
+  Aircraft aircraft = 1;
+}
+
+message Aircraft {
+  string id = 1;
+  string registration = 2;
+  string manufacturer = 3;
+  string model = 4;
+  int32 year_of_manufacture = 5;
+  int32 capacity = 6;
+  AircraftStatus status = 7;
+}
+
+enum AircraftStatus {
+  AIRCRAFT_STATUS_UNSPECIFIED = 0;
+  AIRCRAFT_STATUS_AVAILABLE = 1;
+  AIRCRAFT_STATUS_IN_SERVICE = 2;
+  AIRCRAFT_STATUS_MAINTENANCE = 3;
+  AIRCRAFT_STATUS_GROUNDED = 4;
+}

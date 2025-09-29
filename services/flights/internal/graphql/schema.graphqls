@@ -11,6 +11,7 @@ type Mutation {
         destination: String!
         departureTime: Time!
         arrivalTime: Time!
+        aircraftId: ID!
     ): Flight!
 }
 
@@ -32,6 +33,9 @@ type Flight @key(fields: "id") {
     departureTime: Time!
     arrivalTime: Time!
     status: FlightStatus!
-    createdAt: Time!
-    updatedAt: Time!
+    aircraft: Aircraft
+}
+
+extend type Aircraft @key(fields: "id") {
+    id: ID! @external
 }

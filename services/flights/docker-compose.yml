@@ -1,7 +1,7 @@
 services:
   flights-database:
-    container_name: flights-database
     image: postgres:17.6
+    container_name: flights-database
     environment:
       POSTGRES_DB: flights
       POSTGRES_USER: postgres
@@ -36,8 +36,8 @@ services:
         condition: service_healthy
 
   flights-cache:
-    container_name: flights-cache
     image: redis:8.2
+    container_name: flights-cache
     ports:
       - "6379:6379"
     healthcheck:
@@ -56,6 +56,7 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgres://postgres:postgres@flights-database:5432/flights?sslmode=disable}
       CACHE_URL: ${REDIS_URL:-redis://flights-cache:6379}
+      AIRCRAFT_SERVICE_GRPC_URL: ${AIRCRAFT_SERVICE_GRPC_URL:-http://aircraft-service:9090}
       ENVIRONMENT: "dev"
       PORT: 8081
     healthcheck:

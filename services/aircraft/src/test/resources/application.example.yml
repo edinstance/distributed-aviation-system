@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: aircraft
+  profiles:
+    active: test
+
+  datasource:
+    url: jdbc:h2:mem:test
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: false
+
+redis:
+  url: redis://localhost:6380
+  enabled: false
+
+grpc:
+  server:
+    port: 9090
+
+# Actuator config
+management:
+  endpoints:
+    web:
+      base-path: "/details"
+    jmx:
+      exposure:
+        include: "health"
+
+dgs:
+  graphql:
+    path: "/graphql"
+    introspection:
+      enabled: true

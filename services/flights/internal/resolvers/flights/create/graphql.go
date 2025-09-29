@@ -7,6 +7,7 @@ import (
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"github.com/google/uuid"
 )
 
 func (r *FlightResolver) CreateFlight(
@@ -16,6 +17,7 @@ func (r *FlightResolver) CreateFlight(
 	destination string,
 	departureTime time.Time,
 	arrivalTime time.Time,
+	aircraftId uuid.UUID,
 ) (*models.Flight, error) {
 	logger.Debug("CreateFlight GraphQL request", "number", number)
 
@@ -31,6 +33,7 @@ func (r *FlightResolver) CreateFlight(
 		destination,
 		departureTime,
 		arrivalTime,
+		aircraftId,
 	)
 	if err != nil {
 		logger.Error("Failed to create flight", "err", err)

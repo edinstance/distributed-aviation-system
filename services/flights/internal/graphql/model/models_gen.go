@@ -2,6 +2,12 @@
 
 package model
 
+type Aircraft struct {
+	ID string `json:"id"`
+}
+
+func (Aircraft) IsEntity() {}
+
 type Mutation struct {
 }
 

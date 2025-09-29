@@ -1,0 +1,40 @@
+spring:
+  application:
+    name: aircraft
+  profiles:
+    active: ${ENVIRONMENT}
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: ${LIQUIBASE_ENABLED}
+
+redis:
+  url: ${CACHE_URL}
+
+server:
+  port: ${PORT:8080}
+
+# gRPC server config
+grpc:
+  server:
+    port: ${GRPC_PORT:9090}
+
+# Actuator config
+management:
+  endpoints:
+    web:
+      base-path: "/details"
+    jmx:
+      exposure:
+        include: "health"
+
+dgs:
+  graphql:
+    path: "/graphql"
+    introspection:
+      enabled: true

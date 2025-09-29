@@ -21,6 +21,7 @@ services:
 
 include:
   - ./services/flights/docker-compose.yml
+  - ./services/aircraft/docker-compose.yml
 
 networks:
   aviation-network:

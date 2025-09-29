@@ -10,6 +10,9 @@ import (
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	graphql1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql/model"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"github.com/google/uuid"
 )
 
 // ID is the resolver for the id field.
@@ -17,8 +20,26 @@ func (r *flightResolver) ID(ctx context.Context, obj *models.Flight) (string, er
 	return obj.ID.String(), nil
 }
 
+// Aircraft is the resolver for the aircraft field.
+func (r *flightResolver) Aircraft(ctx context.Context, obj *models.Flight) (*model.Aircraft, error) {
+	if obj.AircraftID == uuid.Nil {
+		logger.Info("the flight does not have an aircraft id")
+		return nil, nil
+	}
+	logger.Debug("the flight had an aircraft id: ", obj.AircraftID)
+
+	return &model.Aircraft{
+		ID: obj.AircraftID.String(),
+	}, nil
+}
+
 // CreateFlight is the resolver for the createFlight field.
-func (r *mutationResolver) CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time) (*models.Flight, error) {
+func (r *mutationResolver) CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time, aircraftID string) (*models.Flight, error) {
+	parsedAircraftId, err := uuid.Parse(aircraftID)
+	if err != nil {
+		return nil, err
+	}
+
 	return r.Resolver.CreateFlightResolver.CreateFlight(
 		ctx,
 		number,
@@ -26,6 +47,7 @@ func (r *mutationResolver) CreateFlight(ctx context.Context, number string, orig
 		destination,
 		departureTime,
 		arrivalTime,
+		parsedAircraftId,
 	)
 }
 

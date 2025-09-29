@@ -9,10 +9,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	cacheRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/cache/repositories/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/clients/aircraft_client"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
+	graphqlschema "github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql/resolvers"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/create"
@@ -26,8 +27,14 @@ func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
 	dbRepo := flightRepository.NewFlightRepository(pool)
 	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
+	aircraftClient, aircraftClientErr := aircraft_client.NewAircraftClient(config.App.AircraftServiceGrpcUrl)
 
-	flightService := flights.NewFlightsService(dbRepo, cacheRepo)
+	if aircraftClientErr != nil {
+		logger.Error("Failed to create aircraft client", "err", aircraftClientErr)
+		return nil
+	}
+
+	flightService := flights.NewFlightsService(dbRepo, cacheRepo, aircraftClient)
 	graphqlCreateFlightResolver := create.NewCreateFlightResolver(flightService)
 	graphqlGetFlightResolver := get.NewGetFlightResolver(flightService)
 
@@ -36,7 +43,7 @@ func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 		GetFlightResolver:    graphqlGetFlightResolver,
 	}
 
-	srv := handler.New(graphql.NewExecutableSchema(graphql.Config{Resolvers: resolver}))
+	srv := handler.New(graphqlschema.NewExecutableSchema(graphqlschema.Config{Resolvers: resolver}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})

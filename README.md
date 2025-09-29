@@ -8,6 +8,8 @@ This project uses [Graphql](https://graphql.org/), each service exposes its own 
 Interface's (API's), and there is a routing layer that
 uses [Apollo Router](https://www.apollographql.com/docs/graphos/routing) for routing to the correct subgraph.
 
+> [!IMPORTANT]
+> The system uses a federated graph which means that some queries need multiple services to be running. It is recommended to run all of the services when querying the router.
 ## Apollo Router
 
 The project runs the router in a [Docker](https://www.docker.com/) container, but the configuration of the router is

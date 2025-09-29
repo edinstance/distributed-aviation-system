@@ -6,6 +6,9 @@ import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1;v1";
 
+option java_package = "aviation.flights.grpc.generated.v1";
+option java_multiple_files = true;
+
 service FlightsService {
   rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
   rpc GetFlightById(GetFlightByIdRequest) returns (GetFlightByIdResponse);
@@ -29,8 +32,7 @@ message Flight {
   google.protobuf.Timestamp departure_time = 5;
   google.protobuf.Timestamp arrival_time = 6;
   FlightStatus status = 7;
-  google.protobuf.Timestamp created_at = 8;
-  google.protobuf.Timestamp updated_at = 9;
+  string aircraft_id = 8;
 }
 
 message CreateFlightRequest {
@@ -39,6 +41,7 @@ message CreateFlightRequest {
   string destination = 3;
   google.protobuf.Timestamp departure_time = 4;
   google.protobuf.Timestamp arrival_time = 5;
+  string aircraft_id = 6;
 }
 
 message CreateFlightResponse {

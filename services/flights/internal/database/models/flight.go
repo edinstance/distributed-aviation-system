@@ -14,6 +14,7 @@ type Flight struct {
 	DepartureTime time.Time    `db:"departure_time" json:"departure_time"`
 	ArrivalTime   time.Time    `db:"arrival_time" json:"arrival_time"`
 	Status        FlightStatus `db:"status" json:"status"`
+	AircraftID    uuid.UUID    `db:"aircraft_id" json:"aircraft_id"`
 	CreatedAt     time.Time    `db:"created_at" json:"created_at"`
 	UpdatedAt     time.Time    `db:"updated_at" json:"updated_at"`
 }
