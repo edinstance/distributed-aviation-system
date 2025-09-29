@@ -67,7 +67,7 @@ func Warn(msg string, args ...any) {
 }
 
 // InfoContext logs an info-level message using the provided context.
-// 
+//
 // The context `ctx` is passed to the underlying logger and can be used to
 // include contextual values. `args` are optional key-value pairs (as accepted
 // by slog) to attach structured fields to the log entry.
