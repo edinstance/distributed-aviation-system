@@ -5,3 +5,9 @@ supergraph:
 health_check:
   enabled: true
   listen: 0.0.0.0:8088
+
+include_subgraph_errors:
+  all: true
+  subgraphs:
+    flights: true
+    aircraft: true
