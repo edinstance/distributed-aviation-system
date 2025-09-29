@@ -8,11 +8,14 @@ import (
 	v1connect "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1/flightsv1connect"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/health"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/redis/go-redis/v9"
 )
 
 func NewMux(pool *pgxpool.Pool, client *redis.Client) *http.ServeMux {
 	mux := http.NewServeMux()
+
+	mux.Handle("/metrics", promhttp.Handler())
 
 	// Register Connect/gRPC/gRPC-Web handlers
 	grpcFlightsServer := NewGrpcFlightsServer(pool, client)
