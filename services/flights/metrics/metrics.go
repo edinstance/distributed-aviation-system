@@ -22,4 +22,21 @@ var (
 		},
 		[]string{"service", "procedure"},
 	)
+
+	GraphQLRequests = promauto.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "graphql_requests_total",
+			Help: "Total GraphQL requests",
+		},
+		[]string{"operation", "type", "success"},
+	)
+
+	GraphQLDuration = promauto.NewHistogramVec(
+		prometheus.HistogramOpts{
+			Name:    "graphql_request_duration_seconds",
+			Help:    "Duration of GraphQL requests",
+			Buckets: prometheus.DefBuckets,
+		},
+		[]string{"operation", "type"},
+	)
 )

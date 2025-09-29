@@ -18,6 +18,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/create"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/get"
+	"github.com/edinstance/distributed-aviation-system/services/flights/metrics"
 	"github.com/gorilla/websocket"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
@@ -62,6 +63,9 @@ func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
+
+	// Metrics
+	srv.AroundOperations(metrics.GraphQLMetricsInterceptor)
 
 	logger.Info("GraphQL Handler setup")
 	return srv
