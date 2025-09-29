@@ -75,6 +75,12 @@ func InfoContext(ctx context.Context, msg string, args ...any) {
 	Logger.InfoContext(ctx, msg, args...)
 }
 
+// DebugContext logs a message at debug level using the package Logger.
+// Optional args are passed through as key/value attributes to the underlying slog.Logger.
+func DebugContext(ctx context.Context, msg string, args ...any) {
+	Logger.DebugContext(ctx, msg, args...)
+}
+
 // ErrorContext logs an error-level record associated with the provided context.
 // It forwards to the package-level Logger's ErrorContext.
 // The variadic args are optional key/value pairs as accepted by slog (typically alternating key, value).
