@@ -11,3 +11,8 @@ scrape_configs:
     static_configs:
       - targets: [ "flights-service:8081" ]
     metrics_path: "/metrics"
+
+  - job_name: "aircraft-service"
+    static_configs:
+      - targets: [ "aircraft-service:8080" ]
+    metrics_path: "/details/prometheus"
