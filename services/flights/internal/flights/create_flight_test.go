@@ -12,12 +12,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func defaultTestDeps() (*FakeRepo, *FakeFlightsCache, *FakeAircraftClient) {
+	return &FakeRepo{}, &FakeFlightsCache{}, &FakeAircraftClient{}
+}
+
 func TestCreateFlight(t *testing.T) {
 	now := time.Now()
 	dep := now.Add(1 * time.Hour)
 	arr := dep.Add(2 * time.Hour)
 
 	repoErr := errors.New("db failure")
+	aircraftErr := errors.New("aircraft not found")
 
 	tests := []struct {
 		name        string
@@ -26,8 +31,7 @@ func TestCreateFlight(t *testing.T) {
 		dest        string
 		departure   time.Time
 		arrival     time.Time
-		repo        *FakeRepo
-		cache       *FakeFlightsCache
+		setup       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient)
 		expectError error
 	}{
 		{
@@ -37,17 +41,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
-			expectError: nil,
+			setup:     func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
 		},
 		{
 			name:        "arrival before departure",
@@ -56,12 +50,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "LHR",
 			departure:   arr,
 			arrival:     dep,
-			repo:        &FakeRepo{},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
 			expectError: exceptions.ErrInvalidTimes,
 		},
 		{
@@ -71,12 +60,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "JFK",
 			departure:   dep,
 			arrival:     arr,
-			repo:        &FakeRepo{},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
 			expectError: exceptions.ErrSameOriginAndDestination,
 		},
 		{
@@ -86,80 +70,65 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
+			setup: func(r *FakeRepo, _ *FakeFlightsCache, _ *FakeAircraftClient) {
+				r.CreateFlightFn = func(ctx context.Context, f *models.Flight) error {
 					return repoErr
-				},
-			},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
+				}
 			},
 			expectError: repoErr,
 		},
 		{
-			name:      "invalid flight number",
-			number:    "123",
-			origin:    "JFK",
-			dest:      "LHR",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
-				},
-			},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
+			name:        "invalid flight number",
+			number:      "123",
+			origin:      "JFK",
+			dest:        "LHR",
+			departure:   dep,
+			arrival:     arr,
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
 			expectError: exceptions.ErrInvalidFlightNumber,
 		},
 		{
-			name:      "invalid origin",
-			number:    "BA121",
-			origin:    "JFK132",
-			dest:      "LHR",
-			departure: dep,
-			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
-				},
-			},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
+			name:        "invalid origin",
+			number:      "BA121",
+			origin:      "JFK132",
+			dest:        "LHR",
+			departure:   dep,
+			arrival:     arr,
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
 			expectError: exceptions.ErrInvalidIATACode,
 		},
 		{
-			name:      "invalid destination",
+			name:        "invalid destination",
+			number:      "BA121",
+			origin:      "LHR",
+			dest:        "LHR1232",
+			departure:   dep,
+			arrival:     arr,
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			expectError: exceptions.ErrInvalidIATACode,
+		},
+		{
+			name:      "aircraft validation error",
 			number:    "BA121",
 			origin:    "LHR",
-			dest:      "LHR1232",
+			dest:      "LGW",
 			departure: dep,
 			arrival:   arr,
-			repo: &FakeRepo{
-				CreateFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return repoErr
-				},
+			setup: func(_ *FakeRepo, _ *FakeFlightsCache, r *FakeAircraftClient) {
+				r.ValidateAircraftExistsFn = func(ctx context.Context, id uuid.UUID) error {
+					return aircraftErr
+				}
 			},
-			cache: &FakeFlightsCache{
-				SaveFlightFn: func(ctx context.Context, f *models.Flight) error {
-					return nil
-				},
-			},
-			expectError: exceptions.ErrInvalidIATACode,
+			expectError: aircraftErr,
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			svc := NewFlightsService(tt.repo, tt.cache)
+			repo, cache, aircraft := defaultTestDeps()
+			tt.setup(repo, cache, aircraft)
+
+			svc := NewFlightsService(repo, cache, aircraft)
 
 			flight, err := svc.CreateFlight(
 				context.Background(),
@@ -168,6 +137,7 @@ func TestCreateFlight(t *testing.T) {
 				tt.dest,
 				tt.departure,
 				tt.arrival,
+				uuid.New(),
 			)
 
 			if tt.expectError != nil {

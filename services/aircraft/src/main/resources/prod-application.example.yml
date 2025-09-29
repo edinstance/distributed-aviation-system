@@ -16,6 +16,14 @@ spring:
 redis:
   url: ${CACHE_URL}
 
+server:
+  port: ${PORT:8080}
+
+# gRPC server config
+grpc:
+  server:
+    port: ${GRPC_PORT:9090}
+
 # Actuator config
 management:
   endpoints:
@@ -30,6 +38,3 @@ dgs:
     path: "/graphql"
     introspection:
       enabled: true
-
-server:
-  port: ${PORT:8080}

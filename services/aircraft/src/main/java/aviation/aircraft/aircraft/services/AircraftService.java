@@ -3,12 +3,15 @@ package aviation.aircraft.aircraft.services;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.exceptions.DuplicateAircraftException;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
-import aviation.aircraft.common.config.AircraftLogger;
+import aviation.aircraft.config.AircraftLogger;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.io.IOException;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.params.GetExParams;
 
 /**
  * A service for interacting with aircraft's.
@@ -46,10 +49,14 @@ public class AircraftService {
    */
   public AircraftEntity createAircraft(final AircraftEntity aircraft) {
 
-    aircraft.setId(UUID.randomUUID());
+    UUID aircraftId = UUID.randomUUID();
+    aircraft.setId(aircraftId);
+
+    AircraftLogger.info("Creating aircraft with id=" + aircraftId);
 
     aircraftRepository.findByRegistration(aircraft.getRegistration())
             .ifPresent(foundAircraft -> {
+              AircraftLogger.warn("Aircraft with registration=" + aircraft.getRegistration() + " already exists");
               throw new DuplicateAircraftException(foundAircraft.getRegistration());
             });
 
@@ -63,6 +70,7 @@ public class AircraftService {
       AircraftLogger.error("Error while saving aircraft to cache", e);
     }
 
+    AircraftLogger.info("Aircraft created with id=" + savedAircraft.getId());
     return savedAircraft;
   }
 
@@ -73,37 +81,41 @@ public class AircraftService {
    *
    * @return the found aircraft.
    */
-  public AircraftEntity getAircraftById(final UUID id) {
+  public Optional<AircraftEntity> getAircraftById(final UUID id) {
     String key = "aircraft:" + id;
 
     try (Jedis jedis = jedisPool.getResource()) {
-      String json = jedis.get(key);
+      String json = jedis.getEx(key, new GetExParams().ex(CACHE_TTL_SECONDS));
       if (json != null) {
-        jedis.expire(key, CACHE_TTL_SECONDS);
-        return objectMapper.readValue(json, AircraftEntity.class);
+        try {
+          AircraftLogger.info("Aircraft with id %s found in cache", id);
+          return Optional.of(objectMapper.readValue(json, AircraftEntity.class));
+        } catch (IOException e) {
+          AircraftLogger.error("Cache data corrupted for key=" + key, e);
+        }
       }
     } catch (Exception e) {
-      AircraftLogger.error("Error reading value from the cache", e);
+      AircraftLogger.error("Cache read error for key=" + key, e);
     }
 
+    AircraftLogger.info("Aircraft with id %s not in cache, falling back on db", id);
     try {
-      return aircraftRepository.findById(id)
-              .map(foundAircraft -> {
-                try (Jedis jedis = jedisPool.getResource()) {
+      Optional<AircraftEntity> dbResult = aircraftRepository.findById(id);
 
-                  jedis.setex(key, CACHE_TTL_SECONDS,
-                          objectMapper.writeValueAsString(foundAircraft));
+      dbResult.ifPresent(foundAircraft -> {
+        try (Jedis jedis = jedisPool.getResource()) {
+          jedis.setex(key, CACHE_TTL_SECONDS,
+                  objectMapper.writeValueAsString(foundAircraft));
+        } catch (Exception cacheEx) {
+          AircraftLogger.error("Error writingAircraft to cache for key=" + key, cacheEx);
+        }
+      });
 
-                } catch (Exception cacheEx) {
-                  AircraftLogger.error("Error writing value to cache", cacheEx);
-                }
-                return foundAircraft;
-              })
-              .orElse(null);
-
+      AircraftLogger.info("Aircraft with id %s found in db", id);
+      return dbResult;
     } catch (Exception e) {
-      AircraftLogger.error("Error fetching Aircraft from DB", e);
-      return null;
+      AircraftLogger.error("Error fetching Aircraft from DB, id=" + id, e);
+      return Optional.empty();
     }
   }
 }

@@ -1,11 +1,7 @@
 package aviation.aircraft.aircraft.services;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.startsWith;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +10,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import redis.clients.jedis.params.GetExParams;
 
 public class GetAircraftByIdTests extends SetupServiceTests {
 
@@ -25,21 +22,16 @@ public class GetAircraftByIdTests extends SetupServiceTests {
   }
 
   @Test
-  public void testGetAircraftByIdSuccess() {
+  public void testGetAircraftByIdSuccess() throws Exception {
     when(jedisPool.getResource()).thenReturn(jedis);
-    when(jedis.get(anyString())).thenReturn(null);
+    when(jedis.getEx(anyString(), any(GetExParams.class))).thenReturn(null);
 
     when(aircraftRepository.findById(aircraft.getId())).thenReturn(Optional.of(aircraft));
 
-    AircraftEntity result = aircraftService.getAircraftById(aircraft.getId());
+    Optional<AircraftEntity> result = aircraftService.getAircraftById(aircraft.getId());
 
-    assertNotNull(result);
-
-    verify(jedis).setex(
-            startsWith("aircraft:"),
-            anyLong(),
-            anyString()
-    );
+    assertTrue(result.isPresent());
+    verify(jedis).setex(startsWith("aircraft:"), anyLong(), anyString());
   }
 
   @Test
@@ -47,57 +39,51 @@ public class GetAircraftByIdTests extends SetupServiceTests {
     when(jedisPool.getResource()).thenReturn(jedis);
 
     String json = objectMapper.writeValueAsString(aircraft);
-    when(jedis.get(anyString())).thenReturn(json);
+    when(jedis.getEx(anyString(), any(GetExParams.class))).thenReturn(json);
 
-    AircraftEntity result = aircraftService.getAircraftById(aircraft.getId());
+    Optional<AircraftEntity> result = aircraftService.getAircraftById(aircraft.getId());
 
-    assertNotNull(result);
-    assertEquals(aircraft.getRegistration(), result.getRegistration());
+    assertTrue(result.isPresent());
+    assertEquals(aircraft.getRegistration(), result.get().getRegistration());
 
-    verify(jedis).get(startsWith("aircraft:"));
-    verify(jedis).expire(startsWith("aircraft:"), anyLong());
+    verify(jedis).getEx(startsWith("aircraft:"), any(GetExParams.class));
   }
 
   @Test
   public void testGetAircraftByIdCacheErrors() {
     when(jedisPool.getResource()).thenReturn(jedis);
-    when(jedis.get(anyString())).thenThrow(new RuntimeException());
+    when(jedis.getEx(anyString(), any(GetExParams.class))).thenThrow(new RuntimeException());
     when(jedis.setex(anyString(), anyLong(), anyString())).thenThrow(new RuntimeException());
 
     when(aircraftRepository.findById(aircraft.getId())).thenReturn(Optional.of(aircraft));
 
-    AircraftEntity result = aircraftService.getAircraftById(aircraft.getId());
+    Optional<AircraftEntity> result = aircraftService.getAircraftById(aircraft.getId());
 
-    assertNotNull(result);
-
-    verify(jedis).setex(
-            startsWith("aircraft:"),
-            anyLong(),
-            anyString()
-    );
+    assertTrue(result.isPresent());
+    verify(jedis).setex(startsWith("aircraft:"), anyLong(), anyString());
   }
 
   @Test
   public void testGetAircraftByIdNothingFound() {
     when(jedisPool.getResource()).thenReturn(jedis);
-    when(jedis.get(anyString())).thenReturn(null);
+    when(jedis.getEx(anyString(), any(GetExParams.class))).thenReturn(null);
 
     when(aircraftRepository.findById(aircraft.getId())).thenReturn(Optional.empty());
 
-    AircraftEntity result = aircraftService.getAircraftById(aircraft.getId());
+    Optional<AircraftEntity> result = aircraftService.getAircraftById(aircraft.getId());
 
-    assertNull(result);
+    assertFalse(result.isPresent());
   }
 
   @Test
   public void testGetAircraftByIdRepositoryErrors() {
     when(jedisPool.getResource()).thenReturn(jedis);
-    when(jedis.get(anyString())).thenReturn(null);
+    when(jedis.getEx(anyString(), any(GetExParams.class))).thenReturn(null);
 
     when(aircraftRepository.findById(aircraft.getId())).thenThrow(new RuntimeException());
 
-    AircraftEntity result = aircraftService.getAircraftById(aircraft.getId());
+    Optional<AircraftEntity> result = aircraftService.getAircraftById(aircraft.getId());
 
-    assertNull(result);
+    assertFalse(result.isPresent());
   }
 }

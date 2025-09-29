@@ -4,14 +4,23 @@ managed:
   override:
     - file_option: go_package_prefix
       value: github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf
+    - file_option: java_package_prefix
+      value: generated
+
 plugins:
   # Go stubs
   - remote: buf.build/protocolbuffers/go:v1.36.8
     out: services/flights/internal/protobuf/
     opt: paths=source_relative
-  - remote: buf.build/connectrpc/go:v1.18.1
+  - remote: buf.build/grpc/go:v1.5.1
     out: services/flights/internal/protobuf/
     opt: paths=source_relative
+
+  # Java stubs
+  - remote: buf.build/protocolbuffers/java:v29.1
+    out: services/aircraft/src/main/java/aviation/aircraft/grpc/
+  - remote: buf.build/grpc/java:v1.70.0
+    out: services/aircraft/src/main/java/aviation/aircraft/grpc
 
 inputs:
   - directory: protobuf

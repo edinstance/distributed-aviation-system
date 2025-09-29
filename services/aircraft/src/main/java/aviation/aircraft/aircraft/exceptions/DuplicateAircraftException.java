@@ -1,8 +1,8 @@
 package aviation.aircraft.aircraft.exceptions;
 
 
-import aviation.aircraft.common.exceptions.DomainException;
-import aviation.aircraft.common.exceptions.ExceptionCategories;
+import aviation.aircraft.exceptions.DomainException;
+import aviation.aircraft.exceptions.ExceptionCategories;
 
 /**
  * An exception for when there is a duplicate aircraft in the system.

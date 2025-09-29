@@ -80,7 +80,7 @@ func TestFlightRepositoryGetFlightByID(t *testing.T) {
 
 			flightID := uuid.New()
 			expectedSQL := `
-				SELECT id, number, origin, destination, departure_time, arrival_time, status, created_at, updated_at
+				SELECT id, number, origin, destination, departure_time, arrival_time, status, aircraft_id, created_at, updated_at
 				FROM flights
 				WHERE id = $1
 			`
@@ -93,7 +93,7 @@ func TestFlightRepositoryGetFlightByID(t *testing.T) {
 			if tc.returnRows {
 				expect.WillReturnRows(
 					pgxmock.NewRows([]string{
-						"id", "number", "origin", "destination", "departure_time", "arrival_time", "status", "created_at", "updated_at",
+						"id", "number", "origin", "destination", "departure_time", "arrival_time", "status", "aircraft_id", "created_at", "updated_at",
 					}).AddRow(
 						flightID,
 						"AA123",
@@ -102,6 +102,7 @@ func TestFlightRepositoryGetFlightByID(t *testing.T) {
 						time.Date(2024, 12, 15, 10, 0, 0, 0, time.UTC),
 						time.Date(2024, 12, 15, 15, 0, 0, 0, time.UTC),
 						models.FlightStatusScheduled,
+						uuid.New(),
 						createdAt,
 						updatedAt,
 					),
@@ -112,7 +113,7 @@ func TestFlightRepositoryGetFlightByID(t *testing.T) {
 
 			repo := &FlightRepository{pool: mock}
 			ctx := context.Background()
-			if tc.name == "ContextCancelled" {
+			if tc.name == "Context Cancelled" {
 				var cancel context.CancelFunc
 				ctx, cancel = context.WithCancel(ctx)
 				cancel()

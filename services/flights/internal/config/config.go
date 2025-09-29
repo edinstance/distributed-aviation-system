@@ -8,11 +8,12 @@ import (
 )
 
 type Config struct {
-	Port        string
-	Environment string
-	DatabaseURL string
-	CacheURL    string
-	CacheTTL    time.Duration
+	Port                   string
+	Environment            string
+	DatabaseURL            string
+	AircraftServiceGrpcUrl string
+	CacheURL               string
+	CacheTTL               time.Duration
 }
 
 var App Config
@@ -21,11 +22,12 @@ var App Config
 // PORT and ENVIRONMENT default to "8081" and "development" respectively if unset; DATABASE_URL is mandatory and the process will exit if it is missing or empty.
 func Init() {
 	App = Config{
-		Port:        getEnv("PORT", "8081"),
-		Environment: getEnv("ENVIRONMENT", "development"),
-		DatabaseURL: mustGetEnv("DATABASE_URL"),
-		CacheURL:    mustGetEnv("CACHE_URL"),
-		CacheTTL:    15 * time.Minute,
+		Port:                   getEnv("PORT", "8081"),
+		Environment:            getEnv("ENVIRONMENT", "development"),
+		DatabaseURL:            mustGetEnv("DATABASE_URL"),
+		AircraftServiceGrpcUrl: mustGetEnv("AIRCRAFT_SERVICE_GRPC_URL"),
+		CacheURL:               mustGetEnv("CACHE_URL"),
+		CacheTTL:               15 * time.Minute,
 	}
 }
 

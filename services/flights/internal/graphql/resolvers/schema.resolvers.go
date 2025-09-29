@@ -34,7 +34,12 @@ func (r *flightResolver) Aircraft(ctx context.Context, obj *models.Flight) (*mod
 }
 
 // CreateFlight is the resolver for the createFlight field.
-func (r *mutationResolver) CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time) (*models.Flight, error) {
+func (r *mutationResolver) CreateFlight(ctx context.Context, number string, origin string, destination string, departureTime time.Time, arrivalTime time.Time, aircraftID string) (*models.Flight, error) {
+	parsedAircraftId, err := uuid.Parse(aircraftID)
+	if err != nil {
+		return nil, err
+	}
+
 	return r.Resolver.CreateFlightResolver.CreateFlight(
 		ctx,
 		number,
@@ -42,6 +47,7 @@ func (r *mutationResolver) CreateFlight(ctx context.Context, number string, orig
 		destination,
 		departureTime,
 		arrivalTime,
+		parsedAircraftId,
 	)
 }
 
