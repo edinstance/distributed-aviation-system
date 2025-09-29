@@ -8,33 +8,33 @@ import (
 var (
 	GrpcRequests = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "grpc_requests_total",
-			Help: "Total gRPC/Connect requests",
+			Name: "flights_grpc_requests_total",
+			Help: "Total gRPC/Connect requests for the flights service",
 		},
-		[]string{"service", "procedure", "status"},
+		[]string{"direction", "procedure", "service", "status"},
 	)
 
 	GrpcDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "grpc_request_duration_seconds",
-			Help:    "Latency of gRPC/Connect requests",
+			Name:    "flights_grpc_request_duration_seconds",
+			Help:    "Latency of gRPC/Connect requests for the flights service",
 			Buckets: prometheus.DefBuckets,
 		},
-		[]string{"service", "procedure"},
+		[]string{"direction", "procedure", "service"},
 	)
 
 	GraphQLRequests = promauto.NewCounterVec(
 		prometheus.CounterOpts{
-			Name: "graphql_requests_total",
-			Help: "Total GraphQL requests",
+			Name: "flights_graphql_requests_total",
+			Help: "Total GraphQL requests for the flights service",
 		},
 		[]string{"operation", "type", "success"},
 	)
 
 	GraphQLDuration = promauto.NewHistogramVec(
 		prometheus.HistogramOpts{
-			Name:    "graphql_request_duration_seconds",
-			Help:    "Duration of GraphQL requests",
+			Name:    "flights_graphql_request_duration_seconds",
+			Help:    "Duration of GraphQL requests for the flights service",
 			Buckets: prometheus.DefBuckets,
 		},
 		[]string{"operation", "type"},
