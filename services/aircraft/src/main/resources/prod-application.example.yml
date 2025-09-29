@@ -29,9 +29,18 @@ management:
   endpoints:
     web:
       base-path: "/details"
+      exposure:
+        include: "health,info,metrics,prometheus"
     jmx:
       exposure:
         include: "health"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  endpoint:
+    health:
+      probes:
+        enabled: true
 
 dgs:
   graphql:
