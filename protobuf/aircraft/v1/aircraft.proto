@@ -7,8 +7,6 @@ option go_package = "github.com/edinstance/distributed-aviation-system/services/
 option java_package = "aviation.aircraft.grpc.generated.v1";
 option java_multiple_files = true;
 
-import "google/protobuf/timestamp.proto";
-
 service AircraftService {
   rpc GetAircraftById(GetAircraftByIdRequest) returns (GetAircraftByIdResponse);
 }
