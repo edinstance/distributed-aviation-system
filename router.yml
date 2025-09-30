@@ -5,6 +5,7 @@ supergraph:
 health_check:
   enabled: true
   listen: 0.0.0.0:8088
+  path: /health
 
 include_subgraph_errors:
   all: true

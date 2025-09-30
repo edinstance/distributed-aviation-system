@@ -15,6 +15,9 @@ plugins:
   - remote: buf.build/grpc/go:v1.5.1
     out: services/flights/internal/protobuf/
     opt: paths=source_relative
+  - remote: buf.build/connectrpc/go:v1.18.1
+    out: services/flights/internal/protobuf/
+    opt: paths=source_relative
 
   # Java stubs
   - remote: buf.build/protocolbuffers/java:v29.1

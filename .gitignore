@@ -79,3 +79,7 @@ build/
 
 # Spring Boot
 spring.log
+
+# Node
+node_modules/
+dist/
