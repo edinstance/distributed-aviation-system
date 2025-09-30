@@ -6,6 +6,7 @@ services:
     ports:
       - "3001:9090"
     volumes:
+      - prometheus_data:/prometheus
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
     command:
       - "--config.file=/etc/prometheus/prometheus.yml"
@@ -26,6 +27,7 @@ services:
     command:
       - "-config.file=/etc/mimir.yaml"
     volumes:
+      - mimir_data:/var/mimir
       - ./mimir/config/mimir.yml:/etc/mimir.yaml:ro
     networks:
       - aviation-network
@@ -55,6 +57,7 @@ services:
 
 volumes:
   prometheus_data:
+  mimir_data:
   grafana_data:
 
 networks:
