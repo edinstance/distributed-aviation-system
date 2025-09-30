@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "moduleResolution": "node",
+    "types": [],
+    "baseUrl": "."
+  },
+  "include": ["./**/*.ts", "types/**/*.d.ts"]
+}
