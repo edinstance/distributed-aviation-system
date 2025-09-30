@@ -19,7 +19,7 @@ The load testing framework consists of:
 
 To run the tests, you will need to install both k6 and the node dependencies. To install k6, follow the instructions
 [here](https://grafana.com/docs/k6/latest/set-up/install-k6/). Once that is complete, install the node dependencies by
-running ```npm install```.
+running `npm install`.
 
 ## Configuration
 
@@ -28,13 +28,14 @@ running ```npm install```.
 The tests can be configured using environment variables, they are all defined in [this](./src/config.ts) config file. They can be set in the following ways:
 
 1. By exporting the values before running the tests.
+
 ```
 export FLIGHT_URL=http://localhost:8081/graphql
 export AIRCRAFT_URL=http://localhost:8082/graphql
 export ROUTER_URL=http://localhost:4000/graphql
 ```
 
-2. Or you can add a -e flag to the run configurations. 
+2. Or you can add a -e flag to the run configurations.
 
 ```
 -e FLIGHT_URL=http://localhost:8081/graphql
@@ -47,7 +48,7 @@ export ROUTER_URL=http://localhost:4000/graphql
 GraphQL operations are type-safe using `@graphql-codegen/cli`:
 
 ```bash
-npx graphql-codegen 
+npx graphql-codegen
 ```
 
 ### Request Helper
@@ -58,18 +59,18 @@ The `graphql()` helper function (`helpers/graphql_request.ts`) provides:
 - Automatic response validation
 - Error handling and logging
 - k6 check assertions for:
-    - HTTP 200 status
-    - Valid JSON response
-    - No GraphQL errors
+  - HTTP 200 status
+  - Valid JSON response
+  - No GraphQL errors
 
 ## Running Tests
 
 ### Prerequisites
 
 1. Ensure services are running:
-    - Aircraft Service (port 8080)
-    - Flight Service (port 8081)
-    - Apollo Router (port 4000)
+   - Aircraft Service (port 8080)
+   - Flight Service (port 8081)
+   - Apollo Router (port 4000)
 
 2. Install dependencies:
    ```bash
@@ -147,11 +148,11 @@ Update the `options` export in test files:
 
 ```typescript
 export let options: Options = {
-    stages: [
-        {duration: "2m", target: 10},  // Ramp up
-        {duration: "5m", target: 10},  // Stay at 10 users
-        {duration: "2m", target: 0},   // Ramp down
-    ],
+  stages: [
+    { duration: "2m", target: 10 }, // Ramp up
+    { duration: "5m", target: 10 }, // Stay at 10 users
+    { duration: "2m", target: 0 }, // Ramp down
+  ],
 };
 ```
 
