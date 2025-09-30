@@ -20,8 +20,27 @@ jobs:
       - name: Setup k6
         uses: grafana/setup-k6-action@v1
 
+      - name: Install buf
+        uses: bufbuild/buf-setup-action@v1.50.0
+
+      - name: Build proto files
+        run: buf generate --template buf.gen.yaml
+
+      - name: Create aircraft application file
+        run: cp services/aircraft/src/main/resources/prod-application.example.yml services/aircraft/src/main/resources/application.yml
+
       - name: Run containers in the background
         run: docker compose up -d
+
+      - name: Wait for router to be up
+        run: |
+          timeout 120 bash -c '
+            until curl -sf http://localhost:8088/health; do
+              echo "Waiting for router..."
+              sleep 5
+            done
+          '
+          echo "Router is up"
 
       - name: Install load test dependencies
         run: |
@@ -29,7 +48,9 @@ jobs:
           npm install
 
       - name: Run load tests
-        run: npm run test:all
+        run: |
+          cd load-tests
+          npm run test:all
 
       - name: Stop containers
         run: docker compose down
