@@ -28,11 +28,27 @@
     },
     {
       "type": "stat",
-      "title": "Total Requests/sec",
+      "title": "Total Requests",
       "gridPos": {
         "h": 3,
         "w": 6,
         "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(apollo_router_operations_total{job=\"apollo-router\"})",
+          "legendFormat": "total"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Requests/sec",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
         "y": 1
       },
       "targets": [
@@ -48,12 +64,12 @@
       "gridPos": {
         "h": 3,
         "w": 6,
-        "x": 6,
+        "x": 12,
         "y": 1
       },
       "targets": [
         {
-          "expr": "100 * sum(rate(apollo_router_operations_total{job=\"apollo-router\",http_response_status_code!~\"2..\"}[5m])) / sum(rate(apollo_router_operations_total{job=\"apollo-router\"}[5m]))",
+          "expr": "100 * sum(rate(apollo_router_graphql_error_total{job=\"apollo-router\"}[5m])) / clamp_min(sum(rate(apollo_router_operations_total{job=\"apollo-router\"}[5m])),1e-9)",
           "legendFormat": "errors %"
         }
       ]
@@ -64,7 +80,7 @@
       "gridPos": {
         "h": 3,
         "w": 6,
-        "x": 12,
+        "x": 18,
         "y": 1
       },
       "targets": [
@@ -97,7 +113,7 @@
       "targets": [
         {
           "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket{job=\"apollo-router\"}[5m])) by (le,subgraph_name))",
-          "legendFormat": "{{subgraph_name}}"
+          "legendFormat": "{{code}}"
         }
       ]
     },
@@ -112,8 +128,8 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(apollo_router_operations_total{job=\"apollo-router\",http_response_status_code!~\"2..\"}[5m])) by (subgraph_name)",
-          "legendFormat": "{{subgraph_name}}"
+          "expr": "sum by (code) (rate(apollo_router_graphql_error_total{job=\"apollo-router\"}[5m]))",
+          "legendFormat": "{{code}}"
         }
       ]
     }
