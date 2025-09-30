@@ -7,6 +7,15 @@ scrape_configs:
     static_configs:
       - targets: [ "prometheus:9090" ]
 
+  - job_name: "grafana"
+    static_configs:
+      - targets: [ "grafana:3000" ]
+
+  - job_name: "apollo-router"
+    static_configs:
+      - targets: [ "apollo-router:8089" ]
+    metrics_path: "/metrics"
+
   - job_name: "flights-service"
     static_configs:
       - targets: [ "flights-service:8081" ]

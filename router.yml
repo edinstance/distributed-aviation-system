@@ -11,3 +11,12 @@ include_subgraph_errors:
   subgraphs:
     flights: true
     aircraft: true
+
+telemetry:
+  exporters:
+    metrics:
+      prometheus:
+        enabled: true
+        resource_selector: all
+        listen: 0.0.0.0:8089
+        path: /metrics

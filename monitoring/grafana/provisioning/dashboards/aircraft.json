@@ -1,0 +1,269 @@
+{
+  "title": "Aircraft Service (GraphQL + gRPC)",
+  "uid": "aircraft-service",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [
+    "aviation",
+    "aircraft",
+    "grpc",
+    "graphql",
+    "java"
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "GraphQL QPS",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "gRPC QPS",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "100 * ( sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\",status=\"failure\"}[5m])) or vector(0) + sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\",code!=\"OK\"}[5m])) or vector(0) ) / ( sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m])) + sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m])) )"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency (GraphQL)",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_seconds_bucket{job=\"aircraft-service\"}[5m])) by (le)) or vector(0)"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "GraphQL Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Requests/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m])",
+          "legendFormat": "{{operation}} {{type}} {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Error Rate %",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "100 * (sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\",status=\"failure\"}[5m])) or vector(0)) / sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_seconds_bucket{job=\"aircraft-service\"}[5m])) by (le,operation,type,status)) or vector(0)",
+          "legendFormat": "{{operation}} {{type}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "gRPC Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Requests/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m])",
+          "legendFormat": "{{service}}/{{method}} {{code}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Error Rate %",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "100 * (sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\",code!=\"OK\"}[5m])) or vector(0)) / sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_grpc_request_duration_seconds_bucket{job=\"aircraft-service\"}[5m])) by (le,service,method)) or vector(0)",
+          "legendFormat": "{{service}}/{{method}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Runtime Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM Memory (Heap)",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{job=\"aircraft-service\",area=\"heap\"}",
+          "legendFormat": "heap used"
+        },
+        {
+          "expr": "jvm_memory_max_bytes{job=\"aircraft-service\",area=\"heap\"}",
+          "legendFormat": "heap max"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "JVM Threads",
+      "gridPos": {
+        "h": 6,
+        "w": 4,
+        "x": 12,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "jvm_threads_live_threads{job=\"aircraft-service\"}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC Pause Time",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 16,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_pause_seconds_sum{job=\"aircraft-service\"}[5m])",
+          "legendFormat": "gc={{gc}}"
+        }
+      ]
+    }
+  ]
+}
