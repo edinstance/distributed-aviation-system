@@ -1,0 +1,35 @@
+name: Smoke Test
+
+on:
+  pull_request:
+
+jobs:
+  verify_supergraph:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        # This fetches the repository's code and places it in the working directory of the workflow runner.
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Run containers in the background
+        run: docker compose up -d
+
+      - name: Install load test dependencies
+        run: |
+          cd load-tests
+          npm install
+
+      - name: Run load tests
+        run: npm run test:all
+
+      - name: Stop containers
+        run: docker compose down
