@@ -8,6 +8,7 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.Meter;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
@@ -21,8 +22,8 @@ import org.springframework.stereotype.Component;
 public class GrpcInboundServerMetricsInterceptor implements ServerInterceptor {
 
   private final MeterRegistry registry;
-  private final Counter.Builder requestCounter;
-  private final Timer.Builder requestTimer;
+  private final Meter.MeterProvider<Counter> requestCounter;
+  private final Meter.MeterProvider<Timer> requestTimer;
 
   /**
    * Constructor for the interceptor.
@@ -33,20 +34,23 @@ public class GrpcInboundServerMetricsInterceptor implements ServerInterceptor {
     this.registry = registry;
     this.requestCounter = Counter.builder("aircraft_grpc_requests_total")
             .description("Total number of inbound gRPC requests for the aircraft service")
-            .tag("direction", "inbound");
+            .tag("direction", "inbound")
+            .withRegistry(registry);
     this.requestTimer = Timer.builder("aircraft_grpc_request_duration_seconds")
             .description("Duration of inbound gRPC requests for the aircraft service")
-            .tag("direction", "inbound");
+            .tag("direction", "inbound")
+            .withRegistry(registry);
   }
 
   /**
    * Intercepts the call and records metrics.
    *
-   * @param call the call to intercept.
+   * @param call    the call to intercept.
    * @param headers the headers of the call.
-   * @param next the next handler in the chain.
-   * @param <ReqT> the request type.
+   * @param next    the next handler in the chain.
+   * @param <ReqT>  the request type.
    * @param <RespT> the response type.
+   *
    * @return the listener for the call.
    */
   @Override
@@ -64,7 +68,6 @@ public class GrpcInboundServerMetricsInterceptor implements ServerInterceptor {
               @Override
               public void close(Status status, Metadata trailers) {
                 GrpcMetricsHelpers.recordMetrics(
-                        registry,
                         requestCounter,
                         requestTimer,
                         parts.service(),
@@ -76,6 +79,7 @@ public class GrpcInboundServerMetricsInterceptor implements ServerInterceptor {
             };
 
     return new ForwardingServerCallListener.SimpleForwardingServerCallListener<>(
-            next.startCall(monitoringCall, headers)) {};
+            next.startCall(monitoringCall, headers)) {
+    };
   }
 }
