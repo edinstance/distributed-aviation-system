@@ -35,7 +35,8 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
    * Begins the execution of a GraphQL request.
    *
    * @param parameters the parameters for the execution.
-   * @param state the state of the execution.
+   * @param state      the state of the execution.
+   *
    * @return the instrumentation context.
    */
   @Override
@@ -46,7 +47,8 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
 
     return new InstrumentationContext<>() {
       @Override
-      public void onDispatched() {}
+      public void onDispatched() {
+      }
 
       @Override
       public void onCompleted(ExecutionResult result, Throwable t) {
@@ -90,8 +92,9 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
    * Instruments a data fetcher.
    *
    * @param dataFetcher the data fetcher to instrument.
-   * @param parameters the parameters for the instrumentation.
-   * @param state the state of the instrumentation.
+   * @param parameters  the parameters for the instrumentation.
+   * @param state       the state of the instrumentation.
+   *
    * @return the instrumented data fetcher.
    */
   @Override
@@ -108,22 +111,37 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
 
     return environment -> {
       Timer.Sample sample = Timer.start(registry);
-      Object result = dataFetcher.get(environment);
+      try {
+        Object result = dataFetcher.get(environment);
+        if (result instanceof CompletableFuture<?> future) {
+          return future.whenComplete(
+                  (r, ex) ->
+                          GraphqlMetricsHelpers.stopFieldTimer(
+                                  registry, sample, fieldTag, ex == null ? "success" : "failure"));
+        }
+        if (result instanceof DataFetcherResult<?> dfr) {
+          if (dfr.getData() instanceof CompletableFuture<?> cf) {
+            CompletableFuture<?> instrumented =
+                    cf.whenComplete((r, ex) ->
+                            GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag,
+                                    ex == null ? "success" : "failure"));
 
-      if (result instanceof CompletableFuture<?> future) {
-        return future.whenComplete(
-                (r, ex) ->
-                        GraphqlMetricsHelpers.stopFieldTimer(
-                                registry, sample, fieldTag, ex == null ? "success" : "failure"));
-      } else if (result instanceof DataFetcherResult<?> dfr
-              && dfr.getData() instanceof CompletableFuture<?> cf) {
-        return cf.whenComplete(
-                (r, ex) ->
-                        GraphqlMetricsHelpers.stopFieldTimer(
-                                registry, sample, fieldTag, ex == null ? "success" : "failure"));
-      } else {
+            return DataFetcherResult.newResult()
+                    .data(instrumented)
+                    .errors(dfr.getErrors())
+                    .localContext(dfr.getLocalContext())
+                    .extensions(dfr.getExtensions())
+                    .build();
+          }
+          String status = dfr.getErrors().isEmpty() ? "success" : "failure";
+          GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
+          return result;
+        }
         GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, "success");
         return result;
+      } catch (Exception ex) {
+        GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, "failure");
+        throw ex;
       }
     };
   }
