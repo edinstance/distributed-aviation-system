@@ -63,4 +63,5 @@ jobs:
           npm run test:all
 
       - name: Stop containers
+        if: always()
         run: docker compose down
