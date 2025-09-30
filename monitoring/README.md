@@ -5,7 +5,7 @@ This directory contains all the configurations for monitoring.
 It is configured to work with all the services deployed using Docker Compose
 and [this configuration](../docker-compose.yml). There are some environment variables
 that need to be set, these currently configure grafana's admin user and password. To set them you need to take the
-values from [.env.example](.env) and put them in a [.env](.env) file.
+values from [.env.example](.env.example) and put them in a [.env](.env) file.
 
 ## Prometheus
 
