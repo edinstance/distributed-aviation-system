@@ -7,7 +7,6 @@ import {
   GetFlightByIdQuery,
   GetFlightByIdQueryVariables,
 } from "../../gql/graphql";
-import { CONFIG } from "../../config";
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import { check } from "k6";
 
@@ -17,9 +16,9 @@ function randomFlightNumber(): string {
   return code + Math.floor(100 + Math.random() * 9000);
 }
 
-export function runFlightScenario(aircraftId: string) {
+export function runFlightScenario(url: string, aircraftId: string) {
   graphql<GetFlightByIdQuery, GetFlightByIdQueryVariables>(
-    CONFIG.flightServiceUrl,
+    url,
     GetFlightByIdDocument,
     { id: uuidv4() },
   );
@@ -27,7 +26,7 @@ export function runFlightScenario(aircraftId: string) {
   const createRes = graphql<
     CreateFlightMutation,
     CreateFlightMutationVariables
-  >(CONFIG.flightServiceUrl, CreateFlightDocument, {
+  >(url, CreateFlightDocument, {
     aircraftId,
     number: randomFlightNumber(),
     origin: "LHR",
@@ -44,7 +43,7 @@ export function runFlightScenario(aircraftId: string) {
 
   if (flightId) {
     graphql<GetFlightByIdQuery, GetFlightByIdQueryVariables>(
-      CONFIG.flightServiceUrl,
+      url,
       GetFlightByIdDocument,
       { id: flightId },
     );

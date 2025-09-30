@@ -8,13 +8,12 @@ import {
   GetAircraftQuery,
   GetAircraftQueryVariables,
 } from "../../gql/graphql";
-import { CONFIG } from "../../config";
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import { check } from "k6";
 
-export function runAircraftScenario() {
+export function runAircraftScenario(url: string) {
   graphql<GetAircraftQuery, GetAircraftQueryVariables>(
-    CONFIG.aircraftServiceUrl,
+    url,
     GetAircraftDocument,
     { id: uuidv4() },
   );
@@ -22,9 +21,9 @@ export function runAircraftScenario() {
   const createAircraftRes = graphql<
     CreateAircraftMutation,
     CreateAircraftMutationVariables
-  >(CONFIG.aircraftServiceUrl, CreateAircraftDocument, {
+  >(url, CreateAircraftDocument, {
     input: {
-      registration: `N${Math.floor(Math.random() * 90000) + 10000}`,
+      registration: `N-${uuidv4().slice(0, 8)}`,
       manufacturer: "Boeing",
       model: "737",
       capacity: 50,
@@ -41,7 +40,7 @@ export function runAircraftScenario() {
 
   if (aircraftId) {
     graphql<GetAircraftQuery, GetAircraftQueryVariables>(
-      CONFIG.aircraftServiceUrl,
+      url,
       GetAircraftDocument,
       { id: aircraftId },
     );
