@@ -3,6 +3,10 @@ name: Verify Supergraph
 on:
   pull_request:
 
+concurrency:
+  group: verify-supergraph-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
 jobs:
   verify_supergraph:
     runs-on: ubuntu-latest
