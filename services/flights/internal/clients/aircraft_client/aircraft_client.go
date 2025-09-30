@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
 	aircraftv1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/aircraft/v1"
 	"github.com/google/uuid"
 	"google.golang.org/grpc"
@@ -21,7 +22,11 @@ type AircraftClient struct {
 }
 
 func NewAircraftClient(address string) (*AircraftClient, error) {
-	conn, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial(
+		address,
+		grpc.WithTransportCredentials(insecure.NewCredentials()),
+		grpc.WithUnaryInterceptor(metrics.OutboundGrpcUnaryClientInterceptor()),
+	)
 
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", exceptions.ErrDownstreamClientDown, err)

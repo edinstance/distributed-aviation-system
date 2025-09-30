@@ -1,0 +1,20 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    ports:
+      - "3001:9090"
+    networks:
+      - aviation-network
+
+volumes:
+  prometheus_data:
+
+networks:
+  aviation-network:
+    name: aviation-network
+    driver: bridge
