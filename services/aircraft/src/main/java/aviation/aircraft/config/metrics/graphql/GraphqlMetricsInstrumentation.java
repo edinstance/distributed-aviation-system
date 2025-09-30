@@ -113,18 +113,32 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
       Timer.Sample sample = Timer.start(registry);
       try {
         Object result = dataFetcher.get(environment);
+
         if (result instanceof CompletableFuture<?> future) {
-          return future.whenComplete(
-                  (r, ex) ->
-                          GraphqlMetricsHelpers.stopFieldTimer(
-                                  registry, sample, fieldTag, ex == null ? "success" : "failure"));
+          return future.whenComplete((r, ex) -> {
+            boolean hasErrors = ex == null
+                    && r instanceof DataFetcherResult<?>
+                    && !((DataFetcherResult<?>) r).getErrors().isEmpty();
+
+            String status = (ex == null && !hasErrors) ? "success" : "failure";
+            GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
+          });
         }
+
         if (result instanceof DataFetcherResult<?> dfr) {
           if (dfr.getData() instanceof CompletableFuture<?> cf) {
-            CompletableFuture<?> instrumented =
-                    cf.whenComplete((r, ex) ->
-                            GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag,
-                                    ex == null ? "success" : "failure"));
+            boolean outerHasErrors = !dfr.getErrors().isEmpty();
+
+            CompletableFuture<?> instrumented = cf.whenComplete((r, ex) -> {
+              boolean innerHasErrors = ex == null
+                      && r instanceof DataFetcherResult<?>
+                      && !((DataFetcherResult<?>) r).getErrors().isEmpty();
+
+              String status = (ex == null && !outerHasErrors && !innerHasErrors)
+                      ? "success"
+                      : "failure";
+              GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
+            });
 
             return DataFetcherResult.newResult()
                     .data(instrumented)
@@ -133,12 +147,15 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
                     .extensions(dfr.getExtensions())
                     .build();
           }
+
           String status = dfr.getErrors().isEmpty() ? "success" : "failure";
           GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
           return result;
         }
+
         GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, "success");
         return result;
+
       } catch (Exception ex) {
         GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, "failure");
         throw ex;
