@@ -26,8 +26,12 @@ func GraphQLMetricsInterceptor(ctx context.Context, next graphql.OperationHandle
 		res := resp(ctx)
 		elapsed := time.Since(start).Seconds()
 
+		if res == nil {
+			return nil
+		}
+
 		result := "success"
-		if res != nil && len(res.Errors) > 0 {
+		if len(res.Errors) > 0 {
 			result = "failure"
 		}
 
