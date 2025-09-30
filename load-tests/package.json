@@ -11,7 +11,7 @@
     "test:aircraft": "npm run build && k6 run dist/aircraft.js",
     "test:router": "npm run build && k6 run dist/router.js",
     "test:all": "npm run build && k6 run dist/flights.js && k6 run dist/aircraft.js && k6 run dist/router.js",
-    "test:all:parallel": "npm run build && npm-run-all --parallel test:flights test:aircraft"
+    "test:all:parallel": "npm run build && npm-run-all --parallel test:flights test:aircraft test:router"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^6.0.0",
