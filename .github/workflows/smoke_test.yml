@@ -36,31 +36,23 @@ jobs:
       - name: Run containers in the background
         run: docker compose up -d
 
-      - name: Debug container statuses
-        run: |
-          docker compose ps
-          docker compose logs flights-service
-          docker compose logs aircraft-service
-
       - name: Wait for services to be up
         run: |
-          services=("flights-service" "aircraft-service")
-          for svc in "${services[@]}"; do
-            echo "Waiting for $svc to be healthy..."
-            timeout 120 bash -c "until [ \"$(docker inspect --format='{{json .State.Health.Status}}' ${svc})\" = '\"healthy\"' ]; do
-              sleep 5
-            done"
-            echo "$svc is healthy"
+          services=(
+            "http://localhost:8081/health"          # flights-service
+            "http://localhost:8080/details/health" # aircraft-service
+            "http://localhost:8088/health"         # router
+          )
+          for url in "${services[@]}"; do
+            echo "Waiting for $url..."
+            timeout 120 bash -c "
+              until curl -sf $url; do
+                echo 'Still waiting for $url...'
+                sleep 5
+              done
+            "
+            echo "$url is healthy"
           done
-
-      - name: Wait for router to be up
-        run: |
-          echo "Waiting for router to be healthy..."
-          until curl -sf http://localhost:8088/health; do
-            echo "Still waiting for router..."
-            sleep 5
-          done
-          echo "router is healthy"
 
       - name: Install load test dependencies
         run: |
