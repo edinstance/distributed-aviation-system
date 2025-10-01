@@ -57,10 +57,16 @@ services:
       DATABASE_URL: ${DATABASE_URL:-jdbc:postgresql://aircraft-database:5432/aircraft?sslmode=disable}
       DATABASE_USERNAME: ${DATABASE_USERNAME:-postgres}
       DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
-      REDIS_URL: ${REDIS_URL:-redis://aircraft-cache:6379}
+      CACHE_URL: ${CACHE_URL:-redis://aircraft-cache:6379}
       LIQUIBASE_ENABLED: ${LIQUIBASE_ENABLED:-false}
       PORT: 8080
       GRPC_PORT: 9090
+      OTEL_SERVICE_NAME: aircraft-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: none
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8080/details/health || exit 1" ]
       interval: 10s
