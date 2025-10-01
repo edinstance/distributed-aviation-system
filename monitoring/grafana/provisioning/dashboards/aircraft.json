@@ -38,7 +38,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m]))"
+          "expr": "sum(rate(aircraft_graphql_requests_total[5m]))"
         }
       ]
     },
@@ -53,7 +53,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m]))"
+          "expr": "sum(rate(aircraft_grpc_requests_total[5m]))"
         }
       ]
     },
@@ -68,7 +68,7 @@
       },
       "targets": [
         {
-          "expr": "100 * ( sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\",status=\"failure\"}[5m])) or vector(0) + sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\",code!=\"OK\"}[5m])) or vector(0) ) / ( sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m])) + sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m])) )"
+          "expr": "100 * ( sum(rate(aircraft_graphql_requests_total{status=\"failure\"}[5m])) or vector(0) + sum(rate(aircraft_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0) ) / ( sum(rate(aircraft_graphql_requests_total[5m])) + sum(rate(aircraft_grpc_requests_total[5m])) )"
         }
       ]
     },
@@ -83,7 +83,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_seconds_bucket{job=\"aircraft-service\"}[5m])) by (le)) or vector(0)"
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_ms_milliseconds_bucket[5m])) by (le)) or vector(0)"
         }
       ]
     },
@@ -109,7 +109,7 @@
       },
       "targets": [
         {
-          "expr": "rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m])",
+          "expr": "rate(aircraft_graphql_requests_total[5m])",
           "legendFormat": "{{operation}} {{type}} {{status}}"
         }
       ]
@@ -125,7 +125,7 @@
       },
       "targets": [
         {
-          "expr": "100 * (sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\",status=\"failure\"}[5m])) or vector(0)) / sum(rate(aircraft_graphql_requests_total{job=\"aircraft-service\"}[5m]))"
+          "expr": "100 * (sum(rate(aircraft_graphql_requests_total{status=\"failure\"}[5m])) or vector(0)) / sum(rate(aircraft_graphql_requests_total[5m]))"
         }
       ]
     },
@@ -140,7 +140,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_seconds_bucket{job=\"aircraft-service\"}[5m])) by (le,operation,type,status)) or vector(0)",
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_ms_milliseconds_bucket[5m])) by (le,operation,type,status)) or vector(0)",
           "legendFormat": "{{operation}} {{type}}"
         }
       ]
@@ -167,8 +167,8 @@
       },
       "targets": [
         {
-          "expr": "rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m])",
-          "legendFormat": "{{service}}/{{method}} {{code}}"
+          "expr": "rate(aircraft_grpc_requests_total[5m])",
+          "legendFormat": "{{service}}/{{method}} {{status}}"
         }
       ]
     },
@@ -183,7 +183,7 @@
       },
       "targets": [
         {
-          "expr": "100 * (sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\",code!=\"OK\"}[5m])) or vector(0)) / sum(rate(aircraft_grpc_requests_total{job=\"aircraft-service\"}[5m]))"
+          "expr": "100 * (sum(rate(aircraft_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0)) / sum(rate(aircraft_grpc_requests_total[5m]))"
         }
       ]
     },
@@ -198,7 +198,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(aircraft_grpc_request_duration_seconds_bucket{job=\"aircraft-service\"}[5m])) by (le,service,method)) or vector(0)",
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_grpc_request_duration_ms_milliseconds_bucket[5m])) by (le,service,method)) or vector(0)",
           "legendFormat": "{{service}}/{{method}}"
         }
       ]
@@ -225,11 +225,11 @@
       },
       "targets": [
         {
-          "expr": "jvm_memory_used_bytes{job=\"aircraft-service\",area=\"heap\"}",
+          "expr": "jvm_memory_used{jvm_memory_type=\"heap\"}",
           "legendFormat": "heap used"
         },
         {
-          "expr": "jvm_memory_max_bytes{job=\"aircraft-service\",area=\"heap\"}",
+          "expr": "jvm_memory_limit{jvm_memory_type=\"heap\"}",
           "legendFormat": "heap max"
         }
       ]
@@ -245,7 +245,7 @@
       },
       "targets": [
         {
-          "expr": "jvm_threads_live_threads{job=\"aircraft-service\"}"
+          "expr": "jvm_thread_count"
         }
       ]
     },
@@ -260,8 +260,8 @@
       },
       "targets": [
         {
-          "expr": "rate(jvm_gc_pause_seconds_sum{job=\"aircraft-service\"}[5m])",
-          "legendFormat": "gc={{gc}}"
+          "expr": "rate(jvm_gc_duration_sum[5m])",
+          "legendFormat": "gc={{jvm_gc_name}}"
         }
       ]
     }
