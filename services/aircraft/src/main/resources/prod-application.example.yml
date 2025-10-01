@@ -34,12 +34,14 @@ management:
     jmx:
       exposure:
         include: "health"
-  oltp:
+  metrics:
     tags:
       application: ${spring.application.name}
-    export:
-      url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
-      step: 5s
+  otlp:
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+        step: 5s
   endpoint:
     health:
       probes:

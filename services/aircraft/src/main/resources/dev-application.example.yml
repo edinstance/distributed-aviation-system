@@ -31,12 +31,14 @@ management:
     jmx:
       exposure:
         include: "health"
-  oltp:
+  metrics:
     tags:
       application: ${spring.application.name}
-    export:
-      url: http://localhost:4317
-      step: 5s
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4317
+        step: 5s
   endpoint:
     health:
       probes:
