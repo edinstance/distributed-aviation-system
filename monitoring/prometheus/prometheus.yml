@@ -28,8 +28,4 @@ scrape_configs:
       - targets: [ "apollo-router:8089" ]
     metrics_path: "/metrics"
 
-  - job_name: "flights-service"
-    static_configs:
-      - targets: [ "flights-service:8081" ]
-    metrics_path: "/metrics"
 
