@@ -21,6 +21,19 @@ The service requires the following env vars:
 - `LIQUIBASE_ENABLED`: A toggle for if the service should run liquibase and the database updates.
 - `CACHE_URL`: Redis connection string in the form of `redis://host:6379`
 
+🔹 Telemetry-specific environment variables
+
+
+To enable OpenTelemetry tracing/metrics/logs, set:
+
+
+- `OTEL_SERVICE_NAME`: The logical name of the service (e.g., aircraft-service)
+- `OTEL_EXPORTER_OTLP_ENDPOINT`: OTLP collector endpoint (http://otel-collector:4317 for gRPC or http://otel-collector:4318 for HTTP/JSON)
+- `OTEL_EXPORTER_OTLP_PROTOCOL`: grpc or http/protobuf
+- `OTEL_TRACES_EXPORTER`: otlp
+- `OTEL_METRICS_EXPORTER`: otlp or none
+- `OTEL_LOGS_EXPORTER`: otlp or none
+
 See [.env.example](.env.example) for a template.
 
 ## Development Setup
@@ -89,7 +102,10 @@ The service will start on `http://localhost:8080`
 mvn clean package
 
 # Run binary
-java -jar target/aircraft-0.0.1-SNAPSHOT.jar
+java -javaagent:target/opentelemetry-javaagent.jar \
+     -Dotel.service.name=aircraft-service \
+     -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
+     -jar target/aircraft-0.0.1-SNAPSHOT.jar
 ```
 
 ## Docker
@@ -116,6 +132,9 @@ docker run -d \
   -e DATABASE_PASSWORD=postgres \
   -e LIQUIBASE_ENABLED=true \
   -e CACHE_URL="redis://host.docker.internal:6380" \
+  -e OTEL_SERVICE_NAME=aircraft-service \
+  -e OTEL_EXPORTER_OTLP_ENDPOINT=http://host.docker.internal:4317 \
+  -e OTEL_TRACES_EXPORTER=otlp \
   aircraft-service
 ```
 
@@ -159,3 +178,9 @@ mvn checkstyle:checkstyle
 mvn test
 ```
 
+## Telemetry Summary
+
+- Agent download is automated via Maven plugin → target/opentelemetry-javaagent.jar
+- Included in Dockerfile and always attached at runtime
+- Configured via environment variables (OTEL_*)
+- Supports OTLP → collector (Tempo, Grafana, Jaeger, Prometheus, etc.)
