@@ -8,8 +8,11 @@ import graphql.execution.instrumentation.InstrumentationState;
 import graphql.execution.instrumentation.parameters.InstrumentationExecutionParameters;
 import graphql.execution.instrumentation.parameters.InstrumentationFieldFetchParameters;
 import graphql.schema.DataFetcher;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import java.util.concurrent.CompletableFuture;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Component;
@@ -20,82 +23,90 @@ import org.springframework.stereotype.Component;
 @Component
 public class GraphqlMetricsInstrumentation implements Instrumentation {
 
-  private final MeterRegistry registry;
+  private static final String OPERATION = "operation";
+  private static final String TYPE = "type";
+  private static final String STATUS = "status";
+  private static final String FIELD = "field";
+
+  private final LongCounter graphqlRequests;
+  private final DoubleHistogram graphqlDuration;
+  private final DoubleHistogram fieldDuration;
+  private final LongCounter fieldRequests;
 
   /**
-   * Constructor for the instrumentation.
-   *
-   * @param registry the registry to record metrics in.
+   * A constructor for the instrumentation.
    */
-  public GraphqlMetricsInstrumentation(MeterRegistry registry) {
-    this.registry = registry;
+  public GraphqlMetricsInstrumentation() {
+    Meter meter = GlobalOpenTelemetry.getMeter("aviation.aircraft.graphql");
+
+    this.graphqlRequests = meter.counterBuilder("aircraft_graphql_requests_total")
+            .setDescription("Total GraphQL operations")
+            .setUnit("1")
+            .build();
+
+    this.graphqlDuration = meter.histogramBuilder("aircraft_graphql_request_duration_ms")
+            .setDescription("Duration of GraphQL operations")
+            .setUnit("ms")
+            .build();
+
+    this.fieldDuration = meter.histogramBuilder("aircraft_graphql_field_duration_ms")
+            .setDescription("Duration of GraphQL field fetchers")
+            .setUnit("ms")
+            .build();
+
+    this.fieldRequests = meter.counterBuilder("aircraft_graphql_fields_total")
+            .setDescription("Total GraphQL field fetches")
+            .setUnit("1")
+            .build();
   }
 
   /**
-   * Begins the execution of a GraphQL request.
+   * Begins the execution of a GraphQL operation.
    *
-   * @param parameters the parameters for the execution.
-   * @param state      the state of the execution.
-   *
+   * @param parameters the parameters of the execution.
+   * @param state the state of the execution.
    * @return the instrumentation context.
    */
   @Override
   public InstrumentationContext<ExecutionResult> beginExecution(
           InstrumentationExecutionParameters parameters, InstrumentationState state) {
 
-    Timer.Sample requestSample = Timer.start(registry);
+    long start = System.nanoTime();
 
     return new InstrumentationContext<>() {
-      @Override
-      public void onDispatched() {
-      }
+      @Override public void onDispatched() {}
 
       @Override
       public void onCompleted(ExecutionResult result, Throwable t) {
-        String opName =
-                GraphqlMetricsHelpers.createSafeOpName(
-                        parameters.getExecutionInput().getOperationName());
+        long durationMs = (System.nanoTime() - start) / 1_000_000;
 
-        String opType =
-                GraphqlMetricsHelpers.extractOperationType(
-                        parameters.getExecutionInput().getQuery(),
-                        parameters.getExecutionInput().getOperationName());
+        String opName = GraphqlMetricsHelpers.createSafeOpName(
+                parameters.getExecutionInput().getOperationName());
+        String opType = GraphqlMetricsHelpers.extractOperationType(
+                parameters.getExecutionInput().getQuery(),
+                parameters.getExecutionInput().getOperationName());
+        String status = (t == null && (result == null || result.getErrors().isEmpty()))
+                ? "success" : "failure";
 
-        String status =
-                (t == null && (result == null || result.getErrors().isEmpty()))
-                        ? "success"
-                        : "failure";
+        Attributes attrs = Attributes.builder()
+                .put(OPERATION, opName)
+                .put(TYPE, opType)
+                .put(STATUS, status)
+                .build();
 
-        requestSample.stop(
-                Timer.builder("aircraft_graphql_request_duration_seconds")
-                        .publishPercentileHistogram(true)
-                        .publishPercentiles(0.5, 0.9, 0.95, 0.99)
-                        .tags("operation", opName, "type", opType, "status", status)
-                        .description("Duration of complete GraphQL operations")
-                        .register(registry));
-
-        registry
-                .counter(
-                        "aircraft_graphql_requests_total",
-                        "operation",
-                        opName,
-                        "type",
-                        opType,
-                        "status",
-                        status)
-                .increment();
+        graphqlRequests.add(1, attrs);
+        graphqlDuration.record(durationMs, attrs);
       }
     };
   }
 
   /**
-   * Instruments a data fetcher.
+   * Instruments a GraphQL field fetcher.
    *
-   * @param dataFetcher the data fetcher to instrument.
-   * @param parameters  the parameters for the instrumentation.
-   * @param state       the state of the instrumentation.
-   *
-   * @return the instrumented data fetcher.
+   * @param dataFetcher the field fetcher.
+   * @param parameters the parameters of the field fetcher.
+   * @param state the state of the field fetcher.
+   * @return the instrumented field fetcher.
    */
   @Override
   public @NotNull DataFetcher<?> instrumentDataFetcher(
@@ -110,35 +121,27 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
     String fieldTag = GraphqlMetricsHelpers.findDatafetcherTag(parameters);
 
     return environment -> {
-      Timer.Sample sample = Timer.start(registry);
+      long start = System.nanoTime();
       try {
         Object result = dataFetcher.get(environment);
 
         if (result instanceof CompletableFuture<?> future) {
-          return future.whenComplete((r, ex) -> {
-            boolean hasErrors = ex == null
-                    && r instanceof DataFetcherResult<?>
-                    && !((DataFetcherResult<?>) r).getErrors().isEmpty();
-
-            String status = (ex == null && !hasErrors) ? "success" : "failure";
-            GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
-          });
+          return future.whenComplete(
+                  (r, ex) -> recordFieldMetric(fieldTag, start,
+                          (ex == null
+                                  && !(r instanceof DataFetcherResult<?> d
+                                  && !d.getErrors().isEmpty()))
+                                  ? "success" : "failure"));
         }
 
         if (result instanceof DataFetcherResult<?> dfr) {
           if (dfr.getData() instanceof CompletableFuture<?> cf) {
-            boolean outerHasErrors = !dfr.getErrors().isEmpty();
-
-            CompletableFuture<?> instrumented = cf.whenComplete((r, ex) -> {
-              boolean innerHasErrors = ex == null
-                      && r instanceof DataFetcherResult<?>
-                      && !((DataFetcherResult<?>) r).getErrors().isEmpty();
-
-              String status = (ex == null && !outerHasErrors && !innerHasErrors)
-                      ? "success"
-                      : "failure";
-              GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
-            });
+            CompletableFuture<?> instrumented = cf.whenComplete(
+                    (r, ex) -> recordFieldMetric(fieldTag, start,
+                            (ex == null && dfr.getErrors().isEmpty()
+                                    && !(r instanceof DataFetcherResult<?> d
+                                    && !d.getErrors().isEmpty()))
+                                    ? "success" : "failure"));
 
             return DataFetcherResult.newResult()
                     .data(instrumented)
@@ -147,19 +150,37 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
                     .extensions(dfr.getExtensions())
                     .build();
           }
-
-          String status = dfr.getErrors().isEmpty() ? "success" : "failure";
-          GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, status);
+          recordFieldMetric(fieldTag, start, dfr.getErrors().isEmpty() ? "success" : "failure");
           return result;
         }
 
-        GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, "success");
+        recordFieldMetric(fieldTag, start, "success");
         return result;
 
       } catch (Exception ex) {
-        GraphqlMetricsHelpers.stopFieldTimer(registry, sample, fieldTag, "failure");
+        recordFieldMetric(fieldTag, start, "failure");
         throw ex;
       }
     };
+  }
+
+  /**
+   * Records a field metric.
+   *
+   * @param fieldTag the field tag.
+   * @param start the start time of the field.
+   * @param status the status of the field.
+   */
+  private void recordFieldMetric(String fieldTag, long start, String status) {
+    long durationMs = (System.nanoTime() - start) / 1_000_000;
+    String sanitized = GraphqlMetricsHelpers.sanitizeFieldName(fieldTag);
+
+    Attributes attrs = Attributes.builder()
+            .put(FIELD, sanitized)
+            .put(STATUS, status)
+            .build();
+
+    fieldRequests.add(1, attrs);
+    fieldDuration.record(durationMs, attrs);
   }
 }
