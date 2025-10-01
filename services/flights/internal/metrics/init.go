@@ -48,7 +48,17 @@ func Init(ctx context.Context, serviceName, otlpAddr string) (func(context.Conte
 	if err := InitInstruments(); err != nil {
 		return nil, fmt.Errorf("failed to init instruments: %w", err)
 	}
-	logger.Info("OTel Metrics started for %s", serviceName)
+	logger.Info(fmt.Sprintf("OTel Metrics started for %s", serviceName))
 
-	return provider.Shutdown, nil
+	return func(ctx context.Context) error {
+		shutdownErr := provider.Shutdown(ctx)
+		closeErr := conn.Close()
+		if shutdownErr != nil {
+			if closeErr != nil {
+				return fmt.Errorf("provider shutdown: %w; conn close: %v", shutdownErr, closeErr)
+			}
+			return shutdownErr
+		}
+		return closeErr
+	}, nil
 }

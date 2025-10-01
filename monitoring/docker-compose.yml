@@ -58,6 +58,7 @@ services:
   otel-collector:
     image: otel/opentelemetry-collector:0.136.0
     container_name: otel-collector
+    restart: unless-stopped
     command: [ "--config=/etc/otel/config.yaml" ]
     volumes:
       - otel_data:/var/lib/otelcol
