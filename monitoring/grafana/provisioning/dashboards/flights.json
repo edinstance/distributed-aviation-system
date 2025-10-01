@@ -198,7 +198,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(flights_grpc_duration_seconds_bucket[24h])) by (le,service,procedure))",
+          "expr": "histogram_quantile(0.95, sum(rate(flights_grpc_duration_seconds_bucket[$__rate_interval])) by (le,direction,service,procedure))",
           "legendFormat": "{{direction}} {{service}}/{{procedure}}"
         }
       ]
