@@ -68,7 +68,7 @@
       },
       "targets": [
         {
-          "expr": "100 * ((sum(rate(flights_graphql_requests_total{result=\"failure\"}[5m])) or vector(0)) + (sum(rate(flights_graphql_requests_total{status!=\"OK\"}[5m])) or vector(0))) / clamp_min(sum(rate(flights_graphql_requests_total[5m])) + sum(rate(flights_graphql_requests_total[5m])), 1e-9)"
+          "expr": "100 * ((sum(rate(flights_graphql_requests_total{result=\"failure\"}[5m])) or vector(0)) + sum(rate(flights_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0)) / clamp_min(sum(rate(flights_graphql_requests_total[5m])) + sum(rate(flights_grpc_requests_total[5m])), 1e-9)"
         }
       ]
     },
