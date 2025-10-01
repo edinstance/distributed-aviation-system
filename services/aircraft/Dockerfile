@@ -30,7 +30,10 @@ HEALTHCHECK CMD curl -sSf http://127.0.0.1:8080/details/health | jq '.status' | 
 
 
 # Copy the JAR file built in the previous stage
-COPY --from=build /app/target/*.jar ./app.jar
+COPY --from=build /app/target/*-SNAPSHOT.jar ./app.jar
+
+# Copy the open telemetry java agent that was downloaded
+COPY --from=build /app/target/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar
 
 ENV PORT=8080
 ENV GRPC_PORT=9090
@@ -40,4 +43,6 @@ EXPOSE ${PORT}
 EXPOSE ${GRPC_PORT}
 
 # Command to run the application
-CMD ["java", "-jar", "app.jar"]
+CMD ["java", \
+    "-javaagent:/app/opentelemetry-javaagent.jar", \
+    "-jar", "app.jar"]
