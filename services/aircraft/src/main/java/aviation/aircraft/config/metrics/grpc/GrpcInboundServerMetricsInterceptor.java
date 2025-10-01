@@ -1,16 +1,16 @@
 package aviation.aircraft.config.metrics.grpc;
 
 import io.grpc.ForwardingServerCall;
-import io.grpc.ForwardingServerCallListener;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import io.grpc.Status;
-import io.micrometer.core.instrument.Counter;
-import io.micrometer.core.instrument.Meter;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.common.Attributes;
+import io.opentelemetry.api.metrics.DoubleHistogram;
+import io.opentelemetry.api.metrics.LongCounter;
+import io.opentelemetry.api.metrics.Meter;
 import net.devh.boot.grpc.server.interceptor.GrpcGlobalServerInterceptor;
 import org.springframework.stereotype.Component;
 
@@ -21,25 +21,28 @@ import org.springframework.stereotype.Component;
 @GrpcGlobalServerInterceptor
 public class GrpcInboundServerMetricsInterceptor implements ServerInterceptor {
 
-  private final MeterRegistry registry;
-  private final Meter.MeterProvider<Counter> requestCounter;
-  private final Meter.MeterProvider<Timer> requestTimer;
+  private static final String SERVICE = "service";
+  private static final String METHOD = "method";
+  private static final String STATUS = "status";
+
+  private final LongCounter requestCounter;
+  private final DoubleHistogram requestDuration;
 
   /**
-   * Constructor for the interceptor.
-   *
-   * @param registry the registry to record metrics in.
+   * A constructor for the interceptor.
    */
-  public GrpcInboundServerMetricsInterceptor(MeterRegistry registry) {
-    this.registry = registry;
-    this.requestCounter = Counter.builder("aircraft_grpc_requests_total")
-            .description("Total number of inbound gRPC requests for the aircraft service")
-            .tag("direction", "inbound")
-            .withRegistry(registry);
-    this.requestTimer = Timer.builder("aircraft_grpc_request_duration_seconds")
-            .description("Duration of inbound gRPC requests for the aircraft service")
-            .tag("direction", "inbound")
-            .withRegistry(registry);
+  public GrpcInboundServerMetricsInterceptor() {
+    Meter meter = GlobalOpenTelemetry.getMeter("aviation.aircraft.grpc");
+
+    this.requestCounter = meter.counterBuilder("aircraft_grpc_requests_total")
+            .setDescription("Total inbound gRPC requests for the aircraft service")
+            .setUnit("1")
+            .build();
+
+    this.requestDuration = meter.histogramBuilder("aircraft_grpc_request_duration_ms")
+            .setDescription("Duration of inbound gRPC requests")
+            .setUnit("ms")
+            .build();
   }
 
   /**
@@ -59,27 +62,29 @@ public class GrpcInboundServerMetricsInterceptor implements ServerInterceptor {
           Metadata headers,
           ServerCallHandler<ReqT, RespT> next) {
 
-    final GrpcMetricsHelpers.MethodParts parts =
+    long start = System.nanoTime();
+    GrpcMetricsHelpers.MethodParts parts =
             GrpcMetricsHelpers.extract(call.getMethodDescriptor().getFullMethodName());
-    final Timer.Sample sample = Timer.start(registry);
 
     ServerCall<ReqT, RespT> monitoringCall =
             new ForwardingServerCall.SimpleForwardingServerCall<>(call) {
               @Override
               public void close(Status status, Metadata trailers) {
-                GrpcMetricsHelpers.recordMetrics(
-                        requestCounter,
-                        requestTimer,
-                        parts.service(),
-                        parts.method(),
-                        status.getCode(),
-                        sample);
+                long durationMs = (System.nanoTime() - start) / 1_000_000;
+
+                Attributes attrs = Attributes.builder()
+                        .put(SERVICE, parts.service())
+                        .put(METHOD, parts.method())
+                        .put(STATUS, status.getCode().name())
+                        .build();
+
+                requestCounter.add(1, attrs);
+                requestDuration.record(durationMs, attrs);
+
                 super.close(status, trailers);
               }
             };
 
-    return new ForwardingServerCallListener.SimpleForwardingServerCallListener<>(
-            next.startCall(monitoringCall, headers)) {
-    };
+    return next.startCall(monitoringCall, headers);
   }
 }

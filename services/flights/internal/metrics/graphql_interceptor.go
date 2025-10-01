@@ -8,6 +8,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/vektah/gqlparser/v2/ast"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 )
 
 func GraphQLMetricsInterceptor(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
@@ -35,8 +37,20 @@ func GraphQLMetricsInterceptor(ctx context.Context, next graphql.OperationHandle
 			result = "failure"
 		}
 
-		GraphQLRequests.WithLabelValues(opName, opType, result).Inc()
-		GraphQLDuration.WithLabelValues(opName, opType).Observe(elapsed)
+		GraphQLRequests.Add(ctx, 1,
+			metric.WithAttributes(
+				attribute.String("operation", opName),
+				attribute.String("type", opType),
+				attribute.String("result", result),
+			),
+		)
+
+		GraphQLDuration.Record(ctx, elapsed,
+			metric.WithAttributes(
+				attribute.String("operation", opName),
+				attribute.String("type", opType),
+			),
+		)
 
 		logger.DebugContext(ctx, "GraphQL operation handled",
 			"operation", opName,
@@ -56,7 +70,6 @@ func deriveOpName(rc *graphql.OperationContext) string {
 	if rc.OperationName != "" {
 		return rc.OperationName
 	}
-
 	if rc.Operation != nil {
 		for _, sel := range rc.Operation.SelectionSet {
 			if field, ok := sel.(*ast.Field); ok && field != nil && field.Name != "" {

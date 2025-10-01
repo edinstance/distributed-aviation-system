@@ -14,6 +14,7 @@ type Config struct {
 	AircraftServiceGrpcUrl string
 	CacheURL               string
 	CacheTTL               time.Duration
+	OtlpGrpcUrl            string
 }
 
 var App Config
@@ -28,6 +29,7 @@ func Init() {
 		AircraftServiceGrpcUrl: mustGetEnv("AIRCRAFT_SERVICE_GRPC_URL"),
 		CacheURL:               mustGetEnv("CACHE_URL"),
 		CacheTTL:               15 * time.Minute,
+		OtlpGrpcUrl:            mustGetEnv("OTLP_GRPC_URL"),
 	}
 }
 

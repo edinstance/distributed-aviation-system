@@ -8,14 +8,11 @@ import graphql.parser.Parser;
 import graphql.schema.GraphQLNonNull;
 import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLOutputType;
-import io.micrometer.core.instrument.MeterRegistry;
-import io.micrometer.core.instrument.Timer;
 
 /**
  * A helper class for recording metrics for GraphQL requests.
  */
 public class GraphqlMetricsHelpers {
-
   private static final Parser parser = new Parser();
 
   /**
@@ -59,36 +56,10 @@ public class GraphqlMetricsHelpers {
   }
 
   /**
-   * Stops a field timer.
+   * Finds the datafetcher tag for a given field.
    *
-   * @param registry the registry to record metrics in.
-   * @param sample the sample to stop the timer with.
-   * @param fieldTag the field tag.
-   * @param status the status of the request.
-   */
-  public static void stopFieldTimer(
-          MeterRegistry registry, Timer.Sample sample, String fieldTag, String status) {
-
-    String sanitized = sanitizeFieldName(fieldTag);
-
-    sample.stop(
-            Timer.builder("aircraft_graphql_field_duration_seconds")
-                    .publishPercentileHistogram(true)
-                    .publishPercentiles(0.5, 0.9, 0.95, 0.99)
-                    .tags("field", sanitized, "status", status)
-                    .description("Duration of individual GraphQL field fetchers")
-                    .register(registry));
-
-    registry
-            .counter("aircraft_graphql_fields_total", "field", sanitized, "status", status)
-            .increment();
-  }
-
-  /**
-   * Finds the datafetcher tag for a field.
-   *
-   * @param parameters the parameters of the field.
-   * @return the tag for the field.
+   * @param parameters the parameters for the field.
+   * @return the datafetcher tag.
    */
   public static String findDatafetcherTag(InstrumentationFieldFetchParameters parameters) {
     GraphQLOutputType type = parameters.getExecutionStepInfo().getParent().getType();
@@ -100,16 +71,15 @@ public class GraphqlMetricsHelpers {
   }
 
   /**
-   * Sanitizes a field name for use in metrics.
+   * Sanitizes a tag name.
    *
-   * @param tag the field name.
-   * @return the sanitized field name.
+   * @param tag the tag name.
+   * @return the sanitized tag name.
    */
   public static String sanitizeFieldName(String tag) {
     if (tag == null || tag.isBlank()) {
       return "unknown";
     }
-
     return tag.replaceAll("[0-9]+", "N");
   }
 }

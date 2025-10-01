@@ -19,17 +19,13 @@ scrape_configs:
       - targets: [ "mimir:9009" ]
     metrics_path: "/metrics"
 
+  - job_name: "otel-collector"
+    static_configs:
+      - targets: [ "otel-collector:9464" ]
+
   - job_name: "apollo-router"
     static_configs:
       - targets: [ "apollo-router:8089" ]
     metrics_path: "/metrics"
 
-  - job_name: "flights-service"
-    static_configs:
-      - targets: [ "flights-service:8081" ]
-    metrics_path: "/metrics"
 
-  - job_name: "aircraft-service"
-    static_configs:
-      - targets: [ "aircraft-service:8080" ]
-    metrics_path: "/details/prometheus"

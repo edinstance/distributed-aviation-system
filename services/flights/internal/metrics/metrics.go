@@ -1,42 +1,53 @@
 package metrics
 
 import (
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promauto"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/metric"
 )
 
 var (
-	GrpcRequests = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "flights_grpc_requests_total",
-			Help: "Total gRPC/Connect requests for the flights service",
-		},
-		[]string{"direction", "procedure", "service", "status"},
-	)
+	meter = otel.GetMeterProvider().Meter("flights-service")
 
-	GrpcDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "flights_grpc_request_duration_seconds",
-			Help:    "Latency of gRPC/Connect requests for the flights service",
-			Buckets: prometheus.DefBuckets,
-		},
-		[]string{"direction", "procedure", "service"},
-	)
-
-	GraphQLRequests = promauto.NewCounterVec(
-		prometheus.CounterOpts{
-			Name: "flights_graphql_requests_total",
-			Help: "Total GraphQL requests for the flights service",
-		},
-		[]string{"operation", "type", "success"},
-	)
-
-	GraphQLDuration = promauto.NewHistogramVec(
-		prometheus.HistogramOpts{
-			Name:    "flights_graphql_request_duration_seconds",
-			Help:    "Duration of GraphQL requests for the flights service",
-			Buckets: prometheus.DefBuckets,
-		},
-		[]string{"operation", "type"},
-	)
+	GrpcRequests    metric.Int64Counter
+	GrpcDuration    metric.Float64Histogram
+	GraphQLRequests metric.Int64Counter
+	GraphQLDuration metric.Float64Histogram
 )
+
+func InitInstruments() error {
+	var err error
+
+	GrpcRequests, err = meter.Int64Counter(
+		"flights.grpc.requests",
+		metric.WithDescription("Total gRPC requests for the flights service"),
+	)
+	if err != nil {
+		return err
+	}
+
+	GrpcDuration, err = meter.Float64Histogram(
+		"flights.grpc.duration.seconds",
+		metric.WithDescription("Latency of gRPC requests for the flights service"),
+	)
+	if err != nil {
+		return err
+	}
+
+	GraphQLRequests, err = meter.Int64Counter(
+		"flights.graphql.requests",
+		metric.WithDescription("Total GraphQL requests for the flights service"),
+	)
+	if err != nil {
+		return err
+	}
+
+	GraphQLDuration, err = meter.Float64Histogram(
+		"flights.graphql.duration.seconds",
+		metric.WithDescription("Duration of GraphQL requests for the flights service"),
+	)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

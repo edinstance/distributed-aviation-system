@@ -8,6 +8,8 @@ import (
 
 	"connectrpc.com/connect"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -35,8 +37,22 @@ func (GrpcMetricsInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFun
 			service = "unknown"
 		}
 
-		GrpcRequests.WithLabelValues("inbound", procedure, service, statusCode).Inc()
-		GrpcDuration.WithLabelValues("inbound", procedure, service).Observe(duration)
+		GrpcRequests.Add(ctx, 1,
+			metric.WithAttributes(
+				attribute.String("direction", "inbound"),
+				attribute.String("procedure", procedure),
+				attribute.String("service", service),
+				attribute.String("status", statusCode),
+			),
+		)
+
+		GrpcDuration.Record(ctx, duration,
+			metric.WithAttributes(
+				attribute.String("direction", "inbound"),
+				attribute.String("procedure", procedure),
+				attribute.String("service", service),
+			),
+		)
 
 		logger.DebugContext(ctx, "gRPC request handled",
 			"direction", "inbound",
@@ -86,10 +102,24 @@ func OutboundGrpcUnaryClientInterceptor() grpc.UnaryClientInterceptor {
 			service = "unknown"
 		}
 
-		GrpcRequests.WithLabelValues("outbound", procedure, service, statusCode).Inc()
-		GrpcDuration.WithLabelValues("outbound", procedure, service).Observe(duration)
+		GrpcRequests.Add(ctx, 1,
+			metric.WithAttributes(
+				attribute.String("direction", "outbound"),
+				attribute.String("procedure", procedure),
+				attribute.String("service", service),
+				attribute.String("status", statusCode),
+			),
+		)
 
-		logger.DebugContext(ctx, "gRPC request handled",
+		GrpcDuration.Record(ctx, duration,
+			metric.WithAttributes(
+				attribute.String("direction", "outbound"),
+				attribute.String("procedure", procedure),
+				attribute.String("service", service),
+			),
+		)
+
+		logger.DebugContext(ctx, "gRPC outbound request handled",
 			"direction", "outbound",
 			"procedure", procedure,
 			"service", service,

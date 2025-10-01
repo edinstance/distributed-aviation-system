@@ -38,7 +38,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(flights_graphql_requests_total{job=\"flights-service\"}[5m]))"
+          "expr": "sum(rate(flights_graphql_requests_total[5m]))"
         }
       ]
     },
@@ -53,7 +53,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(flights_grpc_requests_total{job=\"flights-service\"}[5m]))"
+          "expr": "sum(rate(flights_grpc_requests_total[5m]))"
         }
       ]
     },
@@ -68,7 +68,7 @@
       },
       "targets": [
         {
-          "expr": "100 * ((sum(rate(flights_graphql_requests_total{job=\"flights-service\",success=\"failure\"}[5m])) or vector(0)) + (sum(rate(flights_grpc_requests_total{job=\"flights-service\",status!=\"OK\"}[5m])) or vector(0))) / clamp_min(sum(rate(flights_graphql_requests_total{job=\"flights-service\"}[5m])) + sum(rate(flights_grpc_requests_total{job=\"flights-service\"}[5m])), 1e-9)"
+          "expr": "100 * ((sum(rate(flights_graphql_requests_total{result=\"failure\"}[5m])) or vector(0)) + sum(rate(flights_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0)) / clamp_min(sum(rate(flights_graphql_requests_total[5m])) + sum(rate(flights_grpc_requests_total[5m])), 1e-9)"
         }
       ]
     },
@@ -83,7 +83,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(flights_graphql_request_duration_seconds_bucket[24h])) by (le))"
+          "expr": "histogram_quantile(0.95, sum(rate(flights_graphql_duration_seconds_bucket[24h])) by (le))"
         }
       ]
     },
@@ -110,7 +110,7 @@
       "targets": [
         {
           "expr": "rate(flights_graphql_requests_total[24h])",
-          "legendFormat": "{{operation}} {{type}} {{success}}"
+          "legendFormat": "{{operation}} {{type}} {{result}}"
         }
       ]
     },
@@ -125,7 +125,7 @@
       },
       "targets": [
         {
-          "expr": "100 * sum(rate(flights_graphql_requests_total{success=\"failure\"}[24h])) / sum(rate(flights_graphql_requests_total[24h]))"
+          "expr": "100 * sum(rate(flights_graphql_requests_total{result=\"failure\"}[24h])) / sum(rate(flights_graphql_requests_total[24h]))"
         }
       ]
     },
@@ -140,7 +140,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(flights_graphql_request_duration_seconds_bucket[24h])) by (le,operation,type))",
+          "expr": "histogram_quantile(0.95, sum(rate(flights_graphql_duration_seconds_bucket[24h])) by (le,operation,type))",
           "legendFormat": "{{operation}} {{type}}"
         }
       ]
@@ -168,7 +168,7 @@
       "targets": [
         {
           "expr": "rate(flights_grpc_requests_total[24h])",
-          "legendFormat": "{{service}}/{{procedure}} {{status}}"
+          "legendFormat": "{{direction}} {{service}}/{{procedure}} {{status}}"
         }
       ]
     },
@@ -198,8 +198,8 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(flights_grpc_request_duration_seconds_bucket[24h])) by (le,service,procedure))",
-          "legendFormat": "{{service}}/{{procedure}}"
+          "expr": "histogram_quantile(0.95, sum(rate(flights_grpc_duration_seconds_bucket[$__rate_interval])) by (le,direction,service,procedure))",
+          "legendFormat": "{{direction}} {{service}}/{{procedure}}"
         }
       ]
     },
