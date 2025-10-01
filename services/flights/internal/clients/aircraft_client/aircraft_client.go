@@ -22,7 +22,7 @@ type AircraftClient struct {
 }
 
 func NewAircraftClient(address string) (*AircraftClient, error) {
-	conn, err := grpc.Dial(
+	conn, err := grpc.NewClient(
 		address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithUnaryInterceptor(metrics.OutboundGrpcUnaryClientInterceptor()),
