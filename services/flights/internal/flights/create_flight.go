@@ -64,8 +64,6 @@ func (service *Service) CreateFlight(
 		AircraftID:    aircraftId,
 	}
 
-	logger.InfoContext(ctx, "Flight created", "flight_id", flight.ID, "number", flight.Number, "origin", flight.Origin, "destination", flight.Destination, "departure_time", flight.DepartureTime, "arrival_time", flight.ArrivalTime, "aircraft_id", flight.AircraftID)
-
 	if err := service.Repo.CreateFlight(ctx, flight); err != nil {
 		logger.ErrorContext(ctx, "Failed to create flight in database", "flight_id", flight.ID, "err", err)
 		return nil, err
@@ -74,6 +72,8 @@ func (service *Service) CreateFlight(
 	if err := service.Cache.SetFlight(ctx, flight); err != nil {
 		logger.WarnContext(ctx, "Failed to cache flight", "flight_id", flight.ID, "err", err)
 	}
+
+	logger.InfoContext(ctx, "Flight created", "flight_id", flight.ID, "number", flight.Number, "origin", flight.Origin, "destination", flight.Destination, "departure_time", flight.DepartureTime, "arrival_time", flight.ArrivalTime, "aircraft_id", flight.AircraftID)
 
 	return flight, nil
 }
