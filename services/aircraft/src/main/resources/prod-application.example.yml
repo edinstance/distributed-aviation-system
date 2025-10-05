@@ -41,7 +41,15 @@ management:
     metrics:
       export:
         url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
-        step: 5s
+        step: 5
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+  tracing:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+  logging:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
   endpoint:
     health:
       probes:

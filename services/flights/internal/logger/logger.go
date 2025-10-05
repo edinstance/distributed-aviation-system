@@ -4,29 +4,57 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	logexport "go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
+	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 var Logger *slog.Logger
 
-// Init configures the package logger based on the given environment.
-//
-// If environment == "dev" the logger level is set to debug; otherwise it defaults
-// to info. The logger writes JSON-formatted records to stdout. This function
-// sets the package-level Logger and registers it as the default slog logger.
-//
-// The environment parameter accepts the string "dev" to enable debug logging.
-func Init(environment string) {
-	opts := &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+func Init(environment string) (*log.LoggerProvider, error) {
+	exporter, err := logexport.New(context.Background(),
+		logexport.WithEndpoint(config.App.OtlpGrpcUrl),
+		logexport.WithInsecure(),
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	if environment == "dev" {
-		opts.Level = slog.LevelDebug
+	provider := log.NewLoggerProvider(
+		log.WithProcessor(log.NewBatchProcessor(exporter)),
+		log.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("flights-service"),
+			semconv.DeploymentEnvironmentName(environment),
+		)),
+	)
+
+	otelHandler := otelslog.NewHandler("flights-service", otelslog.WithLoggerProvider(provider))
+	stdoutHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: getLogLevel(environment),
+	})
+
+	// Wrap handlers with tracing handler to add trace_id, span_id, service_name
+	tracingOtelHandler := NewTracingHandler(otelHandler, "flights-service")
+	tracingStdoutHandler := NewTracingHandler(stdoutHandler, "flights-service")
+
+	multiHandler := &MultiLogHandler{
+		handlers: []slog.Handler{tracingOtelHandler, tracingStdoutHandler},
 	}
 
-	handler := slog.NewJSONHandler(os.Stdout, opts)
-	Logger = slog.New(handler)
+	levelHandler := &LogLevelFilterHandler{
+		handler: multiHandler,
+		level:   getLogLevel(environment),
+	}
+
+	Logger = slog.New(levelHandler)
 	slog.SetDefault(Logger)
+
+	return provider, nil
 }
 
 // init initialises the package-level Logger with a JSON stdout handler at Info
@@ -35,9 +63,10 @@ func Init(environment string) {
 func init() {
 	if Logger == nil {
 		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
+			Level: getLogLevel(config.App.Environment),
 		})
-		Logger = slog.New(handler)
+		tracingHandler := NewTracingHandler(handler, "flights-service")
+		Logger = slog.New(tracingHandler)
 		slog.SetDefault(Logger)
 	}
 }
@@ -86,4 +115,11 @@ func DebugContext(ctx context.Context, msg string, args ...any) {
 // The variadic args are optional key/value pairs as accepted by slog (typically alternating key, value).
 func ErrorContext(ctx context.Context, msg string, args ...any) {
 	Logger.ErrorContext(ctx, msg, args...)
+}
+
+// WarnContext logs a warning-level record associated with the provided context.
+// It forwards to the package-level Logger's WarnContext.
+// The variadic args are optional key/value pairs as accepted by slog (typically alternating key, value).
+func WarnContext(ctx context.Context, msg string, args ...any) {
+	Logger.WarnContext(ctx, msg, args...)
 }

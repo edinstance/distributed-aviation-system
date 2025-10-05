@@ -42,6 +42,7 @@ services:
       - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD:-admin}
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grafana-exploretraces-app,grafana-metricsdrilldown-app,grafana-lokiexplore-app
     healthcheck:
       test: [ "CMD-SHELL","wget -qO- http://localhost:3000/api/health | grep -q 'ok'" ]
       interval: 10s
@@ -52,6 +53,31 @@ services:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
+    networks:
+      - aviation-network
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.65.0
+    container_name: jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14268:14268"  # Jaeger HTTP
+      - "14250:14250"  # Jaeger gRPC
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - aviation-network
+
+  loki:
+    image: grafana/loki:3.3.0
+    container_name: loki
+    restart: unless-stopped
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/local-config.yaml
+    volumes:
+      - loki_data:/loki
     networks:
       - aviation-network
 
@@ -67,6 +93,7 @@ services:
       - "4317:4317"    # OTLP gRPC
       - "4318:4318"    # OTLP HTTP
       - "9464:9464"    # Prometheus metrics endpoint (scrapable)
+      - "8888:8888"    # OTEL Collector telemetry metrics
     networks:
       - aviation-network
 
@@ -75,6 +102,7 @@ volumes:
   mimir_data:
   grafana_data:
   otel_data:
+  loki_data:
 
 networks:
   aviation-network:
