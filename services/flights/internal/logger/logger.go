@@ -4,29 +4,53 @@ import (
 	"context"
 	"log/slog"
 	"os"
+
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+	logexport "go.opentelemetry.io/otel/exporters/otlp/otlplog/otlploggrpc"
+	"go.opentelemetry.io/otel/sdk/log"
+	"go.opentelemetry.io/otel/sdk/resource"
+	semconv "go.opentelemetry.io/otel/semconv/v1.37.0"
 )
 
 var Logger *slog.Logger
 
-// Init configures the package logger based on the given environment.
-//
-// If environment == "dev" the logger level is set to debug; otherwise it defaults
-// to info. The logger writes JSON-formatted records to stdout. This function
-// sets the package-level Logger and registers it as the default slog logger.
-//
-// The environment parameter accepts the string "dev" to enable debug logging.
-func Init(environment string) {
-	opts := &slog.HandlerOptions{
-		Level: slog.LevelInfo,
+func Init(environment string) (*log.LoggerProvider, error) {
+	exporter, err := logexport.New(context.Background(),
+		logexport.WithEndpoint(config.App.OtlpGrpcUrl),
+		logexport.WithInsecure(),
+	)
+	if err != nil {
+		return nil, err
 	}
 
-	if environment == "dev" {
-		opts.Level = slog.LevelDebug
+	provider := log.NewLoggerProvider(
+		log.WithProcessor(log.NewBatchProcessor(exporter)),
+		log.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceName("flights-service"),
+			semconv.DeploymentEnvironmentName(environment),
+		)),
+	)
+
+	otelHandler := otelslog.NewHandler("flights-service", otelslog.WithLoggerProvider(provider))
+	stdoutHandler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
+		Level: getLogLevel(environment),
+	})
+
+	multiHandler := &MultiLogHandler{
+		handlers: []slog.Handler{otelHandler, stdoutHandler},
 	}
 
-	handler := slog.NewJSONHandler(os.Stdout, opts)
-	Logger = slog.New(handler)
+	levelHandler := &LogLevelFilterHandler{
+		handler: multiHandler,
+		level:   getLogLevel(environment),
+	}
+
+	Logger = slog.New(levelHandler)
 	slog.SetDefault(Logger)
+
+	return provider, nil
 }
 
 // init initialises the package-level Logger with a JSON stdout handler at Info
@@ -35,7 +59,7 @@ func Init(environment string) {
 func init() {
 	if Logger == nil {
 		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
-			Level: slog.LevelInfo,
+			Level: getLogLevel(config.App.Environment),
 		})
 		Logger = slog.New(handler)
 		slog.SetDefault(Logger)

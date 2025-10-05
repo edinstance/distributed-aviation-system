@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -15,6 +16,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/server"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/tracing"
 	"github.com/joho/godotenv"
 	"golang.org/x/net/http2"
 	"golang.org/x/net/http2/h2c"
@@ -30,7 +32,21 @@ func main() {
 	ctx := context.Background()
 
 	config.Init()
-	logger.Init(config.App.Environment)
+
+	provider, err := logger.Init(config.App.Environment)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer func() { _ = provider.Shutdown(context.Background()) }()
+
+	shutdownTracing, err := tracing.Init(ctx, "flights-service", config.App.OtlpGrpcUrl)
+	if err != nil {
+		logger.Error("failed to init tracing", "err", err)
+		os.Exit(1)
+	}
+	defer func() {
+		_ = shutdownTracing(ctx)
+	}()
 
 	shutdownMetrics, err := metrics.Init(ctx, "flights-service", config.App.OtlpGrpcUrl)
 	if err != nil {
@@ -79,6 +95,7 @@ func main() {
 	}
 
 	logger.Info("FlightsService listening", "addr", addr)
+	logger.Debug("Environment", "env", config.App.Environment)
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
