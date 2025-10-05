@@ -15,9 +15,40 @@ include_subgraph_errors:
 
 telemetry:
   exporters:
-    metrics:
-      prometheus:
+    tracing:
+      common:
+        service_namespace: "aviation-system"
+        service_name: "graphql-router"
+      otlp:
         enabled: true
-        resource_selector: all
-        listen: 0.0.0.0:8089
-        path: /metrics
+        endpoint: http://otel-collector:4317
+        protocol: grpc
+    metrics:
+      common:
+        service_namespace: "aviation-system"
+        service_name: "graphql-router"
+      otlp:
+        enabled: true
+        endpoint: http://otel-collector:4317
+        protocol: grpc
+    logging:
+      stdout:
+        enabled: true
+        format:
+          json:
+            display_level: true
+            display_trace_id: hexadecimal
+            display_timestamp: true
+
+  instrumentation:
+    spans:
+      mode: spec_compliant
+      router:
+        attributes:
+          service_name: router
+      supergraph:
+        attributes:
+          service_name: supergraph
+      subgraph:
+        attributes:
+          service_name: subgraph
