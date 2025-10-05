@@ -10,7 +10,7 @@ datasources:
     jsonData:
       maxLines: 1000
       derivedFields:
-        - datasourceUid: jaeger
-          matcherRegex: "traceID=(\\w+)"
-          name: TraceID
+        - name: trace_id
+          datasourceUid: jaeger
+          matcherRegex: 'trace_id=([a-f0-9]{32})'
           url: '$${__value.raw}'
