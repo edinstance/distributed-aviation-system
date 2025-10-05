@@ -7,6 +7,7 @@ import (
 	"connectrpc.com/otelconnect"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
 	v1connect "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1/flightsv1connect"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/health"
@@ -16,17 +17,27 @@ import (
 )
 
 func NewMux(pool *pgxpool.Pool, client *redis.Client) *http.ServeMux {
-	traceInterceptor, _ := otelconnect.NewInterceptor(
+	traceInterceptor, err := otelconnect.NewInterceptor(
 		otelconnect.WithTracerProvider(otel.GetTracerProvider()),
 	)
 
+	if err != nil {
+		logger.Warn("Failed to create trace interceptor", "err", err)
+		traceInterceptor = nil
+	}
+
 	mux := http.NewServeMux()
+
+	interceptors := []connect.Interceptor{metrics.GrpcMetricsInterceptor{}}
+	if traceInterceptor != nil {
+		interceptors = append([]connect.Interceptor{traceInterceptor}, interceptors...)
+	}
 
 	// Register Connect/gRPC/gRPC-Web handlers
 	grpcFlightsServer := NewGrpcFlightsServer(pool, client)
 	flightPath, flightHandler := v1connect.NewFlightsServiceHandler(
 		grpcFlightsServer,
-		connect.WithInterceptors(traceInterceptor, metrics.GrpcMetricsInterceptor{}),
+		connect.WithInterceptors(interceptors...),
 	)
 
 	mux.Handle(flightPath, flightHandler)

@@ -19,14 +19,14 @@ func (h *MultiLogHandler) Enabled(ctx context.Context, level slog.Level) bool {
 }
 
 func (h *MultiLogHandler) Handle(ctx context.Context, record slog.Record) error {
+	var firstErr error
 	for _, handler := range h.handlers {
-		if handler.Enabled(ctx, record.Level) {
-			if err := handler.Handle(ctx, record); err != nil {
-				return err
-			}
+		err := handler.Handle(ctx, record)
+		if err != nil && firstErr == nil {
+			firstErr = err
 		}
 	}
-	return nil
+	return firstErr
 }
 
 func (h *MultiLogHandler) WithAttrs(attrs []slog.Attr) slog.Handler {
