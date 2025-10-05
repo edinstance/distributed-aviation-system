@@ -38,8 +38,12 @@ func Init(environment string) (*log.LoggerProvider, error) {
 		Level: getLogLevel(environment),
 	})
 
+	// Wrap handlers with tracing handler to add trace_id, span_id, service_name
+	tracingOtelHandler := NewTracingHandler(otelHandler, "flights-service")
+	tracingStdoutHandler := NewTracingHandler(stdoutHandler, "flights-service")
+
 	multiHandler := &MultiLogHandler{
-		handlers: []slog.Handler{otelHandler, stdoutHandler},
+		handlers: []slog.Handler{tracingOtelHandler, tracingStdoutHandler},
 	}
 
 	levelHandler := &LogLevelFilterHandler{
@@ -61,7 +65,8 @@ func init() {
 		handler := slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{
 			Level: getLogLevel(config.App.Environment),
 		})
-		Logger = slog.New(handler)
+		tracingHandler := NewTracingHandler(handler, "flights-service")
+		Logger = slog.New(tracingHandler)
 		slog.SetDefault(Logger)
 	}
 }
@@ -110,4 +115,11 @@ func DebugContext(ctx context.Context, msg string, args ...any) {
 // The variadic args are optional key/value pairs as accepted by slog (typically alternating key, value).
 func ErrorContext(ctx context.Context, msg string, args ...any) {
 	Logger.ErrorContext(ctx, msg, args...)
+}
+
+// WarnContext logs a warning-level record associated with the provided context.
+// It forwards to the package-level Logger's WarnContext.
+// The variadic args are optional key/value pairs as accepted by slog (typically alternating key, value).
+func WarnContext(ctx context.Context, msg string, args ...any) {
+	Logger.WarnContext(ctx, msg, args...)
 }

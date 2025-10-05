@@ -49,7 +49,7 @@ func (service *Service) CreateFlight(
 
 	validationErr := service.AircraftClient.ValidateAircraftExists(ctx, aircraftId)
 	if validationErr != nil {
-		logger.Error("Aircraft does not exist", "aircraft_id", aircraftId, "err", validationErr)
+		logger.ErrorContext(ctx, "Aircraft does not exist", "aircraft_id", aircraftId, "err", validationErr)
 		return nil, validationErr
 	}
 
@@ -64,13 +64,15 @@ func (service *Service) CreateFlight(
 		AircraftID:    aircraftId,
 	}
 
+	logger.InfoContext(ctx, "Flight created", "flight_id", flight.ID, "number", flight.Number, "origin", flight.Origin, "destination", flight.Destination, "departure_time", flight.DepartureTime, "arrival_time", flight.ArrivalTime, "aircraft_id", flight.AircraftID)
+
 	if err := service.Repo.CreateFlight(ctx, flight); err != nil {
-		logger.Error("Failed to create flight in database", "flight_id", flight.ID, "err", err)
+		logger.ErrorContext(ctx, "Failed to create flight in database", "flight_id", flight.ID, "err", err)
 		return nil, err
 	}
 
 	if err := service.Cache.SetFlight(ctx, flight); err != nil {
-		logger.Warn("Failed to cache flight", "flight_id", flight.ID, "err", err)
+		logger.WarnContext(ctx, "Failed to cache flight", "flight_id", flight.ID, "err", err)
 	}
 
 	return flight, nil

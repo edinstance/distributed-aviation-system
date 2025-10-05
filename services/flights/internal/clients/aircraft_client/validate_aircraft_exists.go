@@ -41,11 +41,11 @@ func (c *AircraftClient) ValidateAircraftExists(ctx context.Context, aircraftID 
 			span.SetAttributes(attribute.String("grpc.status_code", s.Code().String()))
 			if s.Code() == codes.NotFound {
 				span.SetAttributes(attribute.String("client.result", "not_found"))
-				logger.Info("Aircraft not found", "aircraft_id", aircraftID)
+				logger.InfoContext(ctx, "Aircraft not found", "aircraft_id", aircraftID)
 				return exceptions.AircraftNotFound(aircraftID)
 			}
 			span.SetAttributes(attribute.String("client.result", "grpc_error"))
-			logger.Error("Downstream aircraft service error", "aircraft_id", aircraftID, "err", s.Message())
+			logger.ErrorContext(ctx, "Downstream aircraft service error", "aircraft_id", aircraftID, "err", s.Message())
 			return exceptions.ErrDownstreamClientDown
 		}
 		span.SetAttributes(attribute.String("client.result", "error"))
@@ -54,7 +54,7 @@ func (c *AircraftClient) ValidateAircraftExists(ctx context.Context, aircraftID 
 
 	if resp.Aircraft == nil {
 		span.SetAttributes(attribute.String("client.result", "nil_aircraft"))
-		logger.Info("Aircraft not found (nil response)", "aircraft_id", aircraftID)
+		logger.InfoContext(ctx, "Aircraft not found (nil response)", "aircraft_id", aircraftID)
 		return exceptions.AircraftNotFound(aircraftID)
 	}
 
