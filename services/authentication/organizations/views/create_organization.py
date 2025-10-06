@@ -20,7 +20,7 @@ class CreateOrganization(APIView):
     def post(self, request):
         org_name = request.data.get("name")
         schema_name = (request.data.get("schema_name") or "").lower()
-        admin_data = request.data.get("admin", {})
+        admin_data = request.data
 
         # --- Validate input ---
         if not all([org_name, schema_name]):

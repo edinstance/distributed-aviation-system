@@ -9,10 +9,11 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
-
+import logging
 from datetime import timedelta
 from pathlib import Path
 
+import structlog
 from decouple import config
 
 from common.jwt_helper import load_signing_key
@@ -49,6 +50,7 @@ TENANT_APPS = [
     "rest_framework",
     "rest_framework_simplejwt",
     "corsheaders",
+    "django_structlog",
 ]
 
 # Combine them for Django
@@ -57,6 +59,8 @@ INSTALLED_APPS = SHARED_APPS + TENANT_APPS
 MIDDLEWARE = [
     "common.middleware.header_tenant_middleware.HeaderTenantMiddleware",
     "corsheaders.middleware.CorsMiddleware",
+    "common.middleware.logging_middleware.EnhancedLoggingMiddleware",
+    "django_structlog.middlewares.RequestMiddleware",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -158,6 +162,7 @@ REST_FRAMEWORK = {
     ),
 }
 
+
 # JWT Settings
 def load_verifying_key():
     """Load the RSA public key for JWT verification."""
@@ -169,6 +174,7 @@ def load_verifying_key():
             return f.read()
     except FileNotFoundError:
         return None
+
 
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
@@ -189,3 +195,99 @@ CORS_ALLOWED_ORIGINS = config(
     default="http://localhost:3000,http://127.0.0.1:3000",
     cast=lambda v: [s.strip() for s in v.split(",")],
 )
+
+# Logging Configuration
+LOG_LEVEL = config("LOG_LEVEL", default="INFO")
+PROMETHEUS_METRICS_PORT = config("PROMETHEUS_METRICS_PORT", default=8001, cast=int)
+
+# OpenTelemetry Configuration
+OTEL_SERVICE_NAME = config("OTEL_SERVICE_NAME", default="authentication-service")
+OTEL_EXPORTER_OTLP_ENDPOINT = config("OTEL_EXPORTER_OTLP_ENDPOINT", default="http://localhost:4317")
+OTEL_EXPORTER_OTLP_PROTOCOL = config("OTEL_EXPORTER_OTLP_PROTOCOL", default="grpc")
+OTEL_TRACES_EXPORTER = config("OTEL_TRACES_EXPORTER", default="otlp")
+OTEL_METRICS_EXPORTER = config("OTEL_METRICS_EXPORTER", default="otlp")
+OTEL_LOGS_EXPORTER = config("OTEL_LOGS_EXPORTER", default="otlp")
+OTEL_METRIC_EXPORT_INTERVAL = config("OTEL_METRIC_EXPORT_INTERVAL", default=5000, cast=int)
+OTEL_BSP_SCHEDULE_DELAY = config("OTEL_BSP_SCHEDULE_DELAY", default=5000, cast=int)
+
+# Structured logging with structlog
+structlog.configure(
+    processors=[
+        structlog.stdlib.filter_by_level,
+        structlog.stdlib.add_logger_name,
+        structlog.stdlib.add_log_level,
+        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.processors.StackInfoRenderer(),
+        structlog.processors.format_exc_info,
+        structlog.processors.UnicodeDecoder(),
+        structlog.processors.JSONRenderer()
+    ],
+    wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+    logger_factory=structlog.stdlib.LoggerFactory(),
+    context_class=dict,
+    cache_logger_on_first_use=True,
+)
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "json": {
+            "()": structlog.stdlib.ProcessorFormatter,
+            "processor": structlog.processors.JSONRenderer(),
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": LOG_LEVEL,
+            "class": "logging.StreamHandler",
+            "formatter": "json",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "django.request": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django.security": {
+            "handlers": ["console"],
+            "level": "WARNING",
+            "propagate": False,
+        },
+        "django_structlog": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "authentication": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "users": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "organizations": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+        "authapi": {
+            "handlers": ["console"],
+            "level": LOG_LEVEL,
+            "propagate": False,
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": LOG_LEVEL,
+    },
+}
