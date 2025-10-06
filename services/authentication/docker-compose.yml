@@ -58,7 +58,11 @@ services:
       authentication-database:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgres://postgres:postgres@authentication-database:5432/authentication
+      DATABASE_NAME: authentication
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: postgres
+      DATABASE_HOST: authentication-database
+      DATABASE_PORT: 5432
     restart: "no"
     networks:
       - aviation-network
