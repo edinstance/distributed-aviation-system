@@ -58,7 +58,7 @@ python manage.py runserver
 ```
 
 ### API Access
-Most API's will require the ```X-Org-id``` header.
+Most APIs will require the ```X-Org-id``` header.
 
 
 ## Configuration

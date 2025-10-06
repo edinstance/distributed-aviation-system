@@ -15,17 +15,23 @@ def create(request):
     password = request.data.get('password')
     email = request.data.get('email')
 
-    if not all([username, password, email]):
+    organization_id = request.headers.get("X-Org-Id")
+
+    if not all([username, password, email, organization_id]):
         return Response(
-            {'error': 'Username, password, and email are required'},
+            {'error': 'Username, password and email are required'},
             status=status.HTTP_400_BAD_REQUEST
         )
 
-    if CustomUser.objects.filter(username=username).exists():
+    if not organization_id:
+        return Response({'error': 'Organization ID is required'},
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    if CustomUser.objects.filter(username=username, org_id=organization_id).exists():
         return Response({'error': 'Username already exists'},
                         status=status.HTTP_400_BAD_REQUEST)
 
-    if CustomUser.objects.filter(email=email).exists():
+    if CustomUser.objects.filter(email=email, org_id=organization_id).exists():
         return Response({'error': 'Email already exists'},
                         status=status.HTTP_400_BAD_REQUEST)
 
@@ -49,7 +55,6 @@ def create(request):
         org_id=organization.id
     )
 
-    print(user)
     refresh = RefreshToken.for_user(user)
 
     return Response({

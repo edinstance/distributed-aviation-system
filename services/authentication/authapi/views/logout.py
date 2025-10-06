@@ -39,8 +39,8 @@ class Logout(APIView):
                 tenant=tenant_schema,
             )
 
-            refresh_str = request.data.get("refresh")
-            if not refresh_str:
+            refresh_token = request.data.get("refresh")
+            if not refresh_token:
                 self.logger.warning(
                     "Logout failed - no refresh token provided",
                     user_id=user.id,
@@ -51,7 +51,7 @@ class Logout(APIView):
                 )
 
             try:
-                token = RefreshToken(refresh_str)
+                token = RefreshToken(refresh_token)
                 token.blacklist()
                 duration = time.time() - start_time
 

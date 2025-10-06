@@ -1,3 +1,4 @@
+import structlog
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -11,6 +12,10 @@ User = get_user_model()
 
 
 class Refresh(APIView):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.logger = structlog.get_logger(__name__)
+
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -41,8 +46,7 @@ class Refresh(APIView):
                     try:
                         token.blacklist()
                     except Exception:
-                        # If blacklist app not installed, skip silently
-                        print("Blacklist not enabled — skipping invalidation.")
+                        self.logger.error("Blacklist not enabled — skipping invalidation.")
 
                 try:
                     user = User.objects.get(pk=user_id)
@@ -64,8 +68,8 @@ class Refresh(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         except Exception as e:
-            print(f"Unexpected refresh error: {e}")
+            self.logger.error(f"Unexpected refresh error: {e}")
             return Response(
-                {"error": f"Token refresh failed: {e}"},
+                {"error": f"Token refresh failed"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

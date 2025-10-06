@@ -54,7 +54,7 @@ class VerifyToken(APIView):
                     "user_id": user.id,
                     "username": user.username,
                     "email": user.email,
-                    "org_id": getattr(user, "organization_id", None),
+                    "org_id": getattr(user, "org_id", None),
                     "roles": getattr(user, "roles", []),
                 }
 

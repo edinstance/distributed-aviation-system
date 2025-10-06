@@ -8,7 +8,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token["username"] = user.username
         token["email"] = user.email
 
-        if hasattr(user, "organization") and user.organization:
+        if hasattr(user, "org_id") and user.org_id:
             token["org_id"] = str(user.org_id)
 
         if hasattr(user, "roles"):

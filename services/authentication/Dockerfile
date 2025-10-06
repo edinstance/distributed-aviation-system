@@ -38,7 +38,7 @@ FROM web-base AS web
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:${PORT}/health || exit 1
 
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "authentication.wsgi:application"]
+CMD gunicorn --bind "0.0.0.0:${PORT}" authentication.wsgi:application
 
 FROM web-base AS migrate
 CMD ["python", "manage.py", "migrate_schemas", "--shared", "--noinput"]

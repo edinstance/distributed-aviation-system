@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY', default='django-insecure-development-key')
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
@@ -189,7 +189,7 @@ SIMPLE_JWT = {
 }
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", default=DEBUG, cast=bool)
+CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", default=False, cast=bool)
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS",
     default="http://localhost:3000,http://127.0.0.1:3000",
@@ -198,7 +198,6 @@ CORS_ALLOWED_ORIGINS = config(
 
 # Logging Configuration
 LOG_LEVEL = config("LOG_LEVEL", default="INFO")
-PROMETHEUS_METRICS_PORT = config("PROMETHEUS_METRICS_PORT", default=8001, cast=int)
 
 # OpenTelemetry Configuration
 OTEL_SERVICE_NAME = config("OTEL_SERVICE_NAME", default="authentication-service")
