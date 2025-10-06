@@ -21,17 +21,23 @@ ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 DJANGO_SETTINGS_MODULE=authenti
 
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y --no-install-recommends libpq5 \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
  && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /usr/local /usr/local
 COPY --from=builder /app /app
 
-ENV PORT=8080
+ENV PORT=8000
 
 EXPOSE ${PORT}
 
 FROM web-base AS web
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:${PORT}/health || exit 1
+
 CMD ["gunicorn", "--bind", "0.0.0.0:8000", "authentication.wsgi:application"]
 
 FROM web-base AS migrate
