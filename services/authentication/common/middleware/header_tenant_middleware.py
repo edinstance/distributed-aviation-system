@@ -25,6 +25,7 @@ class HeaderTenantMiddleware:
             '/api/auth/jwks.json',
             '/api/organizations/create/',
             '/api/organizations/',
+            '/health'
         ]
 
         is_public_endpoint = any(request.path.startswith(ep) for ep in public_endpoints)

@@ -20,6 +20,9 @@ class EnhancedLoggingMiddleware:
         self.tracer = get_tracer()
 
     def __call__(self, request):
+        if request.path.startswith(("/health")):
+            return self.get_response(request)
+
         correlation_id = str(uuid.uuid4())
         request.correlation_id = correlation_id
 

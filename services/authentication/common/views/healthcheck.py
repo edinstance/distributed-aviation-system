@@ -7,15 +7,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 
-def get():
-    result = {
-        "status": "UP",
-    }
-
-    status_code = status.HTTP_200_OK
-
-    return Response(result, status=status_code)
-
-
 class HealthCheckView(APIView):
     permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        result = {
+            "status": "UP",
+        }
+
+        return Response(result, status=status.HTTP_200_OK)
