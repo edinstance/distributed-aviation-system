@@ -52,9 +52,9 @@ services:
     image: postgres:17.6
     container_name: authentication-database
     environment:
-      POSTGRES_DB: authentication
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      DATABASE_NAME: ${DATABASE_NAME:-authentication}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
     ports:
       - "${POSTGRES_PORT:-5434}:5432"
     healthcheck:
@@ -80,11 +80,11 @@ services:
       SECRET_KEY: ${SECRET_KEY:-insecure-key}
       KEYS_DIR: ${KEYS_DIR:-/keys}
       KEY_PASSWORD: ${KEY_PASSWORD:-insecure-password}
-      DATABASE_NAME: authentication
-      DATABASE_USER: postgres
-      DATABASE_PASSWORD: postgres
-      DATABASE_HOST: authentication-database
-      DATABASE_PORT: 5432
+      DATABASE_NAME: ${DATABASE_NAME:-authentication}
+      DATABASE_USER: ${DATABASE_USER:-postgres}
+      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      DATABASE_HOST: ${DATABASE_HOST:-authentication-database}
+      DATABASE_PORT: ${DATABASE_PORT:-5432}
     volumes:
       - jwt_keys:/keys
     restart: "no"

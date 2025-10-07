@@ -149,7 +149,23 @@ class CreateOrganization(APIView):
                         )
                     except Exception as user_err:
                         logger.exception("Failed to create user", error=str(user_err))
-                        rollback_org(org, user_err)
+
+                        try:
+                            org.delete(force_drop=True)
+                            logger.info(
+                                "Tenant rolled back after admin creation failure",
+                                org_id=org.id,
+                                schema_name=schema_name,
+                            )
+                        except Exception as drop_err:
+                            logger.exception(
+                                "Rollback failed while deleting tenant schema",
+                                error=str(drop_err),
+                            )
+                        return Response(
+                            {"error": "Failed to create admin user; tenant has been rolled back."},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        )
 
                 response_data["admin_user"] = {
                     "id": user.id,
