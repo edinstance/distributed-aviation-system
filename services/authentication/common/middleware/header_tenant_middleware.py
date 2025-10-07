@@ -19,7 +19,6 @@ class HeaderTenantMiddleware:
 
         # ----- classify request type -----
         path = request.path
-        JWT_REQUIRED_PREFIX = '/api/'
 
         public_endpoints = [
             '/api/auth/jwks.json',
@@ -35,12 +34,14 @@ class HeaderTenantMiddleware:
         is_public = any(path.startswith(ep) for ep in public_endpoints)
         allows_xorg = any(path.startswith(ep) for ep in xorg_allowed_endpoints)
 
+        # Public endpoints bypass tenant resolution entirely
         if is_public:
             return self.get_response(request)
 
         org_id = None
+        jwt_invalid = False
 
-        # Try extracting from JWT
+        # Try extracting from JWT first
         auth_header = request.headers.get('Authorization')
         if auth_header and auth_header.startswith('Bearer '):
             token_str = auth_header[7:]
@@ -48,15 +49,22 @@ class HeaderTenantMiddleware:
                 token = AccessToken(token_str)
                 org_id = token.get('org_id')
             except (TokenError, InvalidToken):
-                return JsonResponse({'error': 'Invalid JWT token'}, status=401)
+                jwt_invalid = True
 
-        # If no JWT, allow X-Org-Id for specific endpoints
+        # If no org_id found in jwt check the headers
         if not org_id and allows_xorg:
             org_id = request.headers.get('X-Org-Id')
 
         if not org_id:
+            if jwt_invalid:
+                return JsonResponse({'error': 'Invalid JWT token'}, status=401)
             return JsonResponse(
-                {'error': 'Missing org identifier. Provide JWT with org_id or X-Org-Id header.'},
+                {
+                    'error': (
+                        'Missing org identifier. Provide a valid JWT with org_id '
+                        'or X-Org-Id header for allowed endpoints.'
+                    )
+                },
                 status=400,
             )
 
@@ -67,15 +75,15 @@ class HeaderTenantMiddleware:
 
         try:
             tenant = tenant_model.objects.get(id=org_uuid)
-            connection.set_tenant(tenant)
-            request.tenant = tenant
-            request.schema_name = tenant.schema_name
-
-            request.org_id = str(org_uuid)
         except tenant_model.DoesNotExist:
             return JsonResponse(
-                {'error': f'Organization with id "{org_uuid}" not found'},
-                status=404,
+                {'error': f'Organization with id "{org_uuid}" not found'}, status=404
             )
+
+        # Set tenant context
+        connection.set_tenant(tenant)
+        request.tenant = tenant
+        request.schema_name = tenant.schema_name
+        request.org_id = str(org_uuid)
 
         return self.get_response(request)
