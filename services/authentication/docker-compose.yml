@@ -52,9 +52,9 @@ services:
     image: postgres:17.6
     container_name: authentication-database
     environment:
-      DATABASE_NAME: ${DATABASE_NAME:-authentication}
-      DATABASE_USER: ${DATABASE_USER:-postgres}
-      DATABASE_PASSWORD: ${DATABASE_PASSWORD:-postgres}
+      POSTGRES_DB: ${DATABASE_NAME:-authentication}
+      POSTGRES_USER: ${DATABASE_USER:-postgres}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-postgres}
     ports:
       - "${POSTGRES_PORT:-5434}:5432"
     healthcheck:
