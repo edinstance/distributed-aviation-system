@@ -15,9 +15,9 @@ def create(request):
     password = request.data.get('password')
     email = request.data.get('email')
 
-    organization_id = request.headers.get("X-Org-Id")
+    organization_id = getattr(request, "org_id", None)
 
-    if not all([username, password, email, organization_id]):
+    if not all([username, password, email]):
         return Response(
             {'error': 'Username, password and email are required'},
             status=status.HTTP_400_BAD_REQUEST

@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 
 import structlog
@@ -23,7 +22,7 @@ def load_signing_key():
         private_path = keys_dir / active_entry.get("private", "private.pem")
         private_data = private_path.read_bytes()
 
-        password = os.getenv("KEY_PASSWORD")
+        password = config("KEY_PASSWORD", default=None)
         key = serialization.load_pem_private_key(
             private_data,
             password=password.encode() if password else None,
