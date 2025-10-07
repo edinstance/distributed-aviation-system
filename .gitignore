@@ -83,3 +83,11 @@ spring.log
 # Node
 node_modules/
 dist/
+
+# Python
+venv/
+__pycache__/
+
+# JWT keys
+*.pem
+keymap.json

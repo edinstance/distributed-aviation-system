@@ -23,6 +23,7 @@ services:
 include:
   - ./services/flights/docker-compose.yml
   - ./services/aircraft/docker-compose.yml
+  - ./services/authentication/docker-compose.yml
   - ./monitoring/docker-compose.yml
 
 networks:
