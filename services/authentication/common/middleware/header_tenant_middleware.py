@@ -25,15 +25,16 @@ class HeaderTenantMiddleware:
         public_endpoints = [
             '/api/auth/jwks.json',
             '/api/organizations/create/',
-            '/api/organizations/',
             '/health',
         ]
+
         xorg_allowed_endpoints = [
             '/api/auth/login/',
             '/api/auth/refresh/',
         ]
 
-        is_public = any(path.startswith(ep) for ep in public_endpoints)
+        normalized_path = path.rstrip('/')
+        is_public = any(normalized_path == ep.rstrip('/') for ep in public_endpoints)
         allows_xorg = any(path.startswith(ep) for ep in xorg_allowed_endpoints)
 
         # Public endpoints bypass tenant resolution entirely
