@@ -26,6 +26,8 @@ jobs:
 
       - name: Install buf
         uses: bufbuild/buf-setup-action@v1.50.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build proto files
         run: buf generate --template buf.gen.yaml
