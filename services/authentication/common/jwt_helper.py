@@ -1,36 +1,40 @@
 import json
-from django.conf import settings
+import os
+from pathlib import Path
+
+import structlog
+from cryptography.hazmat.primitives import serialization
 from decouple import config
+from django.conf import settings
 
 
 def load_signing_key():
-    """Load the RSA private key for JWT signing from the keys directory."""
-    keys_dir = config("KEYS_DIR", default="/keys")
-    keymap_path = f"{keys_dir}/keymap.json"
-    private_key_path = f"{keys_dir}/private.pem"
+    logger = structlog.get_logger(__name__)
+
+    keys_dir = Path(config("KEYS_DIR", default="/keys"))
+    keymap_path = keys_dir / "keymap.json"
 
     try:
-        # Load keymap to find active key
-        with open(keymap_path) as f:
-            keymap = json.load(f)
-
-        # Find active key (for future key rotation support)
+        keymap = json.loads(keymap_path.read_text())
         active_entry = next((v for v in keymap.values() if v.get("active")), None)
         if not active_entry:
             raise ValueError("No active signing key defined")
 
-        private_key_path = f"{keys_dir}/{active_entry.get('private', 'private.pem')}"
+        private_path = keys_dir / active_entry.get("private", "private.pem")
+        private_data = private_path.read_bytes()
 
-        # Read the private key
-        with open(private_key_path, "r") as f:
-            key_content = f.read()
+        password = os.getenv("KEY_PASSWORD")
+        key = serialization.load_pem_private_key(
+            private_data,
+            password=password.encode() if password else None,
+        )
 
-        # Ensure proper PEM format
-        if key_content and not key_content.startswith("-----BEGIN"):
-            raise ValueError("Invalid PEM format")
+        return key.private_bytes(
+            encoding=serialization.Encoding.PEM,
+            format=serialization.PrivateFormat.TraditionalOpenSSL,
+            encryption_algorithm=serialization.NoEncryption(),
+        ).decode("utf-8")
 
-        return key_content
-
-    except (FileNotFoundError, json.JSONDecodeError, ValueError):
-        # Fallback to SECRET_KEY if keys not found or invalid
+    except Exception as e:
+        logger.error(f"[load_signing_key] Fallback due to error: {e}")
         return getattr(settings, "SECRET_KEY", "fallback-key")

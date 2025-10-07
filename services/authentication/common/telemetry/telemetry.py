@@ -39,9 +39,6 @@ def configure_telemetry(otel_endpoint: str = None):
         }
     )
 
-    DjangoInstrumentor().instrument()
-    Psycopg2Instrumentor().instrument()
-
     # ---- Tracing ----
     if otel_endpoint:
         span_exporter = OTLPSpanExporter(endpoint=otel_endpoint, insecure=True)

@@ -1,8 +1,6 @@
-"""
-Generate RSA key pairs for JWT signing if they don't already exist.
-"""
 import json
 import os
+import getpass
 from pathlib import Path
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives import serialization
@@ -22,12 +20,28 @@ def generate_pair():
 
     key = rsa.generate_private_key(public_exponent=65537, key_size=4096)
 
+    password = os.getenv("KEY_PASSWORD")
+    if password:
+        print("[generate_keys] Using password from environment")
+        encryption = serialization.BestAvailableEncryption(password.encode())
+    else:
+        try:
+            pw_input = getpass.getpass("Enter password to protect private key (leave blank for none): ")
+        except (EOFError, KeyboardInterrupt):
+            pw_input = ""
+        encryption = (
+            serialization.BestAvailableEncryption(pw_input.encode())
+            if pw_input
+            else serialization.NoEncryption()
+        )
+
     private_pem = key.private_bytes(
         encoding=serialization.Encoding.PEM,
         format=serialization.PrivateFormat.TraditionalOpenSSL,
-        encryption_algorithm=serialization.NoEncryption(),
+        encryption_algorithm=encryption,
     )
     PRIVATE_KEY.write_bytes(private_pem)
+    PRIVATE_KEY.chmod(0o600)
 
     public_pem = key.public_key().public_bytes(
         encoding=serialization.Encoding.PEM,
@@ -37,7 +51,9 @@ def generate_pair():
 
     meta = {"v1": {"private": "private.pem", "public": "public.pem", "active": True}}
     KEYMAP.write_text(json.dumps(meta, indent=2))
-    print("[generate_keys] Done.")
+    print("[generate_keys] Done (encrypted)" if isinstance(encryption, serialization.BestAvailableEncryption)
+          else "[generate_keys] Done (unencrypted)")
+
 
 if not key_exists():
     generate_pair()

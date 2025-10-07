@@ -100,6 +100,11 @@ class Logout(APIView):
                 span.set_attribute("logout.success", True)
                 span.set_attribute("logout.blacklist_skipped", True)
 
+                return Response(
+                    {"message": "Successfully logged out"},
+                    status=status.HTTP_200_OK,
+                )
+
             except Exception as e:
                 duration = time.time() - start_time
                 self.logger.error(

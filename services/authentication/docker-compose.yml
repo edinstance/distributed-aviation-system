@@ -27,6 +27,7 @@ services:
       OTEL_BSP_SCHEDULE_DELAY: ${OTEL_BSP_SCHEDULE_DELAY:-5000}
       PORT: ${PORT:-8000}
       KEYS_DIR: ${KEYS_DIR:-/keys}
+      KEY_PASSWORD: ${KEY_PASSWORD:-insecure-password}
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8000/health || exit 1" ]
       interval: 10s
@@ -78,6 +79,7 @@ services:
     environment:
       SECRET_KEY: ${SECRET_KEY:-insecure-key}
       KEYS_DIR: ${KEYS_DIR:-/keys}
+      KEY_PASSWORD: ${KEY_PASSWORD:-insecure-password}
       DATABASE_NAME: authentication
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
@@ -97,6 +99,7 @@ services:
       - jwt_keys:/keys
     environment:
       KEYS_DIR: /keys
+      KEY_PASSWORD: ${KEY_PASSWORD:-insecure-password}
     command: python generate_keys.py
     restart: "no"
     networks:

@@ -2,6 +2,7 @@ import re
 
 import structlog
 from django.contrib.auth import get_user_model
+from django.db import transaction
 from django_tenants.utils import schema_context
 from rest_framework import status
 from rest_framework.permissions import AllowAny
@@ -14,12 +15,21 @@ logger = structlog.get_logger(__name__)
 User = get_user_model()
 
 
-class CreateOrganization(APIView):
-    """
-    POST /api/organizations/create/
-    Creates a new tenant and optional admin user.
-    """
+def rollback_org(org: Organization, error: Exception):
+    logger.exception(
+        "Rolling back tenant after failure",
+        org_id=getattr(org, "id", None),
+        schema_name=getattr(org, "schema_name", None),
+        error=str(error),
+    )
+    try:
+        org.delete(force_drop=True)
+    except Exception as drop_err:
+        logger.exception("Rollback failed while deleting tenant schema", error=str(drop_err))
+    raise
 
+
+class CreateOrganization(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
@@ -54,30 +64,37 @@ class CreateOrganization(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        reserved_schemas = {"public", "pg_catalog", "information_schema", "pg_toast", "pg_temp"}
+        reserved_schemas = {
+            "public",
+            "pg_catalog",
+            "information_schema",
+            "pg_toast",
+            "pg_temp",
+        }
         if schema_name in reserved_schemas or schema_name.startswith("pg_"):
             logger.warning("Reserved schema name requested", schema_name=schema_name)
-
             return Response(
                 {"error": f"schema_name '{schema_name}' is reserved and cannot be used."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        org = None
         try:
-            # --- Create Organization ---
-            org, created = Organization.objects.get_or_create(
-                schema_name=schema_name,
-                defaults={"name": org_name},
-            )
-
-            if not created:
-                logger.info("Organization already exists", schema_name=schema_name)
-                return Response(
-                    {"error": f"Organization schema '{schema_name}' already exists"},
-                    status=status.HTTP_400_BAD_REQUEST,
+            with transaction.atomic():
+                org, created = Organization.objects.get_or_create(
+                    schema_name=schema_name,
+                    defaults={"name": org_name},
                 )
 
-            org.save()
+                if not created:
+                    logger.info("Organization already exists", schema_name=schema_name)
+                    return Response(
+                        {"error": f"Organization schema '{schema_name}' already exists"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                org.save()
+
             logger.info(
                 "Organization created successfully",
                 org_id=org.id,
@@ -98,10 +115,12 @@ class CreateOrganization(APIView):
             admin_email = admin_data.get("email")
             admin_password = admin_data.get("password")
 
-            logger.info("Extracted admin credentials:",
-                        username=admin_username,
-                        email=admin_email,
-                        password_present=bool(admin_password))
+            logger.info(
+                "Extracted admin credentials",
+                username=admin_username,
+                email=admin_email,
+                password_present=bool(admin_password),
+            )
 
             if admin_username and admin_email and admin_password:
                 logger.info(
@@ -120,13 +139,17 @@ class CreateOrganization(APIView):
                             email=admin_email,
                             password=admin_password,
                         )
-                        logger.info("User created successfully, setting org relationships")
                         user.org_id = org.id
                         user.save()
-                        logger.info("User saved with org_id", user_id=user.id, org_id=user.org_id)
-                    except Exception as user_creation_error:
-                        logger.exception("Failed to create user", error=str(user_creation_error))
-                        raise
+                        logger.info(
+                            "Admin user created successfully",
+                            user_id=user.id,
+                            org_id=user.org_id,
+                            schema_name=schema_name,
+                        )
+                    except Exception as user_err:
+                        logger.exception("Failed to create user", error=str(user_err))
+                        rollback_org(org, user_err)
 
                 response_data["admin_user"] = {
                     "id": user.id,
@@ -134,16 +157,9 @@ class CreateOrganization(APIView):
                     "email": user.email,
                     "org_id": org.id,
                 }
-
-                logger.info(
-                    "Admin user created successfully",
-                    admin_user_id=user.id,
-                    username=user.username,
-                    schema_name=schema_name,
-                )
             else:
                 logger.debug(
-                    "Admin credentials not provided — skipping admin user creation",
+                    "Admin credentials not provided - skipping admin user creation",
                     schema_name=schema_name,
                 )
 
@@ -156,7 +172,10 @@ class CreateOrganization(APIView):
                 schema_name=schema_name,
                 error=str(e),
             )
+            if org is not None:
+                rollback_org(org, e)
+
             return Response(
-                {"error": f"Failed to create organization: {str(e)}"},
+                {"error": "Organization provisioning failed and has been rolled back."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
