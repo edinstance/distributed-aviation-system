@@ -1,0 +1,71 @@
+name: Smoke Test
+
+on:
+  pull_request:
+
+concurrency:
+  group: smoke-test-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  verify_supergraph:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+        # This fetches the repository's code and places it in the working directory of the workflow runner.
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 20
+
+      - name: Setup k6
+        uses: grafana/setup-k6-action@v1
+
+      - name: Install buf
+        uses: bufbuild/buf-setup-action@v1.50.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build proto files
+        run: buf generate --template buf.gen.yaml
+
+      - name: Create aircraft application file
+        run: cp services/aircraft/src/main/resources/prod-application.example.yml services/aircraft/src/main/resources/application.yml
+
+      - name: Run containers in the background
+        run: docker compose up -d
+
+      - name: Wait for services to be up
+        run: |
+          services=(
+            "http://localhost:8081/health"          # flights-service
+            "http://localhost:8080/details/health" # aircraft-service
+            "http://localhost:8088/health"         # router
+          )
+          for url in "${services[@]}"; do
+            echo "Waiting for $url..."
+            timeout 120 bash -c "
+              until curl -sf $url; do
+                echo 'Still waiting for $url...'
+                sleep 5
+              done
+            "
+            echo "$url is healthy"
+          done
+
+      - name: Install load test dependencies
+        run: |
+          cd load-tests
+          npm install
+
+      - name: Run load tests
+        run: |
+          cd load-tests
+          npm run test:all
+
+      - name: Stop containers
+        if: always()
+        run: docker compose down

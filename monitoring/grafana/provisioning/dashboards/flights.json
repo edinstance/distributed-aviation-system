@@ -1,0 +1,311 @@
+{
+  "title": "Flights Service (GraphQL + gRPC)",
+  "uid": "flights-service",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [
+    "aviation",
+    "flights",
+    "grpc",
+    "graphql",
+    "go"
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "GraphQL QPS",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(flights_graphql_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "gRPC QPS",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(flights_grpc_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "100 * ((sum(rate(flights_graphql_requests_total{result=\"failure\"}[5m])) or vector(0)) + sum(rate(flights_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0)) / clamp_min(sum(rate(flights_graphql_requests_total[5m])) + sum(rate(flights_grpc_requests_total[5m])), 1e-9)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency (GraphQL)",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(flights_graphql_duration_seconds_bucket[24h])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "GraphQL Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Requests/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "rate(flights_graphql_requests_total[24h])",
+          "legendFormat": "{{operation}} {{type}} {{result}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Error Rate %",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(flights_graphql_requests_total{result=\"failure\"}[24h])) / sum(rate(flights_graphql_requests_total[24h]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(flights_graphql_duration_seconds_bucket[24h])) by (le,operation,type))",
+          "legendFormat": "{{operation}} {{type}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "gRPC Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Requests/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "rate(flights_grpc_requests_total[24h])",
+          "legendFormat": "{{direction}} {{service}}/{{procedure}} {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Error Rate %",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(flights_grpc_requests_total{status!=\"OK\"}[24h])) / sum(rate(flights_grpc_requests_total[24h]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(flights_grpc_duration_seconds_bucket[$__rate_interval])) by (le,direction,service,procedure))",
+          "legendFormat": "{{direction}} {{service}}/{{procedure}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Runtime Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Go Goroutines",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "go_goroutines"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Go Heap Memory",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "go_memstats_heap_inuse_bytes"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Logs & Traces",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Error Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"flights-service\"} |= `error`"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Application Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"flights-service\"} |= ``"
+        }
+      ],
+      "timeFrom": "now-5m",
+      "timeShift": null
+    }
+  ]
+}

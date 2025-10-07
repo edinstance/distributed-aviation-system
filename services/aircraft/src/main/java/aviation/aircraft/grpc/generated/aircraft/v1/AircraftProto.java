@@ -50,35 +50,33 @@ public final class AircraftProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\032aircraft/v1/aircraft.proto\022\013aircraft.v" +
-      "1\032\037google/protobuf/timestamp.proto\"(\n\026Ge" +
-      "tAircraftByIdRequest\022\016\n\002id\030\001 \001(\tR\002id\"L\n\027" +
-      "GetAircraftByIdResponse\0221\n\010aircraft\030\001 \001(" +
-      "\0132\025.aircraft.v1.AircraftR\010aircraft\"\371\001\n\010A" +
-      "ircraft\022\016\n\002id\030\001 \001(\tR\002id\022\"\n\014registration\030" +
-      "\002 \001(\tR\014registration\022\"\n\014manufacturer\030\003 \001(" +
-      "\tR\014manufacturer\022\024\n\005model\030\004 \001(\tR\005model\022.\n" +
-      "\023year_of_manufacture\030\005 \001(\005R\021yearOfManufa" +
-      "cture\022\032\n\010capacity\030\006 \001(\005R\010capacity\0223\n\006sta" +
-      "tus\030\007 \001(\0162\033.aircraft.v1.AircraftStatusR\006" +
-      "status*\257\001\n\016AircraftStatus\022\037\n\033AIRCRAFT_ST" +
-      "ATUS_UNSPECIFIED\020\000\022\035\n\031AIRCRAFT_STATUS_AV" +
-      "AILABLE\020\001\022\036\n\032AIRCRAFT_STATUS_IN_SERVICE\020" +
-      "\002\022\037\n\033AIRCRAFT_STATUS_MAINTENANCE\020\003\022\034\n\030AI" +
-      "RCRAFT_STATUS_GROUNDED\020\0042o\n\017AircraftServ" +
-      "ice\022\\\n\017GetAircraftById\022#.aircraft.v1.Get" +
-      "AircraftByIdRequest\032$.aircraft.v1.GetAir" +
-      "craftByIdResponseB\340\001\n\025generated.aircraft" +
-      ".v1B\rAircraftProtoP\001Zkgithub.com/edinsta" +
-      "nce/distributed-aviation-system/services" +
-      "/flights/internal/protobuf/aircraft/v1;a" +
-      "ircraftv1\242\002\003AXX\252\002\013Aircraft.V1\312\002\013Aircraft" +
-      "\\V1\342\002\027Aircraft\\V1\\GPBMetadata\352\002\014Aircraft" +
-      "::V1b\006proto3"
+      "1\"(\n\026GetAircraftByIdRequest\022\016\n\002id\030\001 \001(\tR" +
+      "\002id\"L\n\027GetAircraftByIdResponse\0221\n\010aircra" +
+      "ft\030\001 \001(\0132\025.aircraft.v1.AircraftR\010aircraf" +
+      "t\"\371\001\n\010Aircraft\022\016\n\002id\030\001 \001(\tR\002id\022\"\n\014regist" +
+      "ration\030\002 \001(\tR\014registration\022\"\n\014manufactur" +
+      "er\030\003 \001(\tR\014manufacturer\022\024\n\005model\030\004 \001(\tR\005m" +
+      "odel\022.\n\023year_of_manufacture\030\005 \001(\005R\021yearO" +
+      "fManufacture\022\032\n\010capacity\030\006 \001(\005R\010capacity" +
+      "\0223\n\006status\030\007 \001(\0162\033.aircraft.v1.AircraftS" +
+      "tatusR\006status*\257\001\n\016AircraftStatus\022\037\n\033AIRC" +
+      "RAFT_STATUS_UNSPECIFIED\020\000\022\035\n\031AIRCRAFT_ST" +
+      "ATUS_AVAILABLE\020\001\022\036\n\032AIRCRAFT_STATUS_IN_S" +
+      "ERVICE\020\002\022\037\n\033AIRCRAFT_STATUS_MAINTENANCE\020" +
+      "\003\022\034\n\030AIRCRAFT_STATUS_GROUNDED\020\0042o\n\017Aircr" +
+      "aftService\022\\\n\017GetAircraftById\022#.aircraft" +
+      ".v1.GetAircraftByIdRequest\032$.aircraft.v1" +
+      ".GetAircraftByIdResponseB\340\001\n\025generated.a" +
+      "ircraft.v1B\rAircraftProtoP\001Zkgithub.com/" +
+      "edinstance/distributed-aviation-system/s" +
+      "ervices/flights/internal/protobuf/aircra" +
+      "ft/v1;aircraftv1\242\002\003AXX\252\002\013Aircraft.V1\312\002\013A" +
+      "ircraft\\V1\342\002\027Aircraft\\V1\\GPBMetadata\352\002\014A" +
+      "ircraft::V1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-          com.google.protobuf.TimestampProto.getDescriptor(),
         });
     internal_static_aircraft_v1_GetAircraftByIdRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
@@ -99,7 +97,6 @@ public final class AircraftProto {
         internal_static_aircraft_v1_Aircraft_descriptor,
         new java.lang.String[] { "Id", "Registration", "Manufacturer", "Model", "YearOfManufacture", "Capacity", "Status", });
     descriptor.resolveAllFeaturesImmutable();
-    com.google.protobuf.TimestampProto.getDescriptor();
   }
 
   // @@protoc_insertion_point(outer_class_scope)

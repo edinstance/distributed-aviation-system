@@ -28,12 +28,15 @@
     </scm>
     <properties>
         <java.version>21</java.version>
+        <logback.version>1.5.19</logback.version>
         <netflix-dgs.version>10.2.1</netflix-dgs.version>
         <jedis.version>6.1.0</jedis.version>
         <checkstyle.version>11.0.0</checkstyle.version>
         <maven-checkstyle.version>3.6.0</maven-checkstyle.version>
         <grpc.version>1.70.0</grpc.version>
         <protobuf.version>4.29.1</protobuf.version>
+        <otel.javaagent.version>2.20.1</otel.javaagent.version>
+        <otel.api.version>1.54.1</otel.api.version>
     </properties>
     <dependencies>
         <dependency>
@@ -82,6 +85,12 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>io.opentelemetry</groupId>
+            <artifactId>opentelemetry-api</artifactId>
+            <version>${otel.api.version}</version>
         </dependency>
 
         <dependency>
@@ -156,6 +165,9 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <jvmArguments>
+                        -javaagent:${project.build.directory}/opentelemetry-javaagent.jar
+                    </jvmArguments>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -163,6 +175,27 @@
                         </exclude>
                     </excludes>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.googlecode.maven-download-plugin</groupId>
+                <artifactId>download-maven-plugin</artifactId>
+                <version>1.13.0</version>
+                <executions>
+                    <execution>
+                        <id>download-otel-agent</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>wget</goal>
+                        </goals>
+                        <configuration>
+                            <url>
+                                https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v${otel.javaagent.version}/opentelemetry-javaagent.jar
+                            </url>
+                            <outputDirectory>${project.build.directory}</outputDirectory>
+                            <outputFileName>opentelemetry-javaagent.jar</outputFileName>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
             <!-- Checkstyle plugin-->
             <plugin>

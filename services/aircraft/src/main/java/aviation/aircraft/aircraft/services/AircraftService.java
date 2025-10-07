@@ -56,7 +56,8 @@ public class AircraftService {
 
     aircraftRepository.findByRegistration(aircraft.getRegistration())
             .ifPresent(foundAircraft -> {
-              AircraftLogger.warn("Aircraft with registration=" + aircraft.getRegistration() + " already exists");
+              AircraftLogger.warn("Aircraft with registration="
+                      + aircraft.getRegistration() + " already exists");
               throw new DuplicateAircraftException(foundAircraft.getRegistration());
             });
 

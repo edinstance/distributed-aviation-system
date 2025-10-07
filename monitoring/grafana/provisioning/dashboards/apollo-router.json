@@ -1,0 +1,137 @@
+{
+  "title": "Apollo Router (GraphQL Router)",
+  "uid": "apollo-router",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [
+    "aviation",
+    "gateway",
+    "graphql",
+    "apollo-router"
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Total Requests",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(apollo_router_operations_total{job=\"apollo-router\"})",
+          "legendFormat": "total"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Requests/sec",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(apollo_router_operations_total{job=\"apollo-router\"}[5m]))",
+          "legendFormat": "req/sec"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(apollo_router_graphql_error_total{job=\"apollo-router\"}[5m])) / clamp_min(sum(rate(apollo_router_operations_total{job=\"apollo-router\"}[5m])),1e-9)",
+          "legendFormat": "errors %"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket{job=\"apollo-router\"}[5m])) by (le))",
+          "legendFormat": "latency"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Subgraph Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Subgraph Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket{job=\"apollo-router\"}[5m])) by (le,subgraph_name))",
+          "legendFormat": "{{code}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Subgraph Errors/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "sum by (code) (rate(apollo_router_graphql_error_total{job=\"apollo-router\"}[5m]))",
+          "legendFormat": "{{code}}"
+        }
+      ]
+    }
+  ]
+}

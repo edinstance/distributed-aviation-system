@@ -1,0 +1,387 @@
+{
+  "title": "Aircraft Service (GraphQL + gRPC)",
+  "uid": "aircraft-service",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [
+    "aviation",
+    "aircraft",
+    "grpc",
+    "graphql",
+    "java"
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "GraphQL QPS",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(aircraft_graphql_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "gRPC QPS",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(aircraft_grpc_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "100 * ((sum(rate(aircraft_graphql_requests_total{result=\"failure\"}[5m])) or vector(0)) + sum(rate(aircraft_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0)) / clamp_min(sum(rate(aircraft_graphql_requests_total[5m])) + sum(rate(aircraft_grpc_requests_total[5m])), 1e-9)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency (GraphQL)",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_ms_milliseconds_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "GraphQL Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Requests/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "rate(aircraft_graphql_requests_total[5m])",
+          "legendFormat": "{{operation}} {{type}} {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Error Rate %",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "100 * (sum(rate(aircraft_graphql_requests_total{status=\"failure\"}[5m])) or vector(0)) / sum(rate(aircraft_graphql_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GraphQL Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_graphql_request_duration_ms_milliseconds_bucket[5m])) by (le,operation,type,status)) or vector(0)",
+          "legendFormat": "{{operation}} {{type}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "gRPC Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Requests/sec",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "rate(aircraft_grpc_requests_total[5m])",
+          "legendFormat": "{{service}}/{{method}} {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Error Rate %",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "100 * (sum(rate(aircraft_grpc_requests_total{status!=\"OK\"}[5m])) or vector(0)) / sum(rate(aircraft_grpc_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "gRPC Latency (p95)",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 30
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aircraft_grpc_request_duration_ms_milliseconds_bucket[5m])) by (le,service,method)) or vector(0)",
+          "legendFormat": "{{service}}/{{method}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Runtime Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM Memory (Heap)",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "jvm_memory_used_bytes{jvm_memory_type=\"heap\"}",
+          "legendFormat": "heap used"
+        },
+        {
+          "expr": "jvm_memory_limit_bytes{jvm_memory_type=\"heap\"}",
+          "legendFormat": "heap max"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "JVM Thread States",
+      "gridPos": {
+        "h": 6,
+        "w": 8,
+        "x": 12,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "sum(jvm_thread_count) by (jvm_thread_state)",
+          "legendFormat": "{{jvm_thread_state}}"
+        }
+      ],
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "values": [
+            "current"
+          ]
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Total Threads",
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 20,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "sum(jvm_thread_count)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Daemon Threads",
+      "gridPos": {
+        "h": 3,
+        "w": 4,
+        "x": 20,
+        "y": 42
+      },
+      "targets": [
+        {
+          "expr": "sum(jvm_thread_count{jvm_thread_daemon=\"true\"})"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC Collections/sec",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 0,
+        "y": 45
+      },
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_duration_seconds_count[5m])",
+          "legendFormat": "{{jvm_gc_name}} collections"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "GC Pause Time",
+      "gridPos": {
+        "h": 6,
+        "w": 12,
+        "x": 12,
+        "y": 45
+      },
+      "targets": [
+        {
+          "expr": "rate(jvm_gc_duration_seconds_sum[5m])",
+          "legendFormat": "{{jvm_gc_name}} pause time"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Logs & Traces",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Error Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 52
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"aircraft-service\"} |= `error`"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Application Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 64
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"aircraft-service\"} |= ``"
+        }
+      ],
+      "timeFrom": "now-5m",
+      "timeShift": null
+    }
+  ]
+}

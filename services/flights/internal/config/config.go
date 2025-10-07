@@ -1,19 +1,20 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"time"
-
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 )
 
 type Config struct {
 	Port                   string
 	Environment            string
+	LogLevel               string
 	DatabaseURL            string
 	AircraftServiceGrpcUrl string
 	CacheURL               string
 	CacheTTL               time.Duration
+	OtlpGrpcUrl            string
 }
 
 var App Config
@@ -24,10 +25,12 @@ func Init() {
 	App = Config{
 		Port:                   getEnv("PORT", "8081"),
 		Environment:            getEnv("ENVIRONMENT", "development"),
+		LogLevel:               getEnvNoFallback("LOG_LEVEL"),
 		DatabaseURL:            mustGetEnv("DATABASE_URL"),
 		AircraftServiceGrpcUrl: mustGetEnv("AIRCRAFT_SERVICE_GRPC_URL"),
 		CacheURL:               mustGetEnv("CACHE_URL"),
 		CacheTTL:               15 * time.Minute,
+		OtlpGrpcUrl:            mustGetEnv("OTLP_GRPC_URL"),
 	}
 }
 
@@ -42,6 +45,13 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+func getEnvNoFallback(key string) string {
+	if value, exists := os.LookupEnv(key); exists {
+		return value
+	}
+	return ""
+}
+
 // mustGetEnv returns the value of the environment variable named by key.
 // If the variable is unset or empty it logs an error and terminates the process
 // with exit status 1. The function does not return on error.
@@ -49,7 +59,7 @@ func mustGetEnv(key string) string {
 	if value, exists := os.LookupEnv(key); exists && value != "" {
 		return value
 	}
-	logger.Error("Required environment variable '%s' is missing or empty", key)
+	fmt.Printf("ERROR: required environment variable %q is missing or empty\n\n", key)
 	os.Exit(1)
 	return ""
 }

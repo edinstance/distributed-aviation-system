@@ -56,8 +56,9 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgres://postgres:postgres@flights-database:5432/flights?sslmode=disable}
       CACHE_URL: ${REDIS_URL:-redis://flights-cache:6379}
-      AIRCRAFT_SERVICE_GRPC_URL: ${AIRCRAFT_SERVICE_GRPC_URL:-http://aircraft-service:9090}
-      ENVIRONMENT: "dev"
+      AIRCRAFT_SERVICE_GRPC_URL: ${AIRCRAFT_SERVICE_GRPC_URL:-aircraft-service:9090}
+      OTLP_GRPC_URL: ${OTLP_GRPC_URL:-otel-collector:4317}
+      ENVIRONMENT: "prod"
       PORT: 8081
     healthcheck:
       test: [ "CMD-SHELL", "curl -f http://localhost:8081/health || exit 1" ]
