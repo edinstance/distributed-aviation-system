@@ -1,10 +1,11 @@
 """
 Generate RSA key pairs for JWT signing if they don't already exist.
 """
-import os
-import subprocess
 import json
+import os
 from pathlib import Path
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives import serialization
 
 KEYS_DIR = Path(os.getenv("KEYS_DIR", "./keys"))
 KEYS_DIR.mkdir(parents=True, exist_ok=True)
@@ -18,15 +19,24 @@ def key_exists():
 
 def generate_pair():
     print(f"[generate_keys] Generating RSA keypair in {KEYS_DIR} …")
-    subprocess.run(["openssl", "genrsa", "-out", str(PRIVATE_KEY), "4096"], check=True)
-    subprocess.run(
-        ["openssl", "rsa", "-in", str(PRIVATE_KEY), "-pubout", "-out", str(PUBLIC_KEY)],
-        check=True,
+
+    key = rsa.generate_private_key(public_exponent=65537, key_size=4096)
+
+    private_pem = key.private_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PrivateFormat.TraditionalOpenSSL,
+        encryption_algorithm=serialization.NoEncryption(),
     )
-    # basic map file (for kid/versioning)
+    PRIVATE_KEY.write_bytes(private_pem)
+
+    public_pem = key.public_key().public_bytes(
+        encoding=serialization.Encoding.PEM,
+        format=serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    PUBLIC_KEY.write_bytes(public_pem)
+
     meta = {"v1": {"private": "private.pem", "public": "public.pem", "active": True}}
-    with open(KEYMAP, "w") as f:
-        json.dump(meta, f, indent=2)
+    KEYMAP.write_text(json.dumps(meta, indent=2))
     print("[generate_keys] Done.")
 
 if not key_exists():

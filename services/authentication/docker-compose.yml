@@ -71,14 +71,20 @@ services:
       target: migrate
     container_name: authentication-migrations
     depends_on:
+      authentication-keygen:
+        condition: service_completed_successfully
       authentication-database:
         condition: service_healthy
     environment:
+      SECRET_KEY: ${SECRET_KEY:-insecure-key}
+      KEYS_DIR: ${KEYS_DIR:-/keys}
       DATABASE_NAME: authentication
       DATABASE_USER: postgres
       DATABASE_PASSWORD: postgres
       DATABASE_HOST: authentication-database
       DATABASE_PORT: 5432
+    volumes:
+      - jwt_keys:/keys
     restart: "no"
     networks:
       - aviation-network
