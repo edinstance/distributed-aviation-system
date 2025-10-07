@@ -1,11 +1,13 @@
 import re
+
 import structlog
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from rest_framework.permissions import AllowAny
 from django.contrib.auth import get_user_model
 from django_tenants.utils import schema_context
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from organizations.models import Organization
 
 logger = structlog.get_logger(__name__)
@@ -52,6 +54,15 @@ class CreateOrganization(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        reserved_schemas = {"public", "pg_catalog", "information_schema", "pg_toast", "pg_temp"}
+        if schema_name in reserved_schemas or schema_name.startswith("pg_"):
+            logger.warning("Reserved schema name requested", schema_name=schema_name)
+
+            return Response(
+                {"error": f"schema_name '{schema_name}' is reserved and cannot be used."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         try:
             # --- Create Organization ---
             org, created = Organization.objects.get_or_create(
@@ -88,9 +99,9 @@ class CreateOrganization(APIView):
             admin_password = admin_data.get("password")
 
             logger.info("Extracted admin credentials:",
-                       username=admin_username,
-                       email=admin_email,
-                       password_present=bool(admin_password))
+                        username=admin_username,
+                        email=admin_email,
+                        password_present=bool(admin_password))
 
             if admin_username and admin_email and admin_password:
                 logger.info(

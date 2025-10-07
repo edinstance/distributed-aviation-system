@@ -3,30 +3,31 @@ OpenTelemetry instrumentation setup for the authentication service.
 This module configures distributed tracing, metrics, and logging collection.
 """
 
-import os
 import logging
+import os
+
 from opentelemetry import trace, metrics
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.prometheus import PrometheusMetricReader
 from opentelemetry.instrumentation.django import DjangoInstrumentor
-from opentelemetry.instrumentation.requests import RequestsInstrumentor
-from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
 from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk.resources import SERVICE_NAME, SERVICE_VERSION, Resource
-from prometheus_client import start_http_server
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
 
 from common.telemetry.auth_metrics import AuthMetrics
 
 SERVICE_NAME_VALUE = "authentication-service"
 SERVICE_VERSION_VALUE = "1.0.0"
+
 
 def configure_telemetry(otel_endpoint: str = None):
     resource = Resource(
@@ -37,6 +38,9 @@ def configure_telemetry(otel_endpoint: str = None):
             "deployment.environment": os.environ.get("ENVIRONMENT", "dev"),
         }
     )
+
+    DjangoInstrumentor().instrument()
+    Psycopg2Instrumentor().instrument()
 
     # ---- Tracing ----
     if otel_endpoint:

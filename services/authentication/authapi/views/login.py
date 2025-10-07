@@ -65,7 +65,7 @@ class Login(TokenObtainPairView):
                     "id": user.id,
                     "username": user.username,
                     "email": user.email,
-                    "org_id": str(user.org_id),
+                    "org_id": str(user.org_id) if user.org_id else None,
                 },
             }
 

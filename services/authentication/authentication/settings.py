@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
+import json
 import logging
 from datetime import timedelta
 from pathlib import Path
@@ -167,13 +168,24 @@ REST_FRAMEWORK = {
 def load_verifying_key():
     """Load the RSA public key for JWT verification."""
     keys_dir = config("KEYS_DIR", default="/keys")
+    keymap_path = f"{keys_dir}/keymap.json"
     public_key_path = f"{keys_dir}/public.pem"
 
     try:
-        with open(public_key_path, "r") as f:
-            return f.read()
-    except FileNotFoundError:
-        return None
+        with open(keymap_path) as f:
+            keymap = json.load(f)
+        active_entry = next((v for v in keymap.values() if v.get("active")), None)
+        if active_entry:
+            public_key_path = f"{keys_dir}/{active_entry.get('public', 'public.pem')}"
+    except (FileNotFoundError, json.JSONDecodeError):
+        pass
+
+    with open(public_key_path, "r") as f:
+        key_content = f.read()
+
+    if key_content and not key_content.startswith("-----BEGIN"):
+        raise ValueError("Invalid PEM format")
+    return key_content
 
 
 SIMPLE_JWT = {

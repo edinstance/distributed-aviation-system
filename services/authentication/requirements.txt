@@ -28,6 +28,3 @@ opentelemetry-instrumentation-logging==0.49b2
 opentelemetry-exporter-otlp==1.28.2
 opentelemetry-exporter-prometheus==0.49b2
 prometheus-client==0.21.1
-
-prometheus_client~=0.21.1
-prometheus_client~=0.21.1

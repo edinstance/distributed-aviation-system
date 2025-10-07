@@ -1,6 +1,9 @@
+from uuid import UUID
+
 from django.db import connection
-from django_tenants.utils import get_tenant_model
 from django.http import JsonResponse
+from django_tenants.utils import get_tenant_model
+
 
 class HeaderTenantMiddleware:
     def __init__(self, get_response):
@@ -15,9 +18,9 @@ class HeaderTenantMiddleware:
         request.schema_name = 'public'
 
         org_id = (
-            request.headers.get("X-Org-Id")
-            or request.headers.get("X-Org")
-            or request.META.get("HTTP_X_ORG_ID")
+                request.headers.get("X-Org-Id")
+                or request.headers.get("X-Org")
+                or request.META.get("HTTP_X_ORG_ID")
         )
 
         # Add safe, public endpoints
@@ -39,13 +42,21 @@ class HeaderTenantMiddleware:
                 )
 
             try:
-                tenant = tenant_model.objects.get(id=org_id)
+                org_uuid = UUID(org_id)
+            except ValueError:
+                return JsonResponse(
+                    {'error': f'Invalid X-Org-Id header value: {org_id}'},
+                    status=400,
+                )
+
+            try:
+                tenant = tenant_model.objects.get(id=org_uuid)
                 connection.set_tenant(tenant)
                 request.tenant = tenant
                 request.schema_name = tenant.schema_name
             except tenant_model.DoesNotExist:
                 return JsonResponse(
-                    {'error': f'Organization with id "{org_id}" not found'},
+                    {'error': f'Organization with id "{org_uuid}" not found'},
                     status=404,
                 )
 

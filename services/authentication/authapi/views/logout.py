@@ -5,6 +5,7 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from common.telemetry.helpers import get_tracer
@@ -68,7 +69,7 @@ class Logout(APIView):
                     {"message": "Successfully logged out"},
                     status=status.HTTP_200_OK,
                 )
-            except Exception as e:
+            except (InvalidToken, TokenError) as e:
                 duration = time.time() - start_time
 
                 self.logger.error(
@@ -87,3 +88,32 @@ class Logout(APIView):
                     {"error": "Invalid or expired token"},
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
+
+            except AttributeError:
+                duration = time.time() - start_time
+                self.logger.info(
+                    "Logout completed without blacklist support",
+                    user_id=user.id,
+                    username=user.username,
+                    duration_seconds=round(duration, 3),
+                )
+                span.set_attribute("logout.success", True)
+                span.set_attribute("logout.blacklist_skipped", True)
+
+            except Exception as e:
+                duration = time.time() - start_time
+                self.logger.error(
+                    "Logout failed",
+                    user_id=user.id,
+                    username=user.username,
+                    duration_seconds=round(duration, 3),
+                    error=str(e),
+                )
+                span.set_attribute("logout.success", False)
+                span.set_attribute("logout.blacklist_skipped", False)
+
+
+        return Response(
+            {"message": "Successfully logged out"},
+            status=status.HTTP_200_OK,
+        )
