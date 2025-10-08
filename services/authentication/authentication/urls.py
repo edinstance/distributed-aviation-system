@@ -18,6 +18,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from authapi.jwks.jwks_view import jwks_view
 from common.views.healthcheck import HealthCheckView
 
 urlpatterns = [
@@ -26,4 +27,5 @@ urlpatterns = [
     path("api/users/", include("users.urls")),
     path("api/organizations/", include("organizations.urls")),
     path("health/", HealthCheckView.as_view(), name="healthcheck"),
+    path(".well-known/jwks.json", jwks_view, name="jwks"),
 ]

@@ -23,7 +23,7 @@ class HeaderTenantMiddleware:
         path = request.path
 
         public_endpoints = [
-            '/api/auth/jwks.json',
+            '/.well-known/jwks.json',
             '/api/organizations/create/',
             '/health',
         ]
