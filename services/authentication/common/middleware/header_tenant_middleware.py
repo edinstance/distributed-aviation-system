@@ -31,6 +31,7 @@ class HeaderTenantMiddleware:
         xorg_allowed_endpoints = [
             '/api/auth/login/',
             '/api/auth/refresh/',
+            '/api/auth/verify-token/',
         ]
 
         normalized_path = path.rstrip('/')

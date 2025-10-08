@@ -45,7 +45,7 @@ class VerifyToken(APIView):
 
             try:
                 token = AccessToken(token_str)
-                user_id = token["user_id"]
+                user_id = token["sub"]
                 user = CustomUser.objects.get(id=user_id)
                 duration = time.time() - start_time
 

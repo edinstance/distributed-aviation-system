@@ -197,7 +197,7 @@ SIMPLE_JWT = {
     "SIGNING_KEY": load_signing_key(),
     "VERIFYING_KEY": load_verifying_key(),
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "AUTH_TOKEN_CLASSES": ("authapi.tokens.CustomAccessToken",),
 }
 
 # CORS settings
