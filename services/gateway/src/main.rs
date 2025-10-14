@@ -4,13 +4,14 @@ mod verify;
 
 use crate::config::Config;
 use crate::requests::forward_request;
+use crate::verify::{JwksCache, verify_jwt};
+use axum::http::StatusCode;
 use axum::response::Response;
 use axum::{Router, extract::Request, routing::any};
 use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
-use axum::http::StatusCode;
-use crate::verify::verify_jwt;
+use std::time::Duration;
 
 #[tokio::main]
 async fn main() {
@@ -19,6 +20,11 @@ async fn main() {
     println!("Config is valid");
     println!("Router URL: {}", config.router_url);
     let router_url = config.router_url.clone();
+
+    let jwks_cache = Arc::new(JwksCache::new(
+        config.jwks_url.clone(),
+        Duration::from_secs(300),
+    ));
 
     let client = Arc::new(
         Client::builder()
@@ -33,14 +39,21 @@ async fn main() {
             any({
                 let router_url = router_url.clone();
                 let client = client.clone();
-                move |req| route_handler(req, router_url.clone(), client.clone())
+                let jwks_cache = jwks_cache.clone();
+                move |req| {
+                    route_handler(req, router_url, client, jwks_cache)
+                }
             }),
         )
         .route(
             "/{*wildcard}",
             any({
+                let router_url = router_url.clone();
                 let client = client.clone();
-                move |req| route_handler(req, router_url, client)
+                let jwks_cache = jwks_cache.clone();
+                move |req| {
+                    route_handler(req, router_url, client, jwks_cache)
+                }
             }),
         );
 
@@ -51,19 +64,31 @@ async fn main() {
         .unwrap();
 }
 
-async fn route_handler(req: Request, router_url: String, client: Arc<Client>) -> Response {
-    let auth_header = req.headers().get("authorization").and_then(|v| v.to_str().ok());
+async fn route_handler(
+    req: Request,
+    router_url: String,
+    client: Arc<Client>,
+    jwks_cache: Arc<JwksCache>,
+) -> Response {
+    let auth_header = req
+        .headers()
+        .get("authorization")
+        .and_then(|v| v.to_str().ok());
     let jwt = match auth_header {
-        Some(header) if header.starts_with("Bearer ") => header.trim_start_matches("Bearer ").trim(),
+        Some(header) if header.starts_with("Bearer ") => {
+            header.trim_start_matches("Bearer ").trim()
+        }
         _ => {
             return Response::builder()
                 .status(StatusCode::UNAUTHORIZED)
-                .body(axum::body::Body::from("Missing or invalid Authorization header"))
+                .body(axum::body::Body::from(
+                    "Missing or invalid Authorization header",
+                ))
                 .unwrap();
         }
     };
 
-    let claims = match verify_jwt(jwt, &client).await {
+    let claims = match verify_jwt(jwt, &client, &jwks_cache).await {
         Ok(c) => c,
         Err(e) => {
             eprintln!("JWT verification failed: {:?}", e);

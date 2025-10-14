@@ -8,14 +8,14 @@ pub struct Claims {
     pub exp: usize,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Jwk {
     pub kid: String,
     pub n: String,
     pub e: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Jwks {
     pub keys: Vec<Jwk>,
 }
