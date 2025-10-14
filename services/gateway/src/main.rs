@@ -9,6 +9,8 @@ use axum::{Router, extract::Request, routing::any};
 use reqwest::Client;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use axum::http::StatusCode;
+use crate::verify::verify_jwt;
 
 #[tokio::main]
 async fn main() {
@@ -50,7 +52,42 @@ async fn main() {
 }
 
 async fn route_handler(req: Request, router_url: String, client: Arc<Client>) -> Response {
-    println!("{:?}", req);
+    let auth_header = req.headers().get("authorization").and_then(|v| v.to_str().ok());
+    let jwt = match auth_header {
+        Some(header) if header.starts_with("Bearer ") => header.trim_start_matches("Bearer ").trim(),
+        _ => {
+            return Response::builder()
+                .status(StatusCode::UNAUTHORIZED)
+                .body(axum::body::Body::from("Missing or invalid Authorization header"))
+                .unwrap();
+        }
+    };
+
+    let claims = match verify_jwt(jwt).await {
+        Ok(c) => c,
+        Err(e) => {
+            eprintln!("JWT verification failed: {:?}", e);
+            return Response::builder()
+                .status(StatusCode::UNAUTHORIZED)
+                .body(axum::body::Body::from("Invalid or expired token"))
+                .unwrap();
+        }
+    };
+    print!("Claims: {:#?}", claims);
+
+    let (mut parts, body) = req.into_parts();
+    if let Ok(header_value) = claims.sub.parse() {
+        parts.headers.insert("x-user-sub", header_value);
+    }
+    if let Ok(header_value) = claims.org_id.parse() {
+        parts.headers.insert("x-org-id", header_value);
+    }
+    if let Ok(header_value) = claims.roles.join(",").parse() {
+        parts.headers.insert("x-user-roles", header_value);
+    }
+
+    let req = Request::from_parts(parts, body);
+
     match forward_request(req, router_url, client).await {
         Ok(resp) => resp,
         Err(code) => Response::builder()
