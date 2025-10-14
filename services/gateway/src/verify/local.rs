@@ -1,16 +1,13 @@
+use crate::config::Config;
+use crate::verify::{Claims, Jwks};
 use anyhow::Result;
-use dotenv::dotenv;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use reqwest::Client;
-use std::env;
-
-use crate::verify::{Claims, Jwks};
 
 pub async fn verify_jwt(jwt: &str) -> Result<Claims> {
-    dotenv().ok();
+    let config = Config::from_env();
+    let jwks_url = config.jwks_url;
 
-    let jwks_url = env::var("JWKS_URL")?;
-    
     // Decode jwt to read KID
     let header = decode_header(&jwt)?;
     let kid = header
