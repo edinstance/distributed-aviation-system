@@ -63,7 +63,7 @@ async fn route_handler(req: Request, router_url: String, client: Arc<Client>) ->
         }
     };
 
-    let claims = match verify_jwt(jwt).await {
+    let claims = match verify_jwt(jwt, &client).await {
         Ok(c) => c,
         Err(e) => {
             eprintln!("JWT verification failed: {:?}", e);

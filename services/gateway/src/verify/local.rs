@@ -1,10 +1,11 @@
+use std::sync::Arc;
 use crate::config::Config;
 use crate::verify::{Claims, Jwks};
 use anyhow::Result;
 use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 use reqwest::Client;
 
-pub async fn verify_jwt(jwt: &str) -> Result<Claims> {
+pub async fn verify_jwt(jwt: &str, client: &Arc<Client>) -> Result<Claims> {
     let config = Config::from_env();
     let jwks_url = config.jwks_url;
 
@@ -15,7 +16,6 @@ pub async fn verify_jwt(jwt: &str) -> Result<Claims> {
         .ok_or_else(|| anyhow::anyhow!("Missing kid in JWT header"))?;
 
     // Fetch JWKS
-    let client = Client::new();
     let jwks: Jwks = client.get(jwks_url).send().await?.json().await?;
 
     // Find matching key
@@ -30,7 +30,8 @@ pub async fn verify_jwt(jwt: &str) -> Result<Claims> {
         .map_err(|_| anyhow::anyhow!("Failed to build RSA decoder"))?;
 
     // Verify JWT
-    let validation = Validation::new(Algorithm::RS256);
+    let mut validation = Validation::new(Algorithm::RS256);
+    validation.validate_exp = true;
 
     let token_data = decode::<Claims>(jwt, &decoding_key, &validation)?;
     let claims = token_data.claims;
