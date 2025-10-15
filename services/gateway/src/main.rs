@@ -15,6 +15,7 @@ use std::time::Duration;
 
 #[tokio::main]
 async fn main() {
+    println!("Starting gateway...");
     let config = Config::from_env();
     config.validate();
     println!("Config is valid");
@@ -57,7 +58,7 @@ async fn main() {
             }),
         );
 
-    let addr = SocketAddr::from(([0, 0, 0, 0], 1000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     println!("🚀 Gateway running on {}", addr);
     axum::serve(tokio::net::TcpListener::bind(addr).await.unwrap(), app)
         .await
