@@ -10,9 +10,6 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     def get_token(cls, user):
         token = super().get_token(user)
 
-        # Replace default claim
-        del token["user_id"]
-
         # Standard + custom claims
         token["sub"] = str(user.id)
         token["username"] = user.username
