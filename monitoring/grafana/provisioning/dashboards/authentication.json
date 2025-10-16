@@ -1,0 +1,217 @@
+{
+  "title": "Authentication Service",
+  "uid": "authentication-service",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [
+    "aviation",
+    "authentication",
+    "django",
+    "jwt"
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 0 }
+    },
+    {
+      "type": "stat",
+      "title": "Login Attempts/sec",
+      "gridPos": { "h": 3, "w": 6, "x": 0, "y": 1 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum(rate(auth_login_attempts_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": { "h": 3, "w": 6, "x": 6, "y": 1 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "100 * sum(rate(auth_login_failures_total[5m])) / sum(rate(auth_login_attempts_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Login p95 Latency (s)",
+      "gridPos": { "h": 3, "w": 6, "x": 12, "y": 1 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "histogram_quantile(0.95, sum(rate(auth_login_duration_seconds_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Token Validations/sec",
+      "gridPos": { "h": 3, "w": 6, "x": 18, "y": 1 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum(rate(auth_token_validations_total[5m]))"
+        }
+      ]
+    },
+
+    { "type": "row", "title": "Request Metrics", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 4 } },
+    {
+      "type": "timeseries",
+      "title": "Login Attempts/sec by Tenant & Success",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 5 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum by (tenant, success) (rate(auth_login_attempts_total[5m]))",
+          "legendFormat": "{{tenant}} success={{success}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Login Duration p95 by Tenant & Success (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 5 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "histogram_quantile(0.95, sum(rate(auth_login_duration_seconds_bucket[5m])) by (le,tenant,success))",
+          "legendFormat": "{{tenant}} success={{success}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate % by Tenant",
+      "gridPos": { "h": 8, "w": 24, "x": 0, "y": 13 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "100 * sum by (tenant) (rate(auth_login_failures_total[5m])) / sum by (tenant) (rate(auth_login_attempts_total[5m]))",
+          "legendFormat": "{{tenant}}"
+        }
+      ]
+    },
+
+    { "type": "row", "title": "Authentication Metrics", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 21 } },
+    {
+      "type": "timeseries",
+      "title": "Token Generations/sec by Type",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum by (token_type) (rate(auth_token_generations_total[5m]))",
+          "legendFormat": "{{token_type}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Token Validations/sec (valid label)",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum by (valid) (rate(auth_token_validations_total[5m]))",
+          "legendFormat": "valid={{valid}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Token Validation p95 Duration (s)",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 30 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "histogram_quantile(0.95, sum(rate(auth_token_validation_duration_seconds_bucket[5m])) by (le,tenant,valid))",
+          "legendFormat": "{{tenant}} valid={{valid}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Token Validation Success Rate %",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 30 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "100 * sum(rate(auth_token_validations_total{valid=\"true\"}[5m])) / sum(rate(auth_token_validations_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Avg Token Validation Time (s)",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 30 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum(rate(auth_token_validation_duration_seconds_sum[5m])) / sum(rate(auth_token_validation_duration_seconds_count[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Total Logins",
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 34 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum(auth_login_attempts_total)"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Total Token Validations",
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 34 },
+      "targets": [
+        {
+          "datasource": { "type": "prometheus", "uid": "prom" },
+          "expr": "sum(auth_token_validations_total)"
+        }
+      ]
+    },
+
+    { "type": "row", "title": "Logs", "collapsed": false, "gridPos": { "h": 1, "w": 24, "x": 0, "y": 38 } },
+    {
+      "type": "logs",
+      "title": "Error Logs",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true, "dedupStrategy": "none" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 39 },
+      "targets": [ { "expr": "{service_name=\"authentication-service\"} | json | level=\"error\"" } ]
+    },
+    {
+      "type": "logs",
+      "title": "Authentication Logs",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true, "dedupStrategy": "none" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 51 },
+      "targets": [ { "expr": "{service_name=\"authentication-service\"} |= \"login\" or \"token\"" } ],
+      "timeFrom": "now-10m"
+    },
+    {
+      "type": "logs",
+      "title": "Application Logs",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "options": { "showTime": true, "wrapLogMessage": true, "enableLogDetails": true, "dedupStrategy": "none" },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 63 },
+      "targets": [ { "expr": "{service_name=\"authentication-service\"}" } ],
+      "timeFrom": "now-5m"
+    }
+  ]
+}
