@@ -21,7 +21,7 @@ impl Config {
             port: env::var("PORT")
                 .ok()
                 .and_then(|p| p.parse().ok())
-                .unwrap_or(1000),
+                .unwrap_or(4001),
             log_level: env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string()),
         }
     }

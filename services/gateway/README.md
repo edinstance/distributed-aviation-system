@@ -96,7 +96,7 @@ All requests must include a valid Bearer token:
 Authorization: Bearer <jwt-token>
 ```
 
-The Bearer tokens should be retrieved from the authenticaiton microservice which can be queried directly.
+The Bearer tokens should be retrieved from the authentication microservice which can be queried directly.
 
 ### Request Flow
 

@@ -211,7 +211,7 @@ CORS_ALLOWED_ORIGINS = config(
 )
 
 # Logging Configuration
-LOG_LEVEL = config("LOG_LEVEL", default="DEBUG")
+LOG_LEVEL = config("LOG_LEVEL", default="INFO")
 
 # OpenTelemetry Configuration
 OTEL_SERVICE_NAME = config("OTEL_SERVICE_NAME", default="authentication-service")

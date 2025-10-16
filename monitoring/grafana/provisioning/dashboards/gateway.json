@@ -353,7 +353,7 @@
       },
       "targets": [
         {
-          "expr": "{service_name=\"aviation-gateway\"} |= ``"
+          "expr": "{service_name=\"aviation-gateway\"}"
         }
       ],
       "timeFrom": "now-5m",

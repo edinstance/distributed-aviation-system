@@ -13,4 +13,4 @@ class HeaderKidMixin:
             headers={"kid": _get_active_kid()},
             json_encoder=backend.json_encoder,
         )
-        return token.decode("utf-8") if isinstance(token, bytes) else token
+        return token
