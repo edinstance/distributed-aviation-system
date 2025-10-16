@@ -6,7 +6,7 @@ import {
 } from "../../helpers/random";
 import { check } from "k6";
 
-export function runAuthenticaionScenario(baseUrl: string) {
+export function runAuthenticationScenario(baseUrl: string) {
   const orgName = `org_${randomString(6)}`;
   const username = randomString(8);
   const password = randomPassword();
