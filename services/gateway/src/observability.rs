@@ -135,6 +135,7 @@ static JWT_VERIFICATION_COUNTER: OnceLock<Counter<u64>> = OnceLock::new();
 static JWT_VERIFICATION_DURATION: OnceLock<Histogram<f64>> = OnceLock::new();
 static JWKS_FETCH_COUNTER: OnceLock<Counter<u64>> = OnceLock::new();
 static JWKS_CACHE_MISSES: OnceLock<Counter<u64>> = OnceLock::new();
+static JWKS_LOOKUPS: OnceLock<Counter<u64>> = OnceLock::new();
 
 pub fn init_metrics() {
     let meter = opentelemetry::global::meter("aviation-gateway");
@@ -169,6 +170,11 @@ pub fn init_metrics() {
         .with_description("Total number of JWKS cache misses")
         .init();
 
+    let jwks_lookups = meter
+        .u64_counter("aviation_gateway_jwks_lookups_total")
+        .with_description("Total number of JWKS cache lookups (hits + misses)")
+        .init();
+
     METER.set(meter).ok();
     REQUEST_COUNTER.set(request_counter).ok();
     REQUEST_DURATION.set(request_duration).ok();
@@ -178,6 +184,7 @@ pub fn init_metrics() {
         .ok();
     JWKS_FETCH_COUNTER.set(jwks_fetch_counter).ok();
     JWKS_CACHE_MISSES.set(jwks_cache_misses).ok();
+    JWKS_LOOKUPS.set(jwks_lookups).ok();
 }
 
 // Metrics for gateway service
@@ -270,5 +277,12 @@ impl GatewayMetrics {
         }
 
         tracing::debug!("JWKS cache miss");
+    }
+
+    pub fn jwks_lookup() {
+        if let Some(counter) = JWKS_LOOKUPS.get() {
+            counter.add(1, &[]);
+        }
+        tracing::debug!("JWKS cache lookup");
     }
 }

@@ -109,7 +109,7 @@
       },
       "targets": [
         {
-          "expr": "rate(aviation_gateway_requests_total[5m])",
+          "expr": "sum by (method, status) (rate(aviation_gateway_requests_total[5m]))",
           "legendFormat": "{{method}} {{status}}"
         }
       ]
@@ -201,7 +201,7 @@
       "targets": [
         {
           "expr": "rate(aviation_gateway_jwks_fetches_total[5m])",
-          "legendFormat": "JWKS fetches"
+          "legendFormat": "JWKS fetches (success={{success}})"
         },
         {
           "expr": "rate(aviation_gateway_jwks_cache_misses_total[5m])",
@@ -235,7 +235,7 @@
       },
       "targets": [
         {
-          "expr": "100 * (1 - sum(rate(aviation_gateway_jwks_cache_misses_total[5m])) / (sum(rate(aviation_gateway_jwks_fetches_total[5m])) + sum(rate(aviation_gateway_jwks_cache_misses_total[5m]))))"
+          "expr": "100 * (1 - sum(rate(aviation_gateway_jwks_cache_misses_total[5m])) / sum(rate(aviation_gateway_jwks_lookups_total[5m])))"
         }
       ]
     },
@@ -250,7 +250,7 @@
       },
       "targets": [
         {
-          "expr": "avg(rate(aviation_gateway_jwt_verification_duration_ms_sum[5m]) / rate(aviation_gateway_jwt_verification_duration_ms_count[5m]))"
+          "expr": "sum(rate(aviation_gateway_jwt_verification_duration_ms_sum[5m])) / sum(rate(aviation_gateway_jwt_verification_duration_ms_count[5m]))"
         }
       ]
     },
@@ -301,7 +301,7 @@
       },
       "targets": [
         {
-          "expr": "{service_name=\"aviation-gateway\"} | detected_level = `error`"
+          "expr": "{service_name=\"aviation-gateway\"} | json | level=\"error\""
         }
       ]
     },
@@ -326,7 +326,7 @@
       },
       "targets": [
         {
-          "expr": "{service_name=\"aviation-gateway\"} |= `JWT`"
+          "expr": "{service_name=\"aviation-gateway\"} |= \"JWT\""
         }
       ],
       "timeFrom": "now-10m",

@@ -38,6 +38,8 @@ impl JwksCache {
         )
     )]
     pub async fn get_jwks(&self, client: &Client) -> Result<Jwks> {
+        GatewayMetrics::jwks_lookup();
+
         // Fast path: check cache first
         if let Some((timestamp, jwks)) = self.inner.read().unwrap().clone() {
             let age = timestamp.elapsed();
