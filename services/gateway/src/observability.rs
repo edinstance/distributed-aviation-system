@@ -4,7 +4,7 @@ use opentelemetry::metrics::{Counter, Histogram, Meter};
 use opentelemetry::trace::TracerProvider;
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
 use opentelemetry_otlp::WithExportConfig;
-use opentelemetry_sdk::{Resource, logs, metrics, trace};
+use opentelemetry_sdk::{logs, metrics, trace};
 use std::env;
 use std::sync::OnceLock;
 use tracing::info;
@@ -60,21 +60,24 @@ pub async fn init_observability(cfg: &ObservabilityConfig) -> Result<()> {
     };
 
     // Initialize OpenTelemetry OTLP exporter
-    let resource = Resource::new(vec![
-        KeyValue::new("service.name", cfg.service_name.clone()),
-        KeyValue::new("service.version", env!("CARGO_PKG_VERSION")),
-    ]);
+    // Use service instance resource for now
+    let mut resource_kvs = Vec::new();
+    resource_kvs.push(KeyValue::new("service.name", cfg.service_name.clone()));
+    resource_kvs.push(KeyValue::new("service.version", env!("CARGO_PKG_VERSION")));
+    let resource = opentelemetry_sdk::Resource::builder()
+        .with_attributes(resource_kvs)
+        .build();
 
     // Initialize metrics
-    let metrics_exporter = opentelemetry_otlp::new_exporter()
-        .tonic()
+    let metrics_exporter = opentelemetry_otlp::MetricExporter::builder()
+        .with_tonic()
         .with_endpoint(&cfg.otlp_endpoint)
-        .build_metrics_exporter(Box::new(metrics::reader::DefaultTemporalitySelector::new()))?;
+        .build()?;
 
     let meter_provider = metrics::SdkMeterProvider::builder()
         .with_resource(resource.clone())
         .with_reader(
-            metrics::PeriodicReader::builder(metrics_exporter, opentelemetry_sdk::runtime::Tokio)
+            metrics::PeriodicReader::builder(metrics_exporter)
                 .with_interval(std::time::Duration::from_secs(5))
                 .build(),
         )
@@ -83,28 +86,28 @@ pub async fn init_observability(cfg: &ObservabilityConfig) -> Result<()> {
     opentelemetry::global::set_meter_provider(meter_provider);
 
     // Initialize tracing
-    let trace_exporter = opentelemetry_otlp::new_exporter()
-        .tonic()
+    let trace_exporter = opentelemetry_otlp::SpanExporter::builder()
+        .with_tonic()
         .with_endpoint(&cfg.otlp_endpoint)
-        .build_span_exporter()?;
+        .build()?;
 
-    let tracer_provider = trace::TracerProvider::builder()
-        .with_batch_exporter(trace_exporter, opentelemetry_sdk::runtime::Tokio)
-        .with_config(trace::Config::default().with_resource(resource.clone()))
+    let tracer_provider = trace::SdkTracerProvider::builder()
+        .with_batch_exporter(trace_exporter)
+        .with_resource(resource.clone())
         .build();
 
     let tracer = tracer_provider.tracer("aviation-gateway");
     let otel_layer = OpenTelemetryLayer::new(tracer);
 
     // Initialize log export
-    let log_exporter = opentelemetry_otlp::new_exporter()
-        .tonic()
+    let log_exporter = opentelemetry_otlp::LogExporter::builder()
+        .with_tonic()
         .with_endpoint(&cfg.otlp_endpoint)
-        .build_log_exporter()?;
+        .build()?;
 
-    let log_provider = logs::LoggerProvider::builder()
+    let log_provider = logs::SdkLoggerProvider::builder()
         .with_resource(resource.clone())
-        .with_batch_exporter(log_exporter, opentelemetry_sdk::runtime::Tokio)
+        .with_batch_exporter(log_exporter)
         .build();
 
     let otel_log_layer = OpenTelemetryTracingBridge::new(&log_provider);
@@ -125,7 +128,7 @@ pub async fn init_observability(cfg: &ObservabilityConfig) -> Result<()> {
 
 pub async fn shutdown_observability() {
     info!("Shutting down observability");
-    opentelemetry::global::shutdown_tracer_provider();
+    // Shutdown is now handled automatically when the provider is dropped
 }
 
 static METER: OnceLock<Meter> = OnceLock::new();
@@ -143,37 +146,37 @@ pub fn init_metrics() {
     let request_counter = meter
         .u64_counter("aviation_gateway_requests_total")
         .with_description("Total number of HTTP requests processed")
-        .init();
+        .build();
 
     let request_duration = meter
         .f64_histogram("aviation_gateway_request_duration_ms")
         .with_description("HTTP request duration in milliseconds")
-        .init();
+        .build();
 
     let jwt_verification_counter = meter
         .u64_counter("aviation_gateway_jwt_verifications_total")
         .with_description("Total number of JWT verifications")
-        .init();
+        .build();
 
     let jwt_verification_duration = meter
         .f64_histogram("aviation_gateway_jwt_verification_duration_ms")
         .with_description("JWT verification duration in milliseconds")
-        .init();
+        .build();
 
     let jwks_fetch_counter = meter
         .u64_counter("aviation_gateway_jwks_fetches_total")
         .with_description("Total number of JWKS fetches")
-        .init();
+        .build();
 
     let jwks_cache_misses = meter
         .u64_counter("aviation_gateway_jwks_cache_misses_total")
         .with_description("Total number of JWKS cache misses")
-        .init();
+        .build();
 
     let jwks_lookups = meter
         .u64_counter("aviation_gateway_jwks_lookups_total")
         .with_description("Total number of JWKS cache lookups (hits + misses)")
-        .init();
+        .build();
 
     METER.set(meter).ok();
     REQUEST_COUNTER.set(request_counter).ok();
