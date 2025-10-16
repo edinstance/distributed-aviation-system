@@ -39,6 +39,16 @@ class Refresh(APIView):
                     status=status.HTTP_401_UNAUTHORIZED,
                 )
 
+            try:
+                user = User.objects.get(pk=user_id)
+            except User.DoesNotExist:
+                return Response(
+                    {"error": "User not found."},
+                    status=status.HTTP_404_NOT_FOUND,
+                )
+
+            token._user = user
+
             new_access = str(token.access_token)
 
             response_data = {"access": new_access}
@@ -52,14 +62,6 @@ class Refresh(APIView):
                         self.logger.warning(
                             "Refresh blacklist failed or not enabled", error=str(e)
                         )
-
-                try:
-                    user = User.objects.get(pk=user_id)
-                except User.DoesNotExist:
-                    return Response(
-                        {"error": "User not found."},
-                        status=status.HTTP_404_NOT_FOUND,
-                    )
 
                 new_refresh = CustomRefreshToken.for_user(user)
                 response_data["refresh"] = str(new_refresh)

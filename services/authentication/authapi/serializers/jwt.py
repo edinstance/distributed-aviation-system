@@ -8,17 +8,10 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
     @classmethod
     def get_token(cls, user):
+        # Get refresh token with minimal payload (just user ID)
         token = super().get_token(user)
 
-        # Standard + custom claims
-        token["sub"] = str(user.id)
-        token["username"] = user.username
-        token["email"] = user.email
-
-        if getattr(user, "org_id", None):
-            token["org_id"] = str(user.org_id)
-
-        if hasattr(user, "roles"):
-            token["roles"] = getattr(user, "roles", [])
+        # Store user reference for access token generation
+        token._user = user
 
         return token
