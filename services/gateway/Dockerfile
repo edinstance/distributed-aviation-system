@@ -30,7 +30,7 @@ RUN apk add --no-cache ca-certificates
 COPY --from=builder /app/target/release/gateway /usr/local/bin/gateway
 
 # Set environment variables
-ENV PORT=1000
+ENV PORT=4001
 EXPOSE ${PORT}
 
 # Run the API
