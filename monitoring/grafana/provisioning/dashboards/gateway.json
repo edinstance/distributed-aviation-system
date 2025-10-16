@@ -1,0 +1,363 @@
+{
+  "title": "Gateway Service (Authentication + Routing)",
+  "uid": "gateway-service",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [
+    "aviation",
+    "gateway",
+    "authentication",
+    "jwt",
+    "rust"
+  ],
+  "refresh": "10s",
+  "time": {
+    "from": "now-30m",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "row",
+      "title": "Overview",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 0
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Requests/sec",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 0,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(aviation_gateway_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate %",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 6,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(aviation_gateway_requests_total{status!~\"2..\"}[5m])) / sum(rate(aviation_gateway_requests_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "p95 Latency",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 12,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aviation_gateway_request_duration_ms_bucket[5m])) by (le))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "JWT Verifications/sec",
+      "gridPos": {
+        "h": 3,
+        "w": 6,
+        "x": 18,
+        "y": 1
+      },
+      "targets": [
+        {
+          "expr": "sum(rate(aviation_gateway_jwt_verifications_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Request Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 4
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Requests/sec by Method & Status",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "rate(aviation_gateway_requests_total[5m])",
+          "legendFormat": "{{method}} {{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Duration p95",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aviation_gateway_request_duration_ms_bucket[5m])) by (le,method,path))",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate % by Endpoint",
+      "gridPos": {
+        "h": 8,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "targets": [
+        {
+          "expr": "100 * sum by (method,path) (rate(aviation_gateway_requests_total{status!~\"2..\"}[5m])) / sum by (method,path) (rate(aviation_gateway_requests_total[5m]))",
+          "legendFormat": "{{method}} {{path}}"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Authentication Metrics",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 21
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "JWT Verification Rate",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "rate(aviation_gateway_jwt_verifications_total[5m])",
+          "legendFormat": "{{success}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "JWT Verification Duration p95",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 22
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(aviation_gateway_jwt_verification_duration_ms_bucket[5m])) by (le,success))",
+          "legendFormat": "{{success}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "JWKS Operations",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 30
+      },
+      "targets": [
+        {
+          "expr": "rate(aviation_gateway_jwks_fetches_total[5m])",
+          "legendFormat": "JWKS fetches"
+        },
+        {
+          "expr": "rate(aviation_gateway_jwks_cache_misses_total[5m])",
+          "legendFormat": "Cache misses"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "JWT Success Rate %",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 30
+      },
+      "targets": [
+        {
+          "expr": "100 * sum(rate(aviation_gateway_jwt_verifications_total{success=\"true\"}[5m])) / sum(rate(aviation_gateway_jwt_verifications_total[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "JWKS Cache Hit Rate %",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 30
+      },
+      "targets": [
+        {
+          "expr": "100 * (1 - sum(rate(aviation_gateway_jwks_cache_misses_total[5m])) / (sum(rate(aviation_gateway_jwks_fetches_total[5m])) + sum(rate(aviation_gateway_jwks_cache_misses_total[5m]))))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Avg JWT Verification Time",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 12,
+        "y": 34
+      },
+      "targets": [
+        {
+          "expr": "avg(rate(aviation_gateway_jwt_verification_duration_ms_sum[5m]) / rate(aviation_gateway_jwt_verification_duration_ms_count[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Total JWT Verifications",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 18,
+        "y": 34
+      },
+      "targets": [
+        {
+          "expr": "sum(aviation_gateway_jwt_verifications_total)"
+        }
+      ]
+    },
+    {
+      "type": "row",
+      "title": "Logs & Traces",
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 38
+      }
+    },
+    {
+      "type": "logs",
+      "title": "Error Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 39
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"aviation-gateway\"} | detected_level = `error`"
+        }
+      ]
+    },
+    {
+      "type": "logs",
+      "title": "Authentication Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 51
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"aviation-gateway\"} |= `JWT`"
+        }
+      ],
+      "timeFrom": "now-10m",
+      "timeShift": null
+    },
+    {
+      "type": "logs",
+      "title": "Application Logs",
+      "datasource": {
+        "type": "loki",
+        "uid": "loki"
+      },
+      "options": {
+        "showTime": true,
+        "wrapLogMessage": true,
+        "enableLogDetails": true,
+        "dedupStrategy": "none"
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 63
+      },
+      "targets": [
+        {
+          "expr": "{service_name=\"aviation-gateway\"} |= ``"
+        }
+      ],
+      "timeFrom": "now-5m",
+      "timeShift": null
+    }
+  ]
+}
