@@ -1,20 +1,23 @@
 mod config;
+mod observability;
 mod requests;
 mod verify;
-mod observability;
 
 use crate::config::Config;
+use crate::observability::{
+    GatewayMetrics, ObservabilityConfig, init_observability, shutdown_observability,
+};
 use crate::requests::forward_request;
 use crate::verify::{JwksCache, verify_jwt};
-use crate::observability::{init_observability, shutdown_observability, ObservabilityConfig, GatewayMetrics};
 use axum::http::StatusCode;
-use axum::response::Response;
-use axum::{Router, extract::Request, routing::any};
+use axum::response::{IntoResponse, Response};
+use axum::{Json, Router, extract::Request, routing::any};
 use reqwest::Client;
+use serde_json::json;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
-use tracing::{info, warn, error, debug, instrument, Span};
+use tracing::{Span, debug, error, info, instrument, warn};
 
 #[tokio::main]
 async fn main() {
@@ -51,9 +54,7 @@ async fn main() {
                 let router_url = router_url.clone();
                 let client = client.clone();
                 let jwks_cache = jwks_cache.clone();
-                move |req| {
-                    route_handler(req, router_url, client, jwks_cache)
-                }
+                move |req| route_handler(req, router_url, client, jwks_cache)
             }),
         )
         .route(
@@ -62,9 +63,7 @@ async fn main() {
                 let router_url = router_url.clone();
                 let client = client.clone();
                 let jwks_cache = jwks_cache.clone();
-                move |req| {
-                    route_handler(req, router_url, client, jwks_cache)
-                }
+                move |req| route_handler(req, router_url, client, jwks_cache)
             }),
         );
 
@@ -125,12 +124,12 @@ async fn route_handler(
             let duration = start_time.elapsed().as_secs_f64() * 1000.0;
             warn!(request_id = %request_id, "Missing or invalid Authorization header");
             GatewayMetrics::request_completed(&method, &path, 401, duration);
-            return Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .body(axum::body::Body::from(
-                    "Missing or invalid Authorization header",
-                ))
-                .unwrap();
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(json!({
+                    "error": "Missing or invalid Authorization header"
+                })),
+            ).into_response();
         }
     };
 
@@ -153,10 +152,12 @@ async fn route_handler(
                 "JWT verification failed"
             );
             GatewayMetrics::request_completed(&method, &path, 401, duration);
-            return Response::builder()
-                .status(StatusCode::UNAUTHORIZED)
-                .body(axum::body::Body::from("Invalid or expired token"))
-                .unwrap();
+            return (
+                StatusCode::UNAUTHORIZED,
+                Json(json!({
+                    "error": "Invalid or expired token"
+                })),
+            ).into_response();
         }
     };
 
