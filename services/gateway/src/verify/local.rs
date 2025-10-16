@@ -118,7 +118,7 @@ pub async fn verify_jwt(
     let claims = token_data.claims;
     let duration = start_time.elapsed().as_secs_f64() * 1000.0;
 
-    info!(
+    debug!(
         kid = %kid,
         user_id = %claims.sub,
         org_id = %claims.org_id,

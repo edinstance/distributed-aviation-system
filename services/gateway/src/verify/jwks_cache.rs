@@ -56,6 +56,7 @@ impl JwksCache {
                     ttl_seconds = self.ttl.as_secs(),
                     "JWKS cache expired, refreshing from network"
                 );
+                GatewayMetrics::jwks_cache_miss();
             }
         } else {
             debug!("No JWKS in cache, fetching from network");

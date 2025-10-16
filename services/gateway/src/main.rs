@@ -54,7 +54,9 @@ async fn main() {
                 let router_url = router_url.clone();
                 let client = client.clone();
                 let jwks_cache = jwks_cache.clone();
-                move |req| route_handler(req, router_url, client, jwks_cache)
+                move |req| {
+                    route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
+                }
             }),
         )
         .route(
@@ -63,7 +65,9 @@ async fn main() {
                 let router_url = router_url.clone();
                 let client = client.clone();
                 let jwks_cache = jwks_cache.clone();
-                move |req| route_handler(req, router_url, client, jwks_cache)
+                move |req| {
+                    route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
+                }
             }),
         );
 
@@ -129,7 +133,8 @@ async fn route_handler(
                 Json(json!({
                     "error": "Missing or invalid Authorization header"
                 })),
-            ).into_response();
+            )
+                .into_response();
         }
     };
 
@@ -157,7 +162,8 @@ async fn route_handler(
                 Json(json!({
                     "error": "Invalid or expired token"
                 })),
-            ).into_response();
+            )
+                .into_response();
         }
     };
 
