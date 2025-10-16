@@ -12,8 +12,6 @@ services:
       JSON_LOGS: ${JSON_LOGS:-true}
       OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
       OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-aviation-gateway}
-      OTEL_TRACES_SAMPLER: always_on
-      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       PORT: 4001
     networks:
       - aviation-network
