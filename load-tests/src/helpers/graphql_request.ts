@@ -10,14 +10,20 @@ export function graphql<
   url: string,
   doc: TypedDocumentNode<TData, TVariables>,
   variables?: TVariables,
+  headers?: Record<string, string>,
 ): TData {
+  const mergedHeaders: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...headers,
+  };
+
   const res: RefinedResponse<ResponseType> = http.post(
     url,
     JSON.stringify({
       query: print(doc),
       variables,
     }),
-    { headers: { "Content-Type": "application/json" } },
+    { headers: mergedHeaders },
   );
 
   check(res, {

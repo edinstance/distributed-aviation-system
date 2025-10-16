@@ -15,8 +15,10 @@
     "test:router:run": "k6 run dist/router.js",
     "test:auth": "npm run build && k6 run dist/auth.js",
     "test:auth:run": "k6 run dist/auth.js",
-    "test:all": "npm run build && k6 run dist/flights.js && k6 run dist/aircraft.js && k6 run dist/router.js && k6 run dist/auth.js",
-    "test:all:parallel": "npm run build && npm-run-all --parallel test:flights:run test:aircraft:run test:router:run test:auth:run"
+    "test:gateway": "npm run build && k6 run dist/gateway.js",
+    "test:gateway:run": "k6 run dist/gateway.js",
+    "test:all": "npm run build && k6 run dist/flights.js && k6 run dist/aircraft.js && k6 run dist/router.js && k6 run dist/auth.js && k6 run dist/gateway.js",
+    "test:all:parallel": "npm run build && npm-run-all --parallel test:flights:run test:aircraft:run test:router:run test:auth:run test:gateway:run"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^6.0.0",
