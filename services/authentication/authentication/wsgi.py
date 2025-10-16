@@ -15,8 +15,8 @@ from common.telemetry.telemetry import configure_telemetry
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "authentication.settings")
 
+application = get_wsgi_application()
+
 configure_telemetry(
     otel_endpoint=os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT"),
 )
-
-application = get_wsgi_application()
