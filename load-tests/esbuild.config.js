@@ -5,6 +5,7 @@ await build({
     "src/tests/flights.ts",
     "src/tests/aircraft.ts",
     "src/tests/router.ts",
+    "src/tests/auth.ts",
   ],
   bundle: true,
   format: "esm",
