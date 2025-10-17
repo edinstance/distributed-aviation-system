@@ -13,7 +13,7 @@ func AuthenticationDirective(ctx context.Context, _ any, next graphql.Resolver) 
 	user := middleware.GetRequestUserContext(ctx)
 
 	if user.UserID == uuid.Nil || user.OrgID == uuid.Nil {
-		return nil, errors.New("unauthorized: userSub or orgId missing")
+		return nil, errors.New("unauthorized: userId or orgId missing")
 	}
 
 	return next(ctx)

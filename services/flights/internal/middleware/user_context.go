@@ -53,7 +53,10 @@ func GetRequestUserContext(ctx context.Context) *userContext.UserContext {
 	if val == nil {
 		return &userContext.UserContext{}
 	}
-	return val.(*userContext.UserContext)
+	if userCtx, ok := val.(*userContext.UserContext); ok {
+		return userCtx
+	}
+	return &userContext.UserContext{}
 }
 
 func SetUserContextInContext(ctx context.Context, userCtx *userContext.UserContext) context.Context {
