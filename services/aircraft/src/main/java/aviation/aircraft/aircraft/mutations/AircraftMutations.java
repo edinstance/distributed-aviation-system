@@ -4,9 +4,12 @@ import aviation.aircraft.aircraft.dto.CreateAircraftInput;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.mapper.CreateAircraftMapper;
 import aviation.aircraft.aircraft.services.AircraftService;
+import aviation.aircraft.user.context.UserContext;
 import com.netflix.graphql.dgs.DgsComponent;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.DgsMutation;
 import com.netflix.graphql.dgs.InputArgument;
+import com.netflix.graphql.dgs.context.DgsContext;
 
 /**
  * The aircraft mutations.
@@ -29,10 +32,13 @@ public class AircraftMutations {
    * A mutation to create an aircraft.
    *
    * @param input the input of the aircraft to be created.
+   *
    * @return the created aircraft.
    */
   @DgsMutation
-  public AircraftEntity createAircraft(@InputArgument CreateAircraftInput input) {
-    return aircraftService.createAircraft(CreateAircraftMapper.toEntity(input));
+  public AircraftEntity createAircraft(@InputArgument CreateAircraftInput input,
+                                       DgsDataFetchingEnvironment dfe) {
+    UserContext userCtx = DgsContext.getCustomContext(dfe);
+    return aircraftService.createAircraft(CreateAircraftMapper.toEntity(input), userCtx);
   }
 }

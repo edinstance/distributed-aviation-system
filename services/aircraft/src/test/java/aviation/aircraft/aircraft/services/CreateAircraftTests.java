@@ -27,7 +27,7 @@ public class CreateAircraftTests extends SetupServiceTests {
     when(aircraftRepository.save(any(AircraftEntity.class))).thenAnswer(inv -> inv.getArgument(0));
     when(jedisPool.getResource()).thenReturn(jedis);
 
-    AircraftEntity result = aircraftService.createAircraft(aircraft);
+    AircraftEntity result = aircraftService.createAircraft(aircraft, userContext);
 
     assertNotNull(result);
     assertNotNull(result.getId());
@@ -48,7 +48,7 @@ public class CreateAircraftTests extends SetupServiceTests {
   public void testCreateAircraftDuplicate() {
     when(aircraftRepository.findByRegistration(aircraft.getRegistration())).thenReturn(Optional.of(aircraft));
 
-    assertThrows(DuplicateAircraftException.class, () -> aircraftService.createAircraft(aircraft));
+    assertThrows(DuplicateAircraftException.class, () -> aircraftService.createAircraft(aircraft, userContext));
 
     verify(aircraftRepository, times(0)).save(aircraft);
   }
@@ -61,7 +61,7 @@ public class CreateAircraftTests extends SetupServiceTests {
     when(jedis.setex(startsWith("aircraft:"), anyLong(), any()))
             .thenThrow(new RuntimeException("Redis cache error"));
 
-    AircraftEntity result = aircraftService.createAircraft(aircraft);
+    AircraftEntity result = aircraftService.createAircraft(aircraft, userContext);
 
     assertNotNull(result);
   }

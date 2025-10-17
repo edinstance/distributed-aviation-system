@@ -1,9 +1,14 @@
+directive @authenticated(
+    requiresOrg: Boolean = true
+    requiresUser: Boolean = true
+) on FIELD_DEFINITION
+
 type Query {
     getAircraftById(input: ID!): Aircraft
 }
 
 type Mutation {
-    createAircraft(input:CreateAircraftInput): Aircraft!
+    createAircraft(input:CreateAircraftInput): Aircraft! @authenticated
 }
 
 enum AircraftStatus {

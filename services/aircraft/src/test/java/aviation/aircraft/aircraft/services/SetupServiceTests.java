@@ -3,7 +3,10 @@ package aviation.aircraft.aircraft.services;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
 import aviation.aircraft.aircraft.types.AircraftStatus;
+import aviation.aircraft.user.context.UserContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
+import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +28,9 @@ public class SetupServiceTests {
   @Mock
   public Jedis jedis;
 
+  @Mock
+  public DgsDataFetchingEnvironment dfe;
+
   @Spy
   public ObjectMapper objectMapper = new ObjectMapper();
 
@@ -32,6 +38,8 @@ public class SetupServiceTests {
   public AircraftService aircraftService;
 
   public AircraftEntity aircraft;
+
+  public UserContext userContext = new UserContext();
 
   @BeforeEach
   public void setUp() {
@@ -42,7 +50,10 @@ public class SetupServiceTests {
             "A380",
             2020,
             50,
-            AircraftStatus.AVAILABLE
+            AircraftStatus.AVAILABLE,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
     );
   }
 }
