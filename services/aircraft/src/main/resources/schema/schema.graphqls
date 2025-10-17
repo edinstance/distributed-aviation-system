@@ -1,4 +1,7 @@
-directive @authenticated on FIELD_DEFINITION
+directive @authenticated(
+    requiresOrg: Boolean = true
+    requiresUser: Boolean = true
+) on FIELD_DEFINITION
 
 type Query {
     getAircraftById(input: ID!): Aircraft
