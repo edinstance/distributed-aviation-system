@@ -1,17 +1,17 @@
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
+from common.jwt.tokens import CustomRefreshToken
+
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
+    token_class = CustomRefreshToken  # ensures kid header is included
+
     @classmethod
     def get_token(cls, user):
+        # Get refresh token with minimal payload (just user ID)
         token = super().get_token(user)
 
-        token["username"] = user.username
-        token["email"] = user.email
-
-        if hasattr(user, "org_id") and user.org_id:
-            token["org_id"] = str(user.org_id)
-
-        if hasattr(user, "roles"):
-            token["roles"] = getattr(user, "roles", [])
+        # Store user reference for access token generation
+        token._user = user
 
         return token

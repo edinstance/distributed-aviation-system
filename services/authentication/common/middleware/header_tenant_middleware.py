@@ -23,7 +23,7 @@ class HeaderTenantMiddleware:
         path = request.path
 
         public_endpoints = [
-            '/api/auth/jwks.json',
+            '/.well-known/jwks.json',
             '/api/organizations/create/',
             '/health',
         ]
@@ -31,6 +31,7 @@ class HeaderTenantMiddleware:
         xorg_allowed_endpoints = [
             '/api/auth/login/',
             '/api/auth/refresh/',
+            '/api/auth/verify-token/',
         ]
 
         normalized_path = path.rstrip('/')

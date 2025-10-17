@@ -197,7 +197,9 @@ SIMPLE_JWT = {
     "SIGNING_KEY": load_signing_key(),
     "VERIFYING_KEY": load_verifying_key(),
     "AUTH_HEADER_TYPES": ("Bearer",),
-    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
+    "AUTH_TOKEN_CLASSES": ("common.jwt.tokens.CustomAccessToken",),
+    'USER_ID_CLAIM': 'sub',
+    'USER_ID_FIELD': 'id',
 }
 
 # CORS settings
@@ -233,7 +235,7 @@ structlog.configure(
         structlog.processors.UnicodeDecoder(),
         structlog.processors.JSONRenderer()
     ],
-    wrapper_class=structlog.make_filtering_bound_logger(logging.INFO),
+    wrapper_class=structlog.make_filtering_bound_logger(logging.DEBUG),
     logger_factory=structlog.stdlib.LoggerFactory(),
     context_class=dict,
     cache_logger_on_first_use=True,

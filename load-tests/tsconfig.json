@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
     "strict": true,
+    "target": "es2023",
     "moduleResolution": "node",
     "types": [],
     "baseUrl": "."

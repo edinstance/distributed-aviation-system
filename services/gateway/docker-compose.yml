@@ -1,0 +1,22 @@
+services:
+  gateway-service:
+    build: .
+    container_name: gateway-service
+    ports:
+      - "4001:4001"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-prod}
+      ROUTER_URL: ${ROUTER_URL:-http://graphql-router:4000}
+      JWKS_URL: http://authentication-service:8000/.well-known/jwks.json
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+      JSON_LOGS: ${JSON_LOGS:-true}
+      OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
+      OTEL_SERVICE_NAME: ${OTEL_SERVICE_NAME:-aviation-gateway}
+      PORT: 4001
+    networks:
+      - aviation-network
+
+networks:
+  aviation-network:
+    name: aviation-network
+    driver: bridge
