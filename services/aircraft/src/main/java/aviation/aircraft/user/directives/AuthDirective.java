@@ -12,11 +12,21 @@ import graphql.schema.GraphQLObjectType;
 import graphql.schema.idl.SchemaDirectiveWiring;
 import graphql.schema.idl.SchemaDirectiveWiringEnvironment;
 
+/**
+ * A directive for authentication.
+ */
 @DgsDirective(name = "authentication")
 public class AuthDirective implements SchemaDirectiveWiring {
 
+  /**
+   * The directive implementation.
+   *
+   * @param env the environment for the directive.
+   * @return the field definition with the authentication.
+   */
   @Override
-  public GraphQLFieldDefinition onField(SchemaDirectiveWiringEnvironment<GraphQLFieldDefinition> env) {
+  public GraphQLFieldDefinition onField(SchemaDirectiveWiringEnvironment
+                                                  <GraphQLFieldDefinition> env) {
     GraphQLFieldsContainer fieldsContainer = env.getFieldsContainer();
     GraphQLFieldDefinition fieldDefinition = env.getFieldDefinition();
 

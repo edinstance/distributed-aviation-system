@@ -8,6 +8,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.WebRequest;
 
+/**
+ * Builds a user context from the request headers.
+ */
 @Component
 public class UserContextBuilder implements DgsCustomContextBuilderWithRequest<UserContext> {
 

@@ -45,8 +45,8 @@ public class AircraftMutations {
       throw new UnauthorizedException("No authentication information found");
     }
     if (userCtx.getUserId() == null || userCtx.getOrgId() == null) {
-      throw new UnauthorizedException("Missing authentication information: " +
-              String.join(", ",
+      throw new UnauthorizedException("Missing authentication information: "
+              + String.join(", ",
                       userCtx.getUserId() == null ? "userId" : "",
                       userCtx.getOrgId() == null ? "orgId" : ""
               ).replaceAll("(, )+$", ""));
