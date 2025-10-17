@@ -25,7 +25,8 @@ func (flightRepository *FlightRepository) GetFlightByID(ctx context.Context, id 
 	)
 
 	const query = `
-        SELECT id, number, origin, destination, departure_time, arrival_time, status, aircraft_id, created_at, updated_at
+        SELECT id, number, origin, destination, departure_time, arrival_time, status, aircraft_id,
+               created_by, last_updated_by, organization_id, created_at, updated_at
         FROM flights
         WHERE id = $1
     `
@@ -40,6 +41,9 @@ func (flightRepository *FlightRepository) GetFlightByID(ctx context.Context, id 
 		&flight.ArrivalTime,
 		&flight.Status,
 		&flight.AircraftID,
+		&flight.CreatedBy,
+		&flight.LastUpdatedBy,
+		&flight.OrganizationID,
 		&flight.CreatedAt,
 		&flight.UpdatedAt,
 	)

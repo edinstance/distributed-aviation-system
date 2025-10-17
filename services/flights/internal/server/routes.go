@@ -9,6 +9,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/middleware"
 	v1connect "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1/flightsv1connect"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/health"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -43,7 +44,7 @@ func NewMux(pool *pgxpool.Pool, client *redis.Client) *http.ServeMux {
 	mux.Handle(flightPath, flightHandler)
 
 	// GraphQL handlers
-	mux.Handle("/graphql", newGraphQLHandler(pool, client))
+	mux.Handle("/graphql", middleware.UserContextMiddleware(newGraphQLHandler(pool, client)))
 
 	if config.App.Environment != "prod" {
 		mux.Handle("/playground", playground.Handler("GraphQL Playground", "/graphql"))

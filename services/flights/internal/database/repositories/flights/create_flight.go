@@ -31,9 +31,10 @@ func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *m
 	const query = `
         INSERT INTO flights (
             id, number, origin, destination,
-            departure_time, arrival_time, status
+            departure_time, arrival_time, status, aircraft_id,
+            created_by, last_updated_by, organization_id
         )
-        VALUES ($1, $2, $3, $4, $5, $6, $7)
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
         RETURNING created_at, updated_at
     `
 
@@ -47,6 +48,10 @@ func (flightRepository *FlightRepository) CreateFlight(ctx context.Context, f *m
 		f.DepartureTime,
 		f.ArrivalTime,
 		f.Status,
+		f.AircraftID,
+		f.CreatedBy,
+		f.LastUpdatedBy,
+		f.OrganizationID,
 	).Scan(&f.CreatedAt, &f.UpdatedAt)
 
 	if err != nil {
