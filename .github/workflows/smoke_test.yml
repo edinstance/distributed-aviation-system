@@ -35,8 +35,11 @@ jobs:
       - name: Create aircraft application file
         run: cp services/aircraft/src/main/resources/prod-application.example.yml services/aircraft/src/main/resources/application.yml
 
-      - name: Run containers in the background
-        run: docker compose up -d
+      - name: Build containers in parallel
+        run: docker compose build --parallel
+
+      - name: Run containers in background
+        run: docker compose up -d --no-build
 
       - name: Wait for services to be up
         run: |
