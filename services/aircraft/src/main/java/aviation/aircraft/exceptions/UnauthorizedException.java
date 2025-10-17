@@ -11,7 +11,7 @@ public class UnauthorizedException extends DomainException {
    * @param message the exception message.
    */
   public UnauthorizedException(String message) {
-    super(message, "UNAUTHORIZED", ExceptionCategories.SECURITY);
+    super(message, "UNAUTHORIZED", ExceptionCategories.UNAUTHORIZED);
   }
 
   /**

@@ -4,7 +4,6 @@ import aviation.aircraft.aircraft.dto.CreateAircraftInput;
 import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.mapper.CreateAircraftMapper;
 import aviation.aircraft.aircraft.services.AircraftService;
-import aviation.aircraft.exceptions.UnauthorizedException;
 import aviation.aircraft.user.context.UserContext;
 import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
@@ -39,18 +38,7 @@ public class AircraftMutations {
   @DgsMutation
   public AircraftEntity createAircraft(@InputArgument CreateAircraftInput input,
                                        DgsDataFetchingEnvironment dfe) {
-
     UserContext userCtx = DgsContext.getCustomContext(dfe);
-    if (userCtx == null) {
-      throw new UnauthorizedException("No authentication information found");
-    }
-    if (userCtx.getUserId() == null || userCtx.getOrgId() == null) {
-      throw new UnauthorizedException("Missing authentication information: "
-              + String.join(", ",
-                      userCtx.getUserId() == null ? "userId" : "",
-                      userCtx.getOrgId() == null ? "orgId" : ""
-              ).replaceAll("(, )+$", ""));
-    }
     return aircraftService.createAircraft(CreateAircraftMapper.toEntity(input), userCtx);
   }
 }
