@@ -3,6 +3,7 @@ package aviation.aircraft.user.context;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.AssertionsKt.assertNotNull;
 
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,14 +21,14 @@ public class UserContextTests {
 
   @Test
   public void testUserContextConstructor() {
-    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), "roles");
+    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), List.of("roles"));
 
     assertNotNull(userContext);
   }
 
   @BeforeEach
   public void setup() {
-    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), "roles");
+    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), List.of("roles"));
   }
 
   @Test
@@ -46,7 +47,7 @@ public class UserContextTests {
 
   @Test
   public void testRolesMethods(){
-    userContext.setRoles("New roles");
-    assertEquals("New roles", userContext.getRoles());
+    userContext.setRoles(List.of("New Roles"));
+    assert userContext.getRoles().contains("New Roles");
   }
 }

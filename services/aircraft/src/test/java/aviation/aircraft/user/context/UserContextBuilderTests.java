@@ -34,7 +34,8 @@ class UserContextBuilderTests {
     assertNotNull(ctx);
     assertEquals(userId, ctx.getUserId());
     assertEquals(orgId, ctx.getOrgId());
-    assertEquals("ADMIN,MANAGER", ctx.getRoles());
+    assert ctx.getRoles().contains("ADMIN");
+    assert ctx.getRoles().contains("MANAGER");
   }
 
   @Test
@@ -46,7 +47,7 @@ class UserContextBuilderTests {
     assertNotNull(ctx);
     assertNull(ctx.getUserId());
     assertNull(ctx.getOrgId());
-    assertNull(ctx.getRoles());
+    assert ctx.getRoles().isEmpty();
   }
 
   @Test

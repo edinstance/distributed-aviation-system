@@ -1,5 +1,6 @@
 package aviation.aircraft.user.context;
 
+import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,7 +27,7 @@ public class UserContext {
   /**
    * The user's roles.
    */
-  private String roles;
+  private List<String> roles;
 
   /**
    * Default constructor.
@@ -41,7 +42,7 @@ public class UserContext {
    * @param orgId  the user's organization id.
    * @param roles  the user's roles.
    */
-  public UserContext(UUID userId, UUID orgId, String roles) {
+  public UserContext(UUID userId, UUID orgId, List<String> roles) {
     this.userId = userId;
     this.orgId = orgId;
     this.roles = roles;

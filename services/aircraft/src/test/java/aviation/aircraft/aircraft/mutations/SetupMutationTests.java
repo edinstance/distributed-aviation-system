@@ -7,6 +7,7 @@ import aviation.aircraft.aircraft.types.AircraftStatus;
 import aviation.aircraft.user.context.UserContext;
 import com.netflix.graphql.dgs.DgsDataFetchingEnvironment;
 import com.netflix.graphql.dgs.context.DgsContext;
+import java.util.List;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,7 +59,7 @@ public class SetupMutationTests {
     userContext = UserContext.builder()
             .userId(UUID.randomUUID())
             .orgId(UUID.randomUUID())
-            .roles("ADMIN")
+            .roles(List.of("ADMIN"))
             .build();
   }
 }

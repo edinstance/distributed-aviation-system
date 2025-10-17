@@ -1,8 +1,11 @@
 package aviation.aircraft.user.context;
 
 import com.netflix.graphql.dgs.context.DgsCustomContextBuilderWithRequest;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
@@ -27,7 +30,7 @@ public class UserContextBuilder implements DgsCustomContextBuilderWithRequest<Us
 
     UUID orgId = safeUuid(headers.getFirst("x-org-id"));
 
-    String roles = headers.getFirst("x-user-roles");
+    List<String> roles = parseRoles(headers.getFirst("x-user-roles"));
 
     return UserContext.builder()
             .userId(userId)
@@ -45,5 +48,16 @@ public class UserContextBuilder implements DgsCustomContextBuilderWithRequest<Us
     } catch (IllegalArgumentException ex) {
       return null;
     }
+  }
+
+  private List<String> parseRoles(String rolesHeader) {
+    if (rolesHeader == null || rolesHeader.isBlank()) {
+      return List.of();
+    }
+
+    return Arrays.stream(rolesHeader.split(","))
+            .map(String::trim)
+            .filter(r -> !r.isEmpty())
+            .collect(Collectors.toList());
   }
 }
