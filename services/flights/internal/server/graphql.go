@@ -14,6 +14,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/clients/aircraft_client"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/directives"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	graphqlschema "github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql/resolvers"
@@ -48,7 +49,16 @@ func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 		GetFlightResolver:    graphqlGetFlightResolver,
 	}
 
-	srv := handler.New(graphqlschema.NewExecutableSchema(graphqlschema.Config{Resolvers: resolver}))
+	srv := handler.New(
+		graphqlschema.NewExecutableSchema(
+			graphqlschema.Config{
+				Resolvers: resolver,
+				Directives: graphqlschema.DirectiveRoot{
+					Authentication: directives.AuthenticationDirective,
+				},
+			},
+		),
+	)
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})

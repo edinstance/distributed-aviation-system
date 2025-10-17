@@ -8,6 +8,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database/models"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/exceptions"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/middleware"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation/flight_number"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/validation/iata_codes"
 	"github.com/google/uuid"
@@ -53,15 +54,20 @@ func (service *Service) CreateFlight(
 		return nil, validationErr
 	}
 
+	userContext := middleware.GetRequestUserContext(ctx)
+
 	flight := &models.Flight{
-		ID:            uuid.New(),
-		Number:        normalizedNumber,
-		Origin:        normalizedOrigin,
-		Destination:   normalizedDestination,
-		DepartureTime: departure,
-		ArrivalTime:   arrival,
-		Status:        models.FlightStatusScheduled,
-		AircraftID:    aircraftId,
+		ID:             uuid.New(),
+		Number:         normalizedNumber,
+		Origin:         normalizedOrigin,
+		Destination:    normalizedDestination,
+		DepartureTime:  departure,
+		ArrivalTime:    arrival,
+		Status:         models.FlightStatusScheduled,
+		AircraftID:     aircraftId,
+		CreatedBy:      userContext.UserID,
+		LastUpdatedBy:  userContext.UserID,
+		OrganizationID: userContext.OrgID,
 	}
 
 	if err := service.Repo.CreateFlight(ctx, flight); err != nil {
