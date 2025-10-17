@@ -4,6 +4,7 @@ import aviation.aircraft.aircraft.entities.AircraftEntity;
 import aviation.aircraft.aircraft.exceptions.DuplicateAircraftException;
 import aviation.aircraft.aircraft.repositories.AircraftRepository;
 import aviation.aircraft.config.AircraftLogger;
+import aviation.aircraft.user.context.UserContext;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.util.Optional;
@@ -47,12 +48,21 @@ public class AircraftService {
    *
    * @return the persisted aircraft.
    */
-  public AircraftEntity createAircraft(final AircraftEntity aircraft) {
-
+  public AircraftEntity createAircraft(final AircraftEntity aircraft, final UserContext userCtx) {
     UUID aircraftId = UUID.randomUUID();
-    aircraft.setId(aircraftId);
 
-    AircraftLogger.info("Creating aircraft with id=" + aircraftId);
+    aircraft.setId(aircraftId);
+    aircraft.setCreatedBy(userCtx.getUserId());
+    aircraft.setLastUpdatedBy(userCtx.getUserId());
+    aircraft.setOrganizationId(userCtx.getOrgId());
+
+    AircraftLogger.info(String.format(
+            "User %s (org=%s) is creating aircraft id=%s (registration=%s)",
+            userCtx.getUserId(),
+            userCtx.getOrgId(),
+            aircraftId,
+            aircraft.getRegistration()
+    ));
 
     aircraftRepository.findByRegistration(aircraft.getRegistration())
             .ifPresent(foundAircraft -> {
@@ -71,7 +81,12 @@ public class AircraftService {
       AircraftLogger.error("Error while saving aircraft to cache", e);
     }
 
-    AircraftLogger.info("Aircraft created with id=" + savedAircraft.getId());
+    AircraftLogger.info(String.format(
+            "Aircraft created id=%s by user=%s org=%s",
+            savedAircraft.getId(),
+            userCtx.getUserId(),
+            userCtx.getOrgId()
+    ));
     return savedAircraft;
   }
 

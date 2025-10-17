@@ -4,6 +4,7 @@ package aviation.aircraft.exceptions;
  * An enum for managing exception categories.
  */
 public enum ExceptionCategories {
+  UNAUTHORIZED,
   VALIDATION,
   NOT_FOUND,
   CONFLICT,

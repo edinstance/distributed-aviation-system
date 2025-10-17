@@ -27,7 +27,10 @@ public class SetupHandlerTests {
             "A380",
             2020,
             50,
-            AircraftStatus.AVAILABLE
+            AircraftStatus.AVAILABLE,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID()
     );
   }
 }
