@@ -55,3 +55,7 @@ func GetRequestUserContext(ctx context.Context) *userContext.UserContext {
 	}
 	return val.(*userContext.UserContext)
 }
+
+func SetUserContextInContext(ctx context.Context, userCtx *userContext.UserContext) context.Context {
+	return context.WithValue(ctx, userCtxKey, userCtx)
+}

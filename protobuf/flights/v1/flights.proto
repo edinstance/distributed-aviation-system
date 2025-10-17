@@ -10,6 +10,9 @@ option java_package = "aviation.flights.grpc.generated.v1";
 option java_multiple_files = true;
 
 service FlightsService {
+  // CreateFlight requires the following gRPC metadata headers:
+  //   - x-user-sub: UUID of the authenticated user
+  //   - x-org-id: UUID of the user's organization
   rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
   rpc GetFlightById(GetFlightByIdRequest) returns (GetFlightByIdResponse);
 }
