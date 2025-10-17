@@ -41,7 +41,7 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 
 	// Kafka Producer config
 	prod, err := kafka.NewProducer(&kafka.ConfigMap{
-		"bootstrap.servers":        brokerURL,
+		"bootstrap.servers":       brokerURL,
 		"client.id":               "flights-service",
 		"acks":                    "all",
 		"go.delivery.reports":     true,

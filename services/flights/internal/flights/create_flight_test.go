@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func defaultTestDeps() (*FakeRepo, *FakeFlightsCache, *FakeAircraftClient) {
-	return &FakeRepo{}, &FakeFlightsCache{}, &FakeAircraftClient{}
+func defaultTestDeps() (*FakeRepo, *FakeFlightsCache, *FakeAircraftClient, *FakeKafkaPublisher) {
+	return &FakeRepo{}, &FakeFlightsCache{}, &FakeAircraftClient{}, &FakeKafkaPublisher{}
 }
 
 func TestCreateFlight(t *testing.T) {
@@ -31,7 +31,7 @@ func TestCreateFlight(t *testing.T) {
 		dest        string
 		departure   time.Time
 		arrival     time.Time
-		setup       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient)
+		setup       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher)
 		expectError error
 	}{
 		{
@@ -41,7 +41,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			setup:     func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			setup:     func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher) {},
 		},
 		{
 			name:        "arrival before departure",
@@ -50,7 +50,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "LHR",
 			departure:   arr,
 			arrival:     dep,
-			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher) {},
 			expectError: exceptions.ErrInvalidTimes,
 		},
 		{
@@ -60,7 +60,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "JFK",
 			departure:   dep,
 			arrival:     arr,
-			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher) {},
 			expectError: exceptions.ErrSameOriginAndDestination,
 		},
 		{
@@ -70,7 +70,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LHR",
 			departure: dep,
 			arrival:   arr,
-			setup: func(r *FakeRepo, _ *FakeFlightsCache, _ *FakeAircraftClient) {
+			setup: func(r *FakeRepo, _ *FakeFlightsCache, _ *FakeAircraftClient, _ *FakeKafkaPublisher) {
 				r.CreateFlightFn = func(ctx context.Context, f *models.Flight) error {
 					return repoErr
 				}
@@ -84,7 +84,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "LHR",
 			departure:   dep,
 			arrival:     arr,
-			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher) {},
 			expectError: exceptions.ErrInvalidFlightNumber,
 		},
 		{
@@ -94,7 +94,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "LHR",
 			departure:   dep,
 			arrival:     arr,
-			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher) {},
 			expectError: exceptions.ErrInvalidIATACode,
 		},
 		{
@@ -104,7 +104,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:        "LHR1232",
 			departure:   dep,
 			arrival:     arr,
-			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient) {},
+			setup:       func(r *FakeRepo, c *FakeFlightsCache, a *FakeAircraftClient, k *FakeKafkaPublisher) {},
 			expectError: exceptions.ErrInvalidIATACode,
 		},
 		{
@@ -114,7 +114,7 @@ func TestCreateFlight(t *testing.T) {
 			dest:      "LGW",
 			departure: dep,
 			arrival:   arr,
-			setup: func(_ *FakeRepo, _ *FakeFlightsCache, r *FakeAircraftClient) {
+			setup: func(_ *FakeRepo, _ *FakeFlightsCache, r *FakeAircraftClient, _ *FakeKafkaPublisher) {
 				r.ValidateAircraftExistsFn = func(ctx context.Context, id uuid.UUID) error {
 					return aircraftErr
 				}
@@ -125,10 +125,10 @@ func TestCreateFlight(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			repo, cache, aircraft := defaultTestDeps()
-			tt.setup(repo, cache, aircraft)
+			repo, cache, aircraft, kafka := defaultTestDeps()
+			tt.setup(repo, cache, aircraft, kafka)
 
-			svc := NewFlightsService(repo, cache, aircraft)
+			svc := NewFlightsService(repo, cache, aircraft, kafka)
 
 			flight, err := svc.CreateFlight(
 				context.Background(),
