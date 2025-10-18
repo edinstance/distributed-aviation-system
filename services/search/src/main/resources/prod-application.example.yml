@@ -1,0 +1,45 @@
+spring:
+  application:
+    name: aircraft
+  profiles:
+    active: ${ENVIRONMENT}
+
+server:
+  port: ${PORT:8082}
+
+# Actuator config
+management:
+  endpoints:
+    web:
+      base-path: "/details"
+      exposure:
+        include: "health,info,metrics,prometheus"
+    jmx:
+      exposure:
+        include: "health"
+  metrics:
+    tags:
+      application: ${spring.application.name}
+  otlp:
+    metrics:
+      export:
+        url: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+        step: 5
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+  tracing:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+  logging:
+    otlp:
+      endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+dgs:
+  graphql:
+    path: "/graphql"
+    introspection:
+      enabled: true

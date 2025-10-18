@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: search
+  profiles:
+    active: test
+
+server:
+  port: 8082
+
+# Actuator config
+management:
+  endpoints:
+    web:
+      base-path: "/details"
+    jmx:
+      exposure:
+        include: "health"
+
+dgs:
+  graphql:
+    path: "/graphql"
+    introspection:
+      enabled: true
