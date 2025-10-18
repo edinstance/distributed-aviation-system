@@ -171,13 +171,6 @@ func (p *Publisher) handleDeliveryEvents() {
 			ctx := context.Background()
 			errCode := m.Code().String()
 
-			attrs := []attribute.KeyValue{
-				attribute.String("topic", p.topic),
-				attribute.String("error_code", errCode),
-				attribute.Bool("is_fatal", m.IsFatal()),
-				attribute.Bool("is_retriable", m.IsRetriable()),
-			}
-
 			switch {
 			case m.IsFatal():
 				recordKafkaError(ctx, m,
@@ -193,8 +186,6 @@ func (p *Publisher) handleDeliveryEvents() {
 					"nonfatal_error", "Kafka non-fatal or local error", p.topic, "")
 				logger.Warn("Kafka local/non-fatal error", "code", errCode, "err", m)
 			}
-
-			metrics.KafkaMessagesErrors.Add(ctx, 1, metric.WithAttributes(attrs...))
 		}
 	}
 }
