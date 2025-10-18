@@ -22,6 +22,7 @@ type Publisher struct {
 	serializer *avro.GenericSerializer
 	topic      string
 	tracer     trace.Tracer
+	done       chan struct{}
 }
 
 // NewPublisher initializes Kafka producer + Avro serializer
@@ -47,6 +48,12 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 		logger.ErrorContext(context.Background(), "Failed to create Kafka producer", "err", err, "broker_url", brokerURL)
 		return nil, fmt.Errorf("create producer: %w", err)
 	}
+
+	defer func() {
+		if err != nil {
+			prod.Close()
+		}
+	}()
 
 	logger.InfoContext(context.Background(), "Kafka producer created successfully")
 
@@ -79,6 +86,7 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 		serializer: serializer,
 		topic:      topic,
 		tracer:     tracer,
+		done:       make(chan struct{}),
 	}
 
 	go pub.handleDeliveryEvents()
@@ -87,10 +95,12 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 }
 
 func (p *Publisher) Close() {
-	if p.producer != nil {
-		p.producer.Flush(5000)
-		p.producer.Close()
+	remaining := p.producer.Flush(5000)
+	if remaining > 0 {
+		logger.Error("Failed to flush all messages", "remaining", remaining)
 	}
+	p.producer.Close()
+	<-p.done
 }
 
 // recordKafkaError centralizes error metric + logging
@@ -113,6 +123,7 @@ func recordKafkaError(
 
 // handleDeliveryEvents listens asynchronously for confirmation events
 func (p *Publisher) handleDeliveryEvents() {
+	defer close(p.done)
 	for e := range p.producer.Events() {
 		switch m := e.(type) {
 		case *kafka.Message:
