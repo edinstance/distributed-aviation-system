@@ -74,12 +74,16 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 	// Initialize OpenTelemetry tracer
 	tracer := otel.Tracer("kafka-publisher")
 
-	return &Publisher{
+	pub := &Publisher{
 		producer:   prod,
 		serializer: serializer,
 		topic:      topic,
 		tracer:     tracer,
-	}, nil
+	}
+
+	go pub.handleDeliveryEvents()
+
+	return pub, nil
 }
 
 func (p *Publisher) Close() {
