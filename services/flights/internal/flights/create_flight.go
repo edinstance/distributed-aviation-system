@@ -75,13 +75,21 @@ func (service *Service) CreateFlight(
 		return nil, err
 	}
 
-	if err := service.Cache.SetFlight(ctx, flight); err != nil {
-		logger.WarnContext(ctx, "Failed to cache flight", "flight_id", flight.ID, "err", err)
-	}
+	// Run post-create tasks asynchronously (cache + Kafka)
+	go func(f *models.Flight) {
+		bgCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	if err := service.KafkaPublisher.PublishFlightCreated(ctx, flight); err != nil {
-		logger.WarnContext(ctx, "Failed to publish flight created event", "flight_id", flight.ID, "err", err)
-	}
+		if err := service.Cache.SetFlight(bgCtx, f); err != nil {
+			logger.WarnContext(bgCtx, "Failed to cache flight",
+				"flight_id", f.ID, "err", err)
+		}
+
+		if err := service.KafkaPublisher.PublishFlightCreated(bgCtx, f); err != nil {
+			logger.WarnContext(bgCtx, "Failed to publish flight created event",
+				"flight_id", f.ID, "err", err)
+		}
+	}(flight)
 
 	logger.InfoContext(ctx, "Flight created", "flight_id", flight.ID, "number", flight.Number, "origin", flight.Origin, "destination", flight.Destination, "departure_time", flight.DepartureTime, "arrival_time", flight.ArrivalTime, "aircraft_id", flight.AircraftID)
 
