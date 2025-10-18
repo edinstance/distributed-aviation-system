@@ -25,7 +25,7 @@ type Publisher struct {
 	done       chan struct{}
 }
 
-// NewPublisher initializes Kafka producer + Avro serializer
+// NewPublisher initializes Kafka producer and Avro serializer
 func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error) {
 	logger.InfoContext(context.Background(), "Initializing Kafka publisher",
 		"broker_url", brokerURL,
@@ -45,10 +45,10 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 		"socket.keepalive.enable": true,
 	})
 	if err != nil {
-		logger.ErrorContext(context.Background(), "Failed to create Kafka producer", "err", err, "broker_url", brokerURL)
+		logger.ErrorContext(context.Background(), "Failed to create Kafka producer",
+			"err", err, "broker_url", brokerURL)
 		return nil, fmt.Errorf("create producer: %w", err)
 	}
-
 	defer func() {
 		if err != nil {
 			prod.Close()
@@ -67,7 +67,7 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 
 	// Avro Serializer configuration
 	sConfig := avro.NewSerializerConfig()
-	sConfig.AutoRegisterSchemas = true // auto-register the schema on first use
+	sConfig.AutoRegisterSchemas = true
 	sConfig.UseLatestVersion = true
 
 	serializer, err := avro.NewGenericSerializer(srClient, serde.ValueSerde, sConfig)
@@ -89,21 +89,28 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 		done:       make(chan struct{}),
 	}
 
+	// Start background handler to consume delivery events (avoids buildup)
 	go pub.handleDeliveryEvents()
 
 	return pub, nil
 }
 
+// Close flushes pending messages and stops the background handler
 func (p *Publisher) Close() {
+	if p.producer == nil {
+		return
+	}
+
 	remaining := p.producer.Flush(5000)
 	if remaining > 0 {
 		logger.Error("Failed to flush all messages", "remaining", remaining)
 	}
 	p.producer.Close()
+
 	<-p.done
 }
 
-// recordKafkaError centralizes error metric + logging
+// recordKafkaError tracks Kafka-related errors with metrics and logs
 func recordKafkaError(
 	ctx context.Context,
 	err error,
@@ -118,33 +125,76 @@ func recordKafkaError(
 			attribute.String("event_type", eventType),
 			attribute.String("error_type", kind),
 		))
-	logger.ErrorContext(ctx, message, "err", err, "topic", topic, "event_type", eventType)
+	logger.ErrorContext(ctx, message,
+		"err", err,
+		"topic", topic,
+		"event_type", eventType,
+		"error_type", kind)
 }
 
-// handleDeliveryEvents listens asynchronously for confirmation events
+// handleDeliveryEvents consumes and classifies Kafka delivery / error events
 func (p *Publisher) handleDeliveryEvents() {
 	defer close(p.done)
+
 	for e := range p.producer.Events() {
 		switch m := e.(type) {
 		case *kafka.Message:
+			topic := "unknown"
+			if m.TopicPartition.Topic != nil {
+				topic = *m.TopicPartition.Topic
+			}
+
 			if m.TopicPartition.Error != nil {
-				recordKafkaError(context.Background(), m.TopicPartition.Error,
-					"delivery_error", "Kafka message delivery failed",
-					*m.TopicPartition.Topic, "")
+				recordKafkaError(
+					context.Background(),
+					m.TopicPartition.Error,
+					"delivery_error",
+					"Kafka message delivery failed",
+					topic,
+					"",
+				)
 				continue
 			}
 
 			metrics.KafkaMessagesSent.Add(context.Background(), 1,
 				metric.WithAttributes(
-					attribute.String("topic", *m.TopicPartition.Topic),
+					attribute.String("topic", topic),
 					attribute.Int("partition", int(m.TopicPartition.Partition)),
 				))
+
 			logger.Info("Kafka message delivered",
-				"topic", *m.TopicPartition.Topic,
+				"topic", topic,
 				"partition", m.TopicPartition.Partition,
 				"offset", m.TopicPartition.Offset)
+
 		case kafka.Error:
-			recordKafkaError(context.Background(), m, "producer_error", "Kafka producer fatal error", "unknown", "")
+			ctx := context.Background()
+			errCode := m.Code().String()
+
+			attrs := []attribute.KeyValue{
+				attribute.String("topic", p.topic),
+				attribute.String("error_code", errCode),
+				attribute.Bool("is_fatal", m.IsFatal()),
+				attribute.Bool("is_retriable", m.IsRetriable()),
+			}
+
+			switch {
+			case m.IsFatal():
+				recordKafkaError(ctx, m,
+					"fatal_error", "Kafka producer fatal error", p.topic, "")
+				logger.Error("Kafka fatal error encountered — producer must be recreated",
+					"code", errCode, "err", m)
+			case m.IsRetriable():
+				recordKafkaError(ctx, m,
+					"retriable_error", "Kafka retriable transient error", p.topic, "")
+				logger.Warn("Kafka transient retriable error", "code", errCode, "err", m)
+			default:
+				recordKafkaError(ctx, m,
+					"nonfatal_error", "Kafka non-fatal or local error", p.topic, "")
+				logger.Warn("Kafka local/non-fatal error", "code", errCode, "err", m)
+			}
+
+			metrics.KafkaMessagesErrors.Add(ctx, 1, metric.WithAttributes(attrs...))
 		}
 	}
 }
