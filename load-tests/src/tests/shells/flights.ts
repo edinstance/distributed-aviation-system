@@ -9,6 +9,7 @@ import {
 } from "../../gql/graphql";
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import { check } from "k6";
+import { AuthContext } from "src/types/auth_context";
 
 function randomFlightNumber(): string {
   const airlines = ["BA", "UA", "LH", "AF"];
@@ -20,6 +21,7 @@ export function runFlightScenario(
   url: string,
   aircraftId: string,
   accessToken?: string,
+  authContext?: AuthContext,
 ) {
   graphql<GetFlightByIdQuery, GetFlightByIdQueryVariables>(
     url,
@@ -42,7 +44,15 @@ export function runFlightScenario(
       departureTime: new Date().toISOString(),
       arrivalTime: new Date(Date.now() + 3600 * 1000).toISOString(),
     },
-    accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...(authContext
+        ? {
+            "x-org-id": authContext.organization.id,
+            "x-user-sub": authContext.admin.id,
+          }
+        : {}),
+    },
   );
 
   check(createRes, {

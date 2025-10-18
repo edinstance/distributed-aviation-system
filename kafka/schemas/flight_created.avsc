@@ -1,0 +1,39 @@
+{
+  "type": "record",
+  "namespace": "flights",
+  "name": "FlightCreated",
+  "fields": [
+    {
+      "name": "flightId",
+      "type": "string"
+    },
+    {
+      "name": "number",
+      "type": "string"
+    },
+    {
+      "name": "origin",
+      "type": "string"
+    },
+    {
+      "name": "destination",
+      "type": "string"
+    },
+    {
+      "name": "departureTime",
+      "type": "long"
+    },
+    {
+      "name": "arrivalTime",
+      "type": "long"
+    },
+    {
+      "name": "airline",
+      "type": "string"
+    },
+    {
+      "name": "status",
+      "type": "string"
+    }
+  ]
+}

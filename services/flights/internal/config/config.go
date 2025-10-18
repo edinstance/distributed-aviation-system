@@ -15,6 +15,9 @@ type Config struct {
 	CacheURL               string
 	CacheTTL               time.Duration
 	OtlpGrpcUrl            string
+	KafkaBrokerURL         string
+	KafkaSchemaRegistryURL string
+	KafkaFlightsTopic      string
 }
 
 var App Config
@@ -31,6 +34,9 @@ func Init() {
 		CacheURL:               mustGetEnv("CACHE_URL"),
 		CacheTTL:               15 * time.Minute,
 		OtlpGrpcUrl:            mustGetEnv("OTLP_GRPC_URL"),
+		KafkaBrokerURL:         getEnv("KAFKA_BROKER_URL", "localhost:9092"),
+		KafkaSchemaRegistryURL: getEnv("KAFKA_SCHEMA_REGISTRY_URL", "http://localhost:8081"),
+		KafkaFlightsTopic:      getEnv("KAFKA_FLIGHTS_TOPIC", "flights"),
 	}
 }
 

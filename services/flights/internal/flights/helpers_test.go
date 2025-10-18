@@ -22,6 +22,10 @@ type FakeAircraftClient struct {
 	ValidateAircraftExistsFn func(ctx context.Context, id uuid.UUID) error
 }
 
+type FakeKafkaPublisher struct {
+	PublishFlightCreatedFn func(ctx context.Context, flight *models.Flight) error
+}
+
 func (f FakeFlightsCache) GetFlight(ctx context.Context, id uuid.UUID) (*models.Flight, error) {
 	if f.GetFlightFn == nil {
 		return nil, nil
@@ -55,4 +59,11 @@ func (f *FakeAircraftClient) ValidateAircraftExists(ctx context.Context, id uuid
 		return nil
 	}
 	return f.ValidateAircraftExistsFn(ctx, id)
+}
+
+func (f *FakeKafkaPublisher) PublishFlightCreated(ctx context.Context, flight *models.Flight) error {
+	if f.PublishFlightCreatedFn == nil {
+		return nil
+	}
+	return f.PublishFlightCreatedFn(ctx, flight)
 }

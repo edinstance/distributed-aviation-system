@@ -10,15 +10,20 @@ export let options: Options = {
   stages: [{ duration: "10s", target: 1 }],
 };
 
-export default function () {
+export function setup() {
   const accessToken = runAuthenticationScenario(CONFIG.authServiceUrl);
 
   const validAccessToken =
     typeof accessToken === "string" ? accessToken : undefined;
 
   const aircraftId = runAircraftScenario(CONFIG.gatewayUrl, validAccessToken);
-  if (aircraftId) {
-    runFlightScenario(CONFIG.gatewayUrl, aircraftId, validAccessToken);
+
+  return { aircraftId, validAccessToken };
+}
+
+export default function (data: { aircraftId: string; validAccessToken?: string }) {
+  if (data.aircraftId && data.validAccessToken) {
+    runFlightScenario(CONFIG.gatewayUrl, data.aircraftId, data.validAccessToken);
   }
   sleep(1);
 }

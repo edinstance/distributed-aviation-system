@@ -13,6 +13,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/cache"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/database"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/kafka"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/server"
@@ -78,7 +79,14 @@ func main() {
 		}
 	}()
 
-	mux := server.NewMux(pool, cacheClient)
+	kafkaPublisher, err := kafka.NewPublisher(config.App.KafkaBrokerURL, config.App.KafkaSchemaRegistryURL, config.App.KafkaFlightsTopic)
+	if err != nil {
+		logger.Error("Failed to initialise Kafka publisher", "err", err)
+		os.Exit(1)
+	}
+	defer kafkaPublisher.Close()
+
+	mux := server.NewMux(pool, cacheClient, kafkaPublisher)
 
 	port := config.App.Port
 	if port == "" {

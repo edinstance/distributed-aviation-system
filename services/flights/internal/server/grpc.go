@@ -9,6 +9,7 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/kafka"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	v1 "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1"
 	v1connect "github.com/edinstance/distributed-aviation-system/services/flights/internal/protobuf/flights/v1/flightsv1connect"
@@ -25,7 +26,7 @@ type GrpcFlightsServer struct {
 	getFlightsResolver   *getFlightsResolver.FlightResolver
 }
 
-func NewGrpcFlightsServer(pool *pgxpool.Pool, client *redis.Client) *GrpcFlightsServer {
+func NewGrpcFlightsServer(pool *pgxpool.Pool, client *redis.Client, kafkaPublisher *kafka.Publisher) *GrpcFlightsServer {
 	logger.Debug("Creating new FlightsServer")
 	dbRepo := flightRepository.NewFlightRepository(pool)
 	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
@@ -36,7 +37,7 @@ func NewGrpcFlightsServer(pool *pgxpool.Pool, client *redis.Client) *GrpcFlights
 		return nil
 	}
 
-	flightService := flights.NewFlightsService(dbRepo, cacheRepo, aircraftClient)
+	flightService := flights.NewFlightsService(dbRepo, cacheRepo, aircraftClient, kafkaPublisher)
 
 	return &GrpcFlightsServer{
 		createFlightResolver: createFlightsResolver.NewCreateFlightResolver(flightService),
