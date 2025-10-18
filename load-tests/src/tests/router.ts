@@ -5,12 +5,13 @@ import { runFlightScenario } from "./shells/flights";
 import { runAircraftScenario } from "./shells/aircraft";
 import { CONFIG } from "../config";
 import { createOrganization } from "src/helpers/organization";
+import { AuthContext } from "src/types/auth_context";
 
 export let options: Options = {
   stages: [{ duration: "10s", target: 1 }],
 };
 
-export default function () {
+export function setup() {
   const authContext = createOrganization(CONFIG.authServiceUrl);
 
   const aircraftId = runAircraftScenario(
@@ -18,8 +19,18 @@ export default function () {
     undefined,
     authContext,
   );
-  if (aircraftId) {
-    runFlightScenario(CONFIG.routerUrl, aircraftId, undefined, authContext);
+
+  return { aircraftId, authContext };
+}
+
+export default function (data: { aircraftId: string ,authContext: AuthContext }) {
+  if (data.aircraftId && data.authContext) {
+    runFlightScenario(
+      CONFIG.routerUrl,
+      data.aircraftId,
+      undefined,
+      data.authContext,
+    );
   }
   sleep(1);
 }

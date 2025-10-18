@@ -32,9 +32,7 @@ export function createOrganization(baseUrl: string): AuthContext {
   });
 
   const orgId = response.json("organization.id")?.toString();
-  const schemaName = response
-    .json("organization.schema_name")
-    ?.toLocaleString();
+  const schemaName = response.json("organization.schema_name")?.toString();
   const adminId = response.json("admin_user.id")?.toString();
 
   if (!orgId || !adminId || !schemaName) {

@@ -9,7 +9,10 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde"
 	"github.com/confluentinc/confluent-kafka-go/v2/schemaregistry/serde/avro"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/metric"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -83,5 +86,50 @@ func (p *Publisher) Close() {
 	if p.producer != nil {
 		p.producer.Flush(5000)
 		p.producer.Close()
+	}
+}
+
+// recordKafkaError centralizes error metric + logging
+func recordKafkaError(
+	ctx context.Context,
+	err error,
+	kind string,
+	message string,
+	topic string,
+	eventType string,
+) {
+	metrics.KafkaMessagesErrors.Add(ctx, 1,
+		metric.WithAttributes(
+			attribute.String("topic", topic),
+			attribute.String("event_type", eventType),
+			attribute.String("error_type", kind),
+		))
+	logger.ErrorContext(ctx, message, "err", err, "topic", topic, "event_type", eventType)
+}
+
+// handleDeliveryEvents listens asynchronously for confirmation events
+func (p *Publisher) handleDeliveryEvents() {
+	for e := range p.producer.Events() {
+		switch m := e.(type) {
+		case *kafka.Message:
+			if m.TopicPartition.Error != nil {
+				recordKafkaError(context.Background(), m.TopicPartition.Error,
+					"delivery_error", "Kafka message delivery failed",
+					*m.TopicPartition.Topic, "")
+				continue
+			}
+
+			metrics.KafkaMessagesSent.Add(context.Background(), 1,
+				metric.WithAttributes(
+					attribute.String("topic", *m.TopicPartition.Topic),
+					attribute.Int("partition", int(m.TopicPartition.Partition)),
+				))
+			logger.Info("Kafka message delivered",
+				"topic", *m.TopicPartition.Topic,
+				"partition", m.TopicPartition.Partition,
+				"offset", m.TopicPartition.Offset)
+		case kafka.Error:
+			recordKafkaError(context.Background(), m, "producer_error", "Kafka producer fatal error", "unknown", "")
+		}
 	}
 }
