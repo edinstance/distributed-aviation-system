@@ -10,8 +10,13 @@ import {
 } from "../../gql/graphql";
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import { check } from "k6";
+import { AuthContext } from "src/types/auth_context";
 
-export function runAircraftScenario(url: string, accessToken?: string) {
+export function runAircraftScenario(
+  url: string,
+  accessToken?: string,
+  authContext?: AuthContext,
+) {
   graphql<GetAircraftQuery, GetAircraftQueryVariables>(
     url,
     GetAircraftDocument,
@@ -35,7 +40,15 @@ export function runAircraftScenario(url: string, accessToken?: string) {
         yearOfManufacture: 2020,
       },
     },
-    accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...(authContext
+        ? {
+            "x-org-id": authContext.organization.id,
+            "x-user-sub": authContext.admin.id,
+          }
+        : {}),
+    },
   );
 
   check(createAircraftRes, {

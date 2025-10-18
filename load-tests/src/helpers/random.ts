@@ -1,6 +1,8 @@
 export function randomString(length = 6) {
   const chars = "abcdefghijklmnopqrstuvwxyz";
-  return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join("");
+  return Array.from({ length }, () =>
+    chars.charAt(Math.floor(Math.random() * chars.length)),
+  ).join("");
 }
 
 export function randomEmail(domain = "example.com") {

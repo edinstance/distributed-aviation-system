@@ -4,44 +4,22 @@ import {
   randomEmail,
   randomPassword,
 } from "../../helpers/random";
+import { createOrganization } from "../../helpers/organization";
 import { check } from "k6";
 
 export function runAuthenticationScenario(baseUrl: string) {
-  const orgName = `org_${randomString(6)}`;
-  const username = randomString(8);
-  const password = randomPassword();
+  const authContext = createOrganization(baseUrl);
 
   let payload = JSON.stringify({
-    name: orgName,
-    schema_name: orgName,
-    admin: {
-      username: username,
-      email: randomEmail("mycompany.com"),
-      password: password,
-    },
+    username: authContext.admin.username,
+    password: authContext.admin.password,
   });
-
-  const createRes = http.post(`${baseUrl}/api/organizations/create/`, payload, {
-    headers: {
-      "Content-Type": "application/json",
-      Accept: "application/json",
-    },
-  });
-
-  check(createRes, {
-    "organization created": (r) =>
-      r.status === 201 && !!r.json("organization.id"),
-  });
-
-  const orgId = createRes.json("organization.id");
-
-  payload = JSON.stringify({ username: username, password: password });
 
   const loginRes = http.post(`${baseUrl}/api/auth/login/`, payload, {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Org-Id": orgId ? String(orgId) : "",
+      "X-Org-Id": authContext.organization.id,
     },
   });
 
@@ -81,7 +59,7 @@ export function runAuthenticationScenario(baseUrl: string) {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
-        "X-Org-Id": orgId ? String(orgId) : "",
+        "X-Org-Id": authContext.organization.id,
       },
     },
   );
@@ -98,7 +76,7 @@ export function runAuthenticationScenario(baseUrl: string) {
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
-      "X-Org-Id": orgId ? String(orgId) : "",
+      "X-Org-Id": authContext.organization.id,
     },
   });
 
