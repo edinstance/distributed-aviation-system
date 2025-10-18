@@ -104,7 +104,6 @@ public class AircraftService {
       String json = jedis.getEx(key, new GetExParams().ex(CACHE_TTL_SECONDS));
       if (json != null) {
         try {
-          AircraftLogger.info("Aircraft with id %s found in cache", id);
           return Optional.of(objectMapper.readValue(json, AircraftEntity.class));
         } catch (IOException e) {
           AircraftLogger.error("Cache data corrupted for key=" + key, e);
