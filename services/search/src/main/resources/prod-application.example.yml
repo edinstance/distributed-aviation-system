@@ -1,6 +1,6 @@
 spring:
   application:
-    name: aircraft
+    name: search
   profiles:
     active: ${ENVIRONMENT}
   kafka:

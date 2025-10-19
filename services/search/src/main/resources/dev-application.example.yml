@@ -44,13 +44,13 @@ management:
         url: http://localhost:4317
         step: 5
     tracing:
-      endpoint: http://localhost:4317}
+      endpoint: http://localhost:4317
   tracing:
     otlp:
-      endpoint: http://localhost:4317}
+      endpoint: http://localhost:4317
   logging:
     otlp:
-      endpoint: http://localhost:4317}
+      endpoint: http://localhost:4317
   endpoint:
     health:
       probes:

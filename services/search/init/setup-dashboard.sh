@@ -11,7 +11,7 @@ wait_for() {
     sleep 5
     echo "  still waiting..."
   done
-  echo "✅ $NAME ready."
+  echo "$NAME ready."
 }
 
 wait_for "$OS_URL/_cluster/health" "OpenSearch"
@@ -24,13 +24,13 @@ for file in /init/indexes/*.json; do
   curl -sf -X PUT "$OS_URL/$name" \
     -H "Content-Type: application/json" \
     -d @"$file" \
-    || echo "⚠️  could not create index $name"
+    || echo "Could not create index $name"
 done
-echo "✅ Index creation finished"
+echo "Index creation finished"
 
 # ---------------- INDEX PATTERN -----------------
 INDEX_PATTERN_ID="flights"
-echo "📋 Creating index pattern '$INDEX_PATTERN_ID'..."
+echo "Creating index pattern '$INDEX_PATTERN_ID'..."
 
 # Delete previous if exists
 EXISTING_PATTERN=$(curl -s \
@@ -38,7 +38,7 @@ EXISTING_PATTERN=$(curl -s \
   -H "osd-xsrf: true" | jq -r '.saved_objects[0].id // empty')
 
 if [ -n "$EXISTING_PATTERN" ]; then
-  echo "🗑️  Deleting existing index pattern: $EXISTING_PATTERN"
+  echo "Deleting existing index pattern: $EXISTING_PATTERN"
   curl -s -X DELETE \
     "$DASH_URL/api/saved_objects/index-pattern/$EXISTING_PATTERN" \
     -H "osd-xsrf: true" >/dev/null || true
@@ -52,9 +52,9 @@ PATTERN_RESP=$(curl -s -X POST \
   -d '{"attributes":{"title":"flights","timeFieldName":"indexedAt"}}')
 
 if echo "$PATTERN_RESP" | jq -e 'has("id")' >/dev/null; then
-  echo "✅ Index pattern created with fixed ID: $INDEX_PATTERN_ID"
+  echo "Index pattern created with fixed ID: $INDEX_PATTERN_ID"
 else
-  echo "⚠️  Failed to create index pattern. Response: $PATTERN_RESP"
+  echo "Failed to create index pattern. Response: $PATTERN_RESP"
   exit 1
 fi
 
@@ -71,8 +71,8 @@ create_object() {
 mkdir -p /tmp/os_ids
 
 # ---------------- VISUALIZATIONS -----------------
-echo "📊 Creating visualizations..."
-for file in /init/vizualizations/*.json; do
+echo "Creating visualizations..."
+for file in /init/visualizations/*.json; do
   vis_name=$(basename "$file" .json)
   id=$(create_object visualization "$file")
   echo "$vis_name=$id" >>/tmp/os_ids/vis.list
@@ -80,7 +80,7 @@ for file in /init/vizualizations/*.json; do
 done
 
 # ---------------- SEARCHES -----------------
-echo "🔍 Creating searches..."
+echo "Creating searches..."
 for file in /init/searches/*.json; do
   search_name=$(basename "$file" .json)
   id=$(create_object search "$file")
@@ -102,7 +102,7 @@ done </tmp/os_ids/vis.list
 # Replace index pattern placeholder (keeps name 'flights')
 sed -i "s/{{INDEX_PATTERN_ID}}/$INDEX_PATTERN_ID/g" "$filled"
 
-echo "🎨 Creating dashboard..."
+echo "Creating dashboard..."
 dash_id=$(create_object dashboard "$filled")
-echo "✅ Dashboard created with id $dash_id"
-echo "🌐 http://localhost:5601/app/dashboards#/view/$dash_id"
+echo "Dashboard created with id $dash_id"
+echo "http://localhost:5601/app/dashboards#/view/$dash_id"

@@ -44,7 +44,7 @@ mvn clean package
 java -javaagent:target/opentelemetry-javaagent.jar \
      -Dotel.service.name=search-service \
      -Dotel.exporter.otlp.endpoint=http://localhost:4317 \
-     -jar target/aircraft-0.0.1-SNAPSHOT.jar
+     -jar target/search-0.0.1-SNAPSHOT.jar
 ```
 
 ## Docker
@@ -60,7 +60,7 @@ docker build -t search-service .
 
 ```bash
 
-# Run container (assumes PostgreSQL is accessible)
+# Run container (assumes OpenSearch is accessible)
 docker run -d \
   --name search-service \
   -p 8082:8080 \

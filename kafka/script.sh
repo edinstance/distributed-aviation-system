@@ -1,17 +1,19 @@
 #!/bin/sh
 set -e
 
-echo "⏳  Waiting for Schema Registry..."
+echo "Waiting for Schema Registry..."
 until curl -sf http://schema-registry:8081/subjects >/dev/null; do
   sleep 2
 done
 echo "Registry is ready"
 
+if ! ls /schemas/*.avsc 1> /dev/null 2>&1; then
+  echo "No .avsc files found in /schemas"
+  exit 0
+fi
+
 for f in /schemas/*.avsc; do
-  if [ ! -f "$f" ]; then
-    echo "No .avsc files found in /schemas"
-    exit 0
-  fi
+  subject=$(basename "$f" .avsc)
 
   subject=$(basename "$f" .avsc)
   echo "Registering $subject"

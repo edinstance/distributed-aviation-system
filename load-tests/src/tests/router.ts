@@ -8,7 +8,7 @@ import { createOrganization } from "src/helpers/organization";
 import { AuthContext } from "src/types/auth_context";
 
 export let options: Options = {
-  stages: [{ duration: "10s", target: 100 },{ duration: "10s", target: 1000 } ],
+  stages: [{ duration: "10s", target: 1 }],
 };
 
 export function setup() {

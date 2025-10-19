@@ -9,7 +9,7 @@ RUN chmod +x /usr/local/bin/setup-dashboard.sh
 
 # Copy all the init files
 COPY indexes/ /init/indexes/
-COPY vizualizations/ /init/vizualizations/
+COPY visualizations/ /init/visualizations/
 COPY searches/ /init/searches/
 COPY dashboards/ /init/dashboards/
 
