@@ -64,7 +64,8 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
    * Begins the execution of a GraphQL operation.
    *
    * @param parameters the parameters of the execution.
-   * @param state the state of the execution.
+   * @param state      the state of the execution.
+   *
    * @return the instrumentation context.
    */
   @Override
@@ -74,7 +75,9 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
     long start = System.nanoTime();
 
     return new InstrumentationContext<>() {
-      @Override public void onDispatched() {}
+      @Override
+      public void onDispatched() {
+      }
 
       @Override
       public void onCompleted(ExecutionResult result, Throwable t) {
@@ -104,8 +107,9 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
    * Instruments a GraphQL field fetcher.
    *
    * @param dataFetcher the field fetcher.
-   * @param parameters the parameters of the field fetcher.
-   * @param state the state of the field fetcher.
+   * @param parameters  the parameters of the field fetcher.
+   * @param state       the state of the field fetcher.
+   *
    * @return the instrumented field fetcher.
    */
   @Override
@@ -168,8 +172,8 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
    * Records a field metric.
    *
    * @param fieldTag the field tag.
-   * @param start the start time of the field.
-   * @param status the status of the field.
+   * @param start    the start time of the field.
+   * @param status   the status of the field.
    */
   private void recordFieldMetric(String fieldTag, long start, String status) {
     long durationMs = (System.nanoTime() - start) / 1_000_000;

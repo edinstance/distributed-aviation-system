@@ -21,11 +21,11 @@
     },
     {
       "name": "departureTime",
-      "type": "long"
+      "type": "string"
     },
     {
       "name": "arrivalTime",
-      "type": "long"
+      "type": "string"
     },
     {
       "name": "airline",

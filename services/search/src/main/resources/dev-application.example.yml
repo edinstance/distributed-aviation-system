@@ -3,9 +3,30 @@ spring:
     name: search
   profiles:
     active: dev
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: search-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: http://localhost:8081
+        specific.avro.reader: false
 
 server:
   port: 8082
+
+opensearch:
+  host: opensearch-node-1
+  port: 9200
+  username: admin
+  password: CH@nge1M3
+  scheme: https
+  dashboard:
+    host: opensearch-dashboards
+    port: 5601
+    auto-setup: true
 
 # Actuator config
 management:

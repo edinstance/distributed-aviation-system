@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.liquibase.LiquibaseAutoConfigurati
 /**
  * This is the main entrypoint to the application.
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class, LiquibaseAutoConfiguration.class})
+@SpringBootApplication()
 public class Application {
 
   /**

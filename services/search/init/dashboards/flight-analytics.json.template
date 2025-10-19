@@ -1,0 +1,34 @@
+{
+  "attributes": {
+    "title": "Flight Analytics Dashboard",
+    "description": "Overview of flight distribution, status, and trends captured from the flights topic.",
+    "panelsJSON": "[
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 0,  \"y\": 0,  \"w\": 24, \"h\": 12, \"i\": \"1\"}, \"panelIndex\": \"1\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_timeline\"},
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 24, \"y\": 0,  \"w\": 24, \"h\": 12, \"i\": \"2\"}, \"panelIndex\": \"2\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_airline\"},
+
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 0,  \"y\": 12, \"w\": 24, \"h\": 12, \"i\": \"3\"}, \"panelIndex\": \"3\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_status\"},
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 24, \"y\": 12, \"w\": 24, \"h\": 12, \"i\": \"4\"}, \"panelIndex\": \"4\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_flight_route\"},
+
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 0,  \"y\": 24, \"w\": 24, \"h\": 12, \"i\": \"5\"}, \"panelIndex\": \"5\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_origin\"},
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 24, \"y\": 24, \"w\": 24, \"h\": 12, \"i\": \"6\"}, \"panelIndex\": \"6\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_destination\"},
+
+      {\"version\": \"3.3.0\", \"gridData\": {\"x\": 0,  \"y\": 36, \"w\": 48, \"h\": 16, \"i\": \"7\"}, \"panelIndex\": \"7\", \"embeddableConfig\": {}, \"panelRefName\": \"panel_table\"}
+    ]",
+    "optionsJSON": "{\"useMargins\": true, \"syncColors\": true, \"hidePanelTitles\": false}",
+    "version": 1,
+    "timeRestore": false,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\": {\"match_all\": {}}, \"filter\": []}"
+    }
+  },
+  "references": [
+    { "name": "panel_timeline", "type": "visualization", "id": "{{TIMELINE_ID}}" },
+    { "name": "panel_airline", "type": "visualization", "id": "{{AIRLINE_ID}}" },
+    { "name": "panel_status", "type": "visualization", "id": "{{STATUS_ID}}" },
+    { "name": "panel_flight_route", "type": "visualization", "id": "{{FLIGHT_ROUTE_ID}}" },
+    { "name": "panel_origin", "type": "visualization", "id": "{{ORIGIN_ID}}" },
+    { "name": "panel_destination", "type": "visualization", "id": "{{DESTINATION_ID}}" },
+    { "name": "panel_table", "type": "search", "id": "{{TABLE_ID}}" },
+    { "name": "kibanaSavedObjectMeta.searchSourceJSON.index", "type": "index-pattern", "id": "{{INDEX_PATTERN_ID}}" }
+  ]
+}

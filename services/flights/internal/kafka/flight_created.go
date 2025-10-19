@@ -17,14 +17,14 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-// FlightCreatedEvent represents the Avro structure for a created flight
-type FlightCreatedEvent struct {
-	FlightID      string `avro:"flightId"`
+// FlightCreated represents the Avro structure for a created flight
+type FlightCreated struct {
+	FlightId      string `avro:"flightId"`
 	Number        string `avro:"number"`
 	Origin        string `avro:"origin"`
 	Destination   string `avro:"destination"`
-	DepartureTime int64  `avro:"departureTime"`
-	ArrivalTime   int64  `avro:"arrivalTime"`
+	DepartureTime string `avro:"departureTime"`
+	ArrivalTime   string `avro:"arrivalTime"`
 	Airline       string `avro:"airline"`
 	Status        string `avro:"status"`
 }
@@ -61,13 +61,13 @@ func (p *Publisher) PublishFlightCreated(ctx context.Context, flight *models.Fli
 			attribute.String("event_type", eventType),
 		))
 
-	event := FlightCreatedEvent{
-		FlightID:      flight.ID.String(),
+	event := FlightCreated{
+		FlightId:      flight.ID.String(),
 		Number:        flight.Number,
 		Origin:        flight.Origin,
 		Destination:   flight.Destination,
-		DepartureTime: flight.DepartureTime.Unix(),
-		ArrivalTime:   flight.ArrivalTime.Unix(),
+		DepartureTime: flight.DepartureTime.Format(time.RFC3339),
+		ArrivalTime:   flight.ArrivalTime.Format(time.RFC3339),
 		Airline:       flight.Number[:2],
 		Status:        string(flight.Status),
 	}
@@ -75,6 +75,10 @@ func (p *Publisher) PublishFlightCreated(ctx context.Context, flight *models.Fli
 	start := time.Now()
 	valueBytes, err := p.serializer.Serialize(p.topic, &event)
 	serializationDuration := time.Since(start)
+
+	logger.DebugContext(ctx, "Avro serialization result",
+		"bytes_length", len(valueBytes),
+		"serialization_duration_ms", serializationDuration.Milliseconds())
 
 	metrics.KafkaSerializationTime.Record(
 		ctx,

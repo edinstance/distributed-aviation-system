@@ -19,6 +19,7 @@ public class GraphqlMetricsHelpers {
    * Creates a safe operation name for metrics.
    *
    * @param name the operation name.
+   *
    * @return the safe operation name.
    */
   public static String createSafeOpName(String name) {
@@ -31,8 +32,9 @@ public class GraphqlMetricsHelpers {
   /**
    * Extracts the operation type from a query.
    *
-   * @param query the query.
+   * @param query         the query.
    * @param operationName the operation name.
+   *
    * @return the operation type.
    */
   public static String extractOperationType(String query, String operationName) {
@@ -59,6 +61,7 @@ public class GraphqlMetricsHelpers {
    * Finds the datafetcher tag for a given field.
    *
    * @param parameters the parameters for the field.
+   *
    * @return the datafetcher tag.
    */
   public static String findDatafetcherTag(InstrumentationFieldFetchParameters parameters) {
@@ -74,6 +77,7 @@ public class GraphqlMetricsHelpers {
    * Sanitizes a tag name.
    *
    * @param tag the tag name.
+   *
    * @return the sanitized tag name.
    */
   public static String sanitizeFieldName(String tag) {

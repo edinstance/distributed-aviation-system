@@ -1,4 +1,4 @@
-# Aircraft Service
+# Search Service
 
 This is a [Java](https://www.java.com/) microservice for searching for data in the larger aviation system.
 
@@ -85,7 +85,7 @@ docker compose up -d
 
 #### Linting
 
-This project uses [checkstyle](https://checkstyle.sourceforge.io) with the Google Checkstyle configuration which is in [this folder](config).:
+This project uses [checkstyle](https://checkstyle.sourceforge.io) with the Google Checkstyle configuration which is in [this folder](config).
 
 ```bash
 

@@ -13,8 +13,8 @@ public abstract class DomainException extends RuntimeException {
   /**
    * A constructor with a message, code and category.
    *
-   * @param message the exception message.
-   * @param code the exception code.
+   * @param message  the exception message.
+   * @param code     the exception code.
    * @param category the category of exception.
    */
   protected DomainException(String message, String code, ExceptionCategories category) {
@@ -27,7 +27,7 @@ public abstract class DomainException extends RuntimeException {
    * A constructor with a message and code.
    *
    * @param message the exception message.
-   * @param code the exception code.
+   * @param code    the exception code.
    */
   protected DomainException(String message, String code) {
     super(message);

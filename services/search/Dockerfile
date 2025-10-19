@@ -26,7 +26,7 @@ WORKDIR /app
 
 RUN apk add --no-cache curl jq
 
-HEALTHCHECK CMD curl -sSf http://127.0.0.1:8080/details/health | jq '.status' | grep -q '\"UP\"' || exit 1
+HEALTHCHECK CMD curl -sSf http://127.0.0.1:8082/details/health | jq '.status' | grep -q '\"UP\"' || exit 1
 
 
 # Copy the JAR file built in the previous stage

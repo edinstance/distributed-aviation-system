@@ -1,0 +1,9 @@
+{
+  "attributes": {
+    "title": "Flights Timeline",
+    "visState": "{\"title\":\"Flights Timeline\",\"type\":\"line\",\"params\":{\"addTooltip\":true,\"addLegend\":true,\"showCircles\":true},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\"},{\"id\":\"2\",\"type\":\"date_histogram\",\"schema\":\"segment\",\"params\":{\"field\":\"departureTime\",\"interval\":\"auto\",\"min_doc_count\":1}}]}",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"flights\",\"query\":{\"match_all\":{}},\"filter\":[]}"
+    }
+  }
+}

@@ -3,9 +3,31 @@ spring:
     name: aircraft
   profiles:
     active: ${ENVIRONMENT}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka:9092}
+    consumer:
+      group-id: search-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: ${SCHEMA_REGISTRY_URL:schema-registry:8081}
+        specific.avro.reader: false
 
 server:
   port: ${PORT:8082}
+
+opensearch:
+  host: ${OPENSEARCH_HOST}
+  port: ${OPENSEARCH_PORT}
+  username: ${OPENSEARCH_USERNAME}
+  password: ${OPENSEARCH_PASSWORD}
+  scheme: ${OPENSEARCH_SCHEME:http}
+  dashboard:
+    host: opensearch-dashboards
+    port: 5601
+    auto-setup: true
+
 
 # Actuator config
 management:
