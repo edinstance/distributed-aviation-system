@@ -66,6 +66,20 @@ type Flight
   aircraft: Aircraft
 }
 
+type FlightDocument
+  @join__type(graph: SEARCH)
+{
+  flightId: String!
+  number: String!
+  origin: String!
+  destination: String!
+  departureTime: String!
+  arrivalTime: String!
+  airline: String!
+  status: String!
+  indexedAt: String!
+}
+
 enum FlightStatus
   @join__type(graph: FLIGHTS)
 {
@@ -83,6 +97,7 @@ scalar join__FieldSet
 enum join__Graph {
   AIRCRAFT @join__graph(name: "aircraft", url: "http://aircraft-service:8080/graphql")
   FLIGHTS @join__graph(name: "flights", url: "http://flights-service:8081/graphql")
+  SEARCH @join__graph(name: "search", url: "http://search-service:8082/graphql")
 }
 
 scalar link__Import
@@ -110,9 +125,13 @@ type Mutation
 type Query
   @join__type(graph: AIRCRAFT)
   @join__type(graph: FLIGHTS)
+  @join__type(graph: SEARCH)
 {
   getAircraftById(input: ID!): Aircraft @join__field(graph: AIRCRAFT)
   getFlightById(id: ID!): Flight @join__field(graph: FLIGHTS)
+  searchFlights(searchTerm: String!): [FlightDocument!]! @join__field(graph: SEARCH)
+  searchFlightsByRoute(origin: String!, destination: String!): [FlightDocument!]! @join__field(graph: SEARCH)
+  searchFlightsByAirline(airline: String!): [FlightDocument!]! @join__field(graph: SEARCH)
 }
 
 scalar Time
