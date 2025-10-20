@@ -1,0 +1,56 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: flights-database
+  namespace: aviation
+spec:
+  clusterIP: None
+  ports:
+    - port: 5432
+  selector:
+    app: flights-database
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: flights-database
+  namespace: aviation
+spec:
+  serviceName: flights-database
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flights-database
+  template:
+    metadata:
+      labels:
+        app: flights-database
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:17.6
+          ports:
+            - containerPort: 5432
+          env:
+            - name: POSTGRES_DB
+              value: flights
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgres
+          readinessProbe:
+            exec:
+              command: [ "pg_isready","-U","postgres","-d","flights" ]
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        resources:
+          requests:
+            storage: 1Gi
