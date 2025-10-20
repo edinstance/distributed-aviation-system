@@ -21,6 +21,8 @@ headers:
       - propagate:
           named: x-org-id
       - propagate:
+          named: x-org-name
+      - propagate:
           named: x-user-roles
 
 telemetry:
