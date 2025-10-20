@@ -1,0 +1,79 @@
+name: Build Images
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ closed ]
+    branches:
+      - main
+      - dev
+      - test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.base.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_PREFIX: ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'workflow_dispatch')
+
+    strategy:
+      matrix:
+        include:
+          - service: services/flights
+            uses_buf: true
+          - service: services/aircraft
+            uses_buf: true
+            needs_app_file: true
+          - service: services/search
+            needs_app_file: true
+            uses_buf: false
+          - service: services/authentication
+            uses_buf: false
+          - service: services/gateway
+            uses_buf: false
+
+    steps:
+      # Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup the service dependencies
+      - name: Install buf
+        if: matrix.uses_buf
+        uses: bufbuild/buf-setup-action@v1.50.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build proto files
+        if: matrix.uses_buf
+        run: buf generate --template buf.gen.yaml
+
+      - name: Create application file
+        if: matrix.needs_app_file
+        run: cp ${{ matrix.service }}/src/main/resources/prod-application.example.yml ${{ matrix.service }}/src/main/resources/application.yml
+
+      # Build and push the image to GitHub Container Registry
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./${{ matrix.service }}
+          file: ./${{ matrix.service }}/Dockerfile
+          push: true
+          tags: |
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:${{ github.sha }}
+            ${{ github.ref_name == 'main' && format('{0}-{1}:latest', env.IMAGE_PREFIX, matrix.service) || '' }}
