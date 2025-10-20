@@ -68,7 +68,7 @@ func (p *Publisher) PublishFlightCreated(ctx context.Context, flight *models.Fli
 		Destination:   flight.Destination,
 		DepartureTime: flight.DepartureTime.Format(time.RFC3339),
 		ArrivalTime:   flight.ArrivalTime.Format(time.RFC3339),
-		Airline:       flight.Number[:2],
+		Airline:       flight.Airline,
 		Status:        string(flight.Status),
 	}
 

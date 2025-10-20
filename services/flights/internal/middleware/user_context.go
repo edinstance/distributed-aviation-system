@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	userContext "github.com/edinstance/distributed-aviation-system/services/flights/internal/context"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/google/uuid"
 )
 
@@ -18,6 +19,7 @@ func UserContextMiddleware(next http.Handler) http.Handler {
 
 		userSub := headers.Get("x-user-sub")
 		orgID := headers.Get("x-org-id")
+		orgName := headers.Get("x-org-name")
 		roles := headers.Get("x-user-roles")
 
 		var parsedUserID, parsedOrgID uuid.UUID
@@ -36,11 +38,13 @@ func UserContextMiddleware(next http.Handler) http.Handler {
 				parsedOrgID = uuid.Nil
 			}
 		}
-
+		logger.Info("", headers)
+		logger.Info(orgName)
 		ctx := context.WithValue(r.Context(), userCtxKey, &userContext.UserContext{
-			UserID: parsedUserID,
-			OrgID:  parsedOrgID,
-			Roles:  roles,
+			UserID:  parsedUserID,
+			OrgID:   parsedOrgID,
+			OrgName: orgName,
+			Roles:   roles,
 		})
 
 		next.ServeHTTP(w, r.WithContext(ctx))

@@ -15,9 +15,10 @@ type Flight struct {
 	ArrivalTime    time.Time    `db:"arrival_time" json:"arrival_time"`
 	Status         FlightStatus `db:"status" json:"status"`
 	AircraftID     uuid.UUID    `db:"aircraft_id" json:"aircraft_id"`
-	CreatedBy      uuid.UUID    `db:"created_by" json:"-"`
-	LastUpdatedBy  uuid.UUID    `db:"last_updated_by" json:"-"`
-	OrganizationID uuid.UUID    `db:"organization_id" json:"-"`
+	CreatedBy      uuid.UUID    `db:"created_by" json:"created_by"`
+	LastUpdatedBy  uuid.UUID    `db:"last_updated_by" json:"last_updated_by"`
+	OrganizationID uuid.UUID    `db:"organization_id" json:"organization_id"`
+	Airline        string       `db:"airline" json:"airline"`
 	CreatedAt      time.Time    `db:"created_at" json:"created_at"`
 	UpdatedAt      time.Time    `db:"updated_at" json:"updated_at"`
 }

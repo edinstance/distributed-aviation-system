@@ -64,6 +64,7 @@ type Flight
   arrivalTime: Time!
   status: FlightStatus!
   aircraft: Aircraft
+  airline: String!
 }
 
 type FlightDocument

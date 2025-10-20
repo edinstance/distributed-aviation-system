@@ -1,0 +1,3 @@
+ALTER TABLE flights DROP COLUMN IF EXISTS airline;
+
+DROP INDEX IF EXISTS idx_airline;

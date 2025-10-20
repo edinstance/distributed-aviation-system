@@ -16,5 +16,9 @@ func AuthenticationDirective(ctx context.Context, _ any, next graphql.Resolver) 
 		return nil, errors.New("unauthorized: userId or orgId missing")
 	}
 
+	if user.OrgName == "" {
+		return nil, errors.New("unauthorized: orgName missing")
+	}
+
 	return next(ctx)
 }
