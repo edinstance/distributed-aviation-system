@@ -56,9 +56,9 @@ jobs:
         if: matrix.uses_buf
         run: buf generate --template buf.gen.yaml
 
-      - name: Create aircraft application file
+      - name: Create application file
         if: matrix.needs_app_file
-        run: cp services/aircraft/src/main/resources/prod-application.example.yml services/aircraft/src/main/resources/application.yml
+        run: cp ${{ matrix.service }}/src/main/resources/prod-application.example.yml ${{ matrix.service }}/src/main/resources/application.yml
 
       # Build and push the image to GitHub Container Registry
       - name: Log in to GitHub Container Registry
