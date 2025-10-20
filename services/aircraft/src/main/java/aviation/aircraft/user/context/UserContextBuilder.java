@@ -29,12 +29,14 @@ public class UserContextBuilder implements DgsCustomContextBuilderWithRequest<Us
     UUID userId = safeUuid(headers.getFirst("x-user-sub"));
 
     UUID orgId = safeUuid(headers.getFirst("x-org-id"));
+    String orgName = headers.getFirst("x-org-name");
 
     List<String> roles = parseRoles(headers.getFirst("x-user-roles"));
 
     return UserContext.builder()
             .userId(userId)
             .orgId(orgId)
+            .orgName(orgName)
             .roles(roles)
             .build();
   }

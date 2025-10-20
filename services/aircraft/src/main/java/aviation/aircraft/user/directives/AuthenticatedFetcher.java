@@ -21,6 +21,9 @@ record AuthenticatedFetcher(DataFetcher<?> delegate, boolean requiresUser,
     if (requiresOrg && user.getOrgId() == null) {
       throw new UnauthorizedException("Organization ID missing");
     }
+    if (requiresOrg && user.getOrgName() == null || user.getOrgName().isBlank()) {
+      throw new UnauthorizedException("Organization name missing");
+    }
     return delegate.get(dfe);
   }
 }

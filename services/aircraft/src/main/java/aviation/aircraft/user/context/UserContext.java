@@ -25,6 +25,11 @@ public class UserContext {
   private UUID orgId;
 
   /**
+   * The user's organization name.
+   */
+  private String orgName;
+
+  /**
    * The user's roles.
    */
   private List<String> roles;
@@ -42,9 +47,11 @@ public class UserContext {
    * @param orgId  the user's organization id.
    * @param roles  the user's roles.
    */
-  public UserContext(UUID userId, UUID orgId, List<String> roles) {
+  public UserContext(UUID userId, UUID orgId,
+                     String orgName ,List<String> roles) {
     this.userId = userId;
     this.orgId = orgId;
     this.roles = roles;
+    this.orgName = orgName;
   }
 }

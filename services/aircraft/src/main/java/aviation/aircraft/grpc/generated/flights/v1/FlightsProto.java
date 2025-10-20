@@ -60,7 +60,7 @@ public final class FlightsProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\030flights/v1/flights.proto\022\nflights.v1\032\037" +
-      "google/protobuf/timestamp.proto\"\277\002\n\006Flig" +
+      "google/protobuf/timestamp.proto\"\331\002\n\006Flig" +
       "ht\022\016\n\002id\030\001 \001(\tR\002id\022\026\n\006number\030\002 \001(\tR\006numb" +
       "er\022\026\n\006origin\030\003 \001(\tR\006origin\022 \n\013destinatio" +
       "n\030\004 \001(\tR\013destination\022A\n\016departure_time\030\005" +
@@ -68,34 +68,35 @@ public final class FlightsProto {
       "ureTime\022=\n\014arrival_time\030\006 \001(\0132\032.google.p" +
       "rotobuf.TimestampR\013arrivalTime\0220\n\006status" +
       "\030\007 \001(\0162\030.flights.v1.FlightStatusR\006status" +
-      "\022\037\n\013aircraft_id\030\010 \001(\tR\naircraftId\"\212\002\n\023Cr" +
-      "eateFlightRequest\022\026\n\006number\030\001 \001(\tR\006numbe" +
-      "r\022\026\n\006origin\030\002 \001(\tR\006origin\022 \n\013destination" +
-      "\030\003 \001(\tR\013destination\022A\n\016departure_time\030\004 " +
-      "\001(\0132\032.google.protobuf.TimestampR\rdepartu" +
-      "reTime\022=\n\014arrival_time\030\005 \001(\0132\032.google.pr" +
-      "otobuf.TimestampR\013arrivalTime\022\037\n\013aircraf" +
-      "t_id\030\006 \001(\tR\naircraftId\"B\n\024CreateFlightRe" +
-      "sponse\022*\n\006flight\030\001 \001(\0132\022.flights.v1.Flig" +
-      "htR\006flight\"&\n\024GetFlightByIdRequest\022\016\n\002id" +
-      "\030\001 \001(\tR\002id\"C\n\025GetFlightByIdResponse\022*\n\006f" +
-      "light\030\001 \001(\0132\022.flights.v1.FlightR\006flight*" +
-      "\330\001\n\014FlightStatus\022\035\n\031FLIGHT_STATUS_UNSPEC" +
-      "IFIED\020\000\022\033\n\027FLIGHT_STATUS_SCHEDULED\020\001\022\031\n\025" +
-      "FLIGHT_STATUS_DELAYED\020\002\022\031\n\025FLIGHT_STATUS" +
-      "_ARRIVED\020\003\022\035\n\031FLIGHT_STATUS_IN_PROGRESS\020" +
-      "\004\022\032\n\026FLIGHT_STATUS_DEPARTED\020\005\022\033\n\027FLIGHT_" +
-      "STATUS_CANCELLED\020\0062\271\001\n\016FlightsService\022Q\n" +
-      "\014CreateFlight\022\037.flights.v1.CreateFlightR" +
-      "equest\032 .flights.v1.CreateFlightResponse" +
-      "\022T\n\rGetFlightById\022 .flights.v1.GetFlight" +
-      "ByIdRequest\032!.flights.v1.GetFlightByIdRe" +
-      "sponseB\330\001\n\024generated.flights.v1B\014Flights" +
-      "ProtoP\001Zigithub.com/edinstance/distribut" +
-      "ed-aviation-system/services/flights/inte" +
-      "rnal/protobuf/flights/v1;flightsv1\242\002\003FXX" +
-      "\252\002\nFlights.V1\312\002\nFlights\\V1\342\002\026Flights\\V1\\" +
-      "GPBMetadata\352\002\013Flights::V1b\006proto3"
+      "\022\037\n\013aircraft_id\030\010 \001(\tR\naircraftId\022\030\n\007air" +
+      "line\030\t \001(\tR\007airline\"\212\002\n\023CreateFlightRequ" +
+      "est\022\026\n\006number\030\001 \001(\tR\006number\022\026\n\006origin\030\002 " +
+      "\001(\tR\006origin\022 \n\013destination\030\003 \001(\tR\013destin" +
+      "ation\022A\n\016departure_time\030\004 \001(\0132\032.google.p" +
+      "rotobuf.TimestampR\rdepartureTime\022=\n\014arri" +
+      "val_time\030\005 \001(\0132\032.google.protobuf.Timesta" +
+      "mpR\013arrivalTime\022\037\n\013aircraft_id\030\006 \001(\tR\nai" +
+      "rcraftId\"B\n\024CreateFlightResponse\022*\n\006flig" +
+      "ht\030\001 \001(\0132\022.flights.v1.FlightR\006flight\"&\n\024" +
+      "GetFlightByIdRequest\022\016\n\002id\030\001 \001(\tR\002id\"C\n\025" +
+      "GetFlightByIdResponse\022*\n\006flight\030\001 \001(\0132\022." +
+      "flights.v1.FlightR\006flight*\330\001\n\014FlightStat" +
+      "us\022\035\n\031FLIGHT_STATUS_UNSPECIFIED\020\000\022\033\n\027FLI" +
+      "GHT_STATUS_SCHEDULED\020\001\022\031\n\025FLIGHT_STATUS_" +
+      "DELAYED\020\002\022\031\n\025FLIGHT_STATUS_ARRIVED\020\003\022\035\n\031" +
+      "FLIGHT_STATUS_IN_PROGRESS\020\004\022\032\n\026FLIGHT_ST" +
+      "ATUS_DEPARTED\020\005\022\033\n\027FLIGHT_STATUS_CANCELL" +
+      "ED\020\0062\271\001\n\016FlightsService\022Q\n\014CreateFlight\022" +
+      "\037.flights.v1.CreateFlightRequest\032 .fligh" +
+      "ts.v1.CreateFlightResponse\022T\n\rGetFlightB" +
+      "yId\022 .flights.v1.GetFlightByIdRequest\032!." +
+      "flights.v1.GetFlightByIdResponseB\330\001\n\024gen" +
+      "erated.flights.v1B\014FlightsProtoP\001Zigithu" +
+      "b.com/edinstance/distributed-aviation-sy" +
+      "stem/services/flights/internal/protobuf/" +
+      "flights/v1;flightsv1\242\002\003FXX\252\002\nFlights.V1\312" +
+      "\002\nFlights\\V1\342\002\026Flights\\V1\\GPBMetadata\352\002\013" +
+      "Flights::V1b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -107,7 +108,7 @@ public final class FlightsProto {
     internal_static_flights_v1_Flight_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_flights_v1_Flight_descriptor,
-        new java.lang.String[] { "Id", "Number", "Origin", "Destination", "DepartureTime", "ArrivalTime", "Status", "AircraftId", });
+        new java.lang.String[] { "Id", "Number", "Origin", "Destination", "DepartureTime", "ArrivalTime", "Status", "AircraftId", "Airline", });
     internal_static_flights_v1_CreateFlightRequest_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_flights_v1_CreateFlightRequest_fieldAccessorTable = new

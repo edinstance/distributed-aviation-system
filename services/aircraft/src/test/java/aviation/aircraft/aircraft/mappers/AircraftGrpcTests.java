@@ -31,7 +31,8 @@ class AircraftGrpcTests {
             AircraftStatus.AVAILABLE,
             UUID.randomUUID(),
             UUID.randomUUID(),
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     Aircraft proto = AircraftGrpc.toProto(entity);

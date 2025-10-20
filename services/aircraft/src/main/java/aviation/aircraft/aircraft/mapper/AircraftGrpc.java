@@ -33,6 +33,7 @@ public final class AircraftGrpc {
             .setYearOfManufacture(entity.getYearOfManufacture())
             .setCapacity(entity.getCapacity())
             .setStatus(AircraftStatusMapper.toProto(entity.getStatus()))
+            .setAirline(entity.getAirline())
             .build();
   }
 }

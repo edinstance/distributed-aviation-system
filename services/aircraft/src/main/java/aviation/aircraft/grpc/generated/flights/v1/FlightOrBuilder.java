@@ -109,4 +109,16 @@ public interface FlightOrBuilder extends
    */
   com.google.protobuf.ByteString
       getAircraftIdBytes();
+
+  /**
+   * <code>string airline = 9 [json_name = "airline"];</code>
+   * @return The airline.
+   */
+  java.lang.String getAirline();
+  /**
+   * <code>string airline = 9 [json_name = "airline"];</code>
+   * @return The bytes for airline.
+   */
+  com.google.protobuf.ByteString
+      getAirlineBytes();
 }
