@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	userContext "github.com/edinstance/distributed-aviation-system/services/flights/internal/context"
-	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/google/uuid"
 )
 
@@ -38,8 +37,7 @@ func UserContextMiddleware(next http.Handler) http.Handler {
 				parsedOrgID = uuid.Nil
 			}
 		}
-		logger.Info("", headers)
-		logger.Info(orgName)
+
 		ctx := context.WithValue(r.Context(), userCtxKey, &userContext.UserContext{
 			UserID:  parsedUserID,
 			OrgID:   parsedOrgID,
