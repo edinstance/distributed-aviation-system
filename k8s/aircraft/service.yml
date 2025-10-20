@@ -4,8 +4,11 @@ metadata:
   name: aircraft-service
   namespace: aviation
 spec:
+  type: ClusterIP
   ports:
     - port: 8080
+      targetPort: 8080
+      protocol: TCP
   selector:
     app: aircraft-service
 ---
@@ -71,7 +74,7 @@ spec:
               value: "5000"
           readinessProbe:
             httpGet:
-              path: /health
+              path: /details/health
               port: 8080
             initialDelaySeconds: 10
             periodSeconds: 10
