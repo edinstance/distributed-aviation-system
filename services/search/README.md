@@ -30,6 +30,8 @@ export PORT=8082
 
 # Run the service
 mvn spring-boot:run
+```
+
 The service will start on `http://localhost:8082`
 
 ## Building

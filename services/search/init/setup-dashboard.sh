@@ -6,11 +6,18 @@ DASH_URL="http://opensearch-dashboards:5601"
 
 wait_for() {
   local URL=$1 NAME=$2
-  echo "⏳ Waiting for $NAME..."
-  until curl -fs "$URL" >/dev/null 2>&1; do
+  local TIMEOUT=300  # 5 minutes
+  local ELAPSED=0
+  echo "Waiting for $NAME..."
+  until curl -fs "$URL" >/dev/null 2>&1 || [ $ELAPSED -ge $TIMEOUT ]; do
     sleep 5
-    echo "  still waiting..."
+    ELAPSED=$((ELAPSED + 5))
+    echo "still waiting..."
   done
+  if [ $ELAPSED -ge $TIMEOUT ]; then
+    echo "Timeout waiting for $NAME after ${TIMEOUT}s"
+    exit 1
+  fi
   echo "$NAME ready."
 }
 
