@@ -27,6 +27,7 @@ public class CreateAircraftMapper {
             createAircraftInput.getStatus(),
             null,
             null,
+            null,
             null
     );
 

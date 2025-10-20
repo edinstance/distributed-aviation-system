@@ -33,7 +33,8 @@ public class AircraftEntityTests {
             AircraftStatus.AVAILABLE,
             UUID.randomUUID(),
             UUID.randomUUID(),
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     assertNotNull(aircraftEntity);
@@ -57,7 +58,8 @@ public class AircraftEntityTests {
             AircraftStatus.AVAILABLE,
             UUID.randomUUID(),
             UUID.randomUUID(),
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     assertNotNull(aircraftEntity);
@@ -82,7 +84,8 @@ public class AircraftEntityTests {
             AircraftStatus.AVAILABLE,
             UUID.randomUUID(),
             UUID.randomUUID(),
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            "British Airways"
     );
   }
 

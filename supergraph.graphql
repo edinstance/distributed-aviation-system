@@ -31,6 +31,7 @@ type Aircraft
   yearOfManufacture: Int! @join__field(graph: AIRCRAFT)
   capacity: Int! @join__field(graph: AIRCRAFT)
   status: AircraftStatus! @join__field(graph: AIRCRAFT)
+  airline: String! @join__field(graph: AIRCRAFT)
 }
 
 enum AircraftStatus
@@ -64,6 +65,7 @@ type Flight
   arrivalTime: Time!
   status: FlightStatus!
   aircraft: Aircraft
+  airline: String!
 }
 
 type FlightDocument

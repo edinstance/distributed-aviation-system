@@ -13,6 +13,7 @@ service FlightsService {
   // CreateFlight requires the following gRPC metadata headers:
   //   - x-user-sub: UUID of the authenticated user
   //   - x-org-id: UUID of the user's organization
+  //   - x-org-name: String the user's organization name
   rpc CreateFlight(CreateFlightRequest) returns (CreateFlightResponse);
   rpc GetFlightById(GetFlightByIdRequest) returns (GetFlightByIdResponse);
 }
@@ -36,6 +37,7 @@ message Flight {
   google.protobuf.Timestamp arrival_time = 6;
   FlightStatus status = 7;
   string aircraft_id = 8;
+  string airline = 9;
 }
 
 message CreateFlightRequest {

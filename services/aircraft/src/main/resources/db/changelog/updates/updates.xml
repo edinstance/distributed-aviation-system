@@ -6,5 +6,6 @@
         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
 
     <include file="aircraft-user-info.sql" relativeToChangelogFile="true" author="edinstance"/>
+    <include file="aircraft-airline-info.sql" relativeToChangelogFile="true" author="edinstance" />
 
 </databaseChangeLog>

@@ -53,6 +53,9 @@ public class AircraftEntity {
   @Column(name = "organization_id", nullable = false)
   private UUID organizationId;
 
+  @Column(name = "airline", nullable = false)
+  private String airline;
+
   /**
    * The default constructor.
    */
@@ -71,12 +74,14 @@ public class AircraftEntity {
    * @param createdBy         the user who created the aircraft.
    * @param lastUpdatedBy     the user who last updated the aircraft.
    * @param organizationId    the organization id of the aircraft.
+   * @param airline           the airline of the aircraft.
    */
   public AircraftEntity(String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,
                         AircraftStatus status, UUID createdBy,
-                        UUID lastUpdatedBy, UUID organizationId) {
+                        UUID lastUpdatedBy, UUID organizationId,
+                        String airline) {
     this.registration = registration;
     this.manufacturer = manufacturer;
     this.model = model;
@@ -86,6 +91,7 @@ public class AircraftEntity {
     this.createdBy = createdBy;
     this.lastUpdatedBy = lastUpdatedBy;
     this.organizationId = organizationId;
+    this.airline = airline;
   }
 
   /**
@@ -101,12 +107,14 @@ public class AircraftEntity {
    * @param createdBy         the user who created the aircraft.
    * @param lastUpdatedBy     the user who last updated the aircraft.
    * @param organizationId    the organization id of the aircraft.
+   * @param airline           the airline of the aircraft.
    */
   public AircraftEntity(UUID id, String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,
                         AircraftStatus status, UUID createdBy,
-                        UUID lastUpdatedBy, UUID organizationId) {
+                        UUID lastUpdatedBy, UUID organizationId,
+                        String airline) {
     this.id = id;
     this.registration = registration;
     this.manufacturer = manufacturer;
@@ -117,6 +125,7 @@ public class AircraftEntity {
     this.createdBy = createdBy;
     this.lastUpdatedBy = lastUpdatedBy;
     this.organizationId = organizationId;
+    this.airline = airline;
   }
 
 }

@@ -34,7 +34,8 @@ public class SetupQueriesTests {
             AircraftStatus.AVAILABLE,
             UUID.randomUUID(),
             UUID.randomUUID(),
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            "British Airways"
     );
   }
 }

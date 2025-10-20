@@ -68,6 +68,7 @@ func (service *Service) CreateFlight(
 		CreatedBy:      userContext.UserID,
 		LastUpdatedBy:  userContext.UserID,
 		OrganizationID: userContext.OrgID,
+		Airline:        userContext.OrgName,
 	}
 
 	if err := service.Repo.CreateFlight(ctx, flight); err != nil {

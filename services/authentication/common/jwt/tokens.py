@@ -50,6 +50,9 @@ class CustomRefreshToken(HeaderKidMixin, RefreshToken):
 
             if getattr(user, "org_id", None):
                 custom_access["org_id"] = str(user.org_id)
+                if getattr(user, "organization", None):
+                    custom_access["org_name"] = user.organization.name
+
 
             if hasattr(user, "roles"):
                 custom_access["roles"] = getattr(user, "roles", [])

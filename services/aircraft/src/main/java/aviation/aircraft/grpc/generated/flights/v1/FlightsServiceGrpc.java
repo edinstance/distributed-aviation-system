@@ -141,6 +141,12 @@ public final class FlightsServiceGrpc {
   public interface AsyncService {
 
     /**
+     * <pre>
+     * CreateFlight requires the following gRPC metadata headers:
+     *   - x-user-sub: UUID of the authenticated user
+     *   - x-org-id: UUID of the user's organization
+     *   - x-org-name: String the user's organization name
+     * </pre>
      */
     default void createFlight(generated.flights.v1.CreateFlightRequest request,
         io.grpc.stub.StreamObserver<generated.flights.v1.CreateFlightResponse> responseObserver) {
@@ -183,6 +189,12 @@ public final class FlightsServiceGrpc {
     }
 
     /**
+     * <pre>
+     * CreateFlight requires the following gRPC metadata headers:
+     *   - x-user-sub: UUID of the authenticated user
+     *   - x-org-id: UUID of the user's organization
+     *   - x-org-name: String the user's organization name
+     * </pre>
      */
     public void createFlight(generated.flights.v1.CreateFlightRequest request,
         io.grpc.stub.StreamObserver<generated.flights.v1.CreateFlightResponse> responseObserver) {
@@ -216,6 +228,12 @@ public final class FlightsServiceGrpc {
     }
 
     /**
+     * <pre>
+     * CreateFlight requires the following gRPC metadata headers:
+     *   - x-user-sub: UUID of the authenticated user
+     *   - x-org-id: UUID of the user's organization
+     *   - x-org-name: String the user's organization name
+     * </pre>
      */
     public generated.flights.v1.CreateFlightResponse createFlight(generated.flights.v1.CreateFlightRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
@@ -247,6 +265,12 @@ public final class FlightsServiceGrpc {
     }
 
     /**
+     * <pre>
+     * CreateFlight requires the following gRPC metadata headers:
+     *   - x-user-sub: UUID of the authenticated user
+     *   - x-org-id: UUID of the user's organization
+     *   - x-org-name: String the user's organization name
+     * </pre>
      */
     public generated.flights.v1.CreateFlightResponse createFlight(generated.flights.v1.CreateFlightRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
@@ -278,6 +302,12 @@ public final class FlightsServiceGrpc {
     }
 
     /**
+     * <pre>
+     * CreateFlight requires the following gRPC metadata headers:
+     *   - x-user-sub: UUID of the authenticated user
+     *   - x-org-id: UUID of the user's organization
+     *   - x-org-name: String the user's organization name
+     * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<generated.flights.v1.CreateFlightResponse> createFlight(
         generated.flights.v1.CreateFlightRequest request) {

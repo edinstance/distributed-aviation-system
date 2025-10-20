@@ -18,6 +18,7 @@ func UserContextMiddleware(next http.Handler) http.Handler {
 
 		userSub := headers.Get("x-user-sub")
 		orgID := headers.Get("x-org-id")
+		orgName := headers.Get("x-org-name")
 		roles := headers.Get("x-user-roles")
 
 		var parsedUserID, parsedOrgID uuid.UUID
@@ -38,9 +39,10 @@ func UserContextMiddleware(next http.Handler) http.Handler {
 		}
 
 		ctx := context.WithValue(r.Context(), userCtxKey, &userContext.UserContext{
-			UserID: parsedUserID,
-			OrgID:  parsedOrgID,
-			Roles:  roles,
+			UserID:  parsedUserID,
+			OrgID:   parsedOrgID,
+			OrgName: orgName,
+			Roles:   roles,
 		})
 
 		next.ServeHTTP(w, r.WithContext(ctx))

@@ -18,8 +18,9 @@ type Flight struct {
 	CreatedBy      uuid.UUID    `db:"created_by" json:"-"`
 	LastUpdatedBy  uuid.UUID    `db:"last_updated_by" json:"-"`
 	OrganizationID uuid.UUID    `db:"organization_id" json:"-"`
-	CreatedAt      time.Time    `db:"created_at" json:"created_at"`
-	UpdatedAt      time.Time    `db:"updated_at" json:"updated_at"`
+	Airline        string       `db:"airline" json:"airline"`
+	CreatedAt      time.Time    `db:"created_at" json:"-"`
+	UpdatedAt      time.Time    `db:"updated_at" json:"-"`
 }
 
 func (Flight) IsEntity() {}

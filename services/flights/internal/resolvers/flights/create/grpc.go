@@ -21,9 +21,10 @@ func extractUserContextFromMetadata(ctx context.Context, req *connect.Request[v1
 
 	userSub := req.Header().Get("x-user-sub")
 	orgID := req.Header().Get("x-org-id")
+	orgName := req.Header().Get("x-org-name")
 	roles := req.Header().Get("x-user-roles")
 
-	logger.Debug("Extracting user context from gRPC metadata", "userSub", userSub, "orgID", orgID, "roles", roles)
+	logger.Debug("Extracting user context from gRPC metadata", "userSub", userSub, "orgID", orgID, "orgName", orgName, "roles", roles)
 
 	// Require both user sub and org ID
 	if userSub == "" {
@@ -33,6 +34,11 @@ func extractUserContextFromMetadata(ctx context.Context, req *connect.Request[v1
 
 	if orgID == "" {
 		logger.Warn("Missing required organization ID in metadata")
+		return ctx, errors.New("missing required organization context")
+	}
+
+	if orgName == "" {
+		logger.Warn("Missing required organization name in metadata")
 		return ctx, errors.New("missing required organization context")
 	}
 
@@ -52,9 +58,10 @@ func extractUserContextFromMetadata(ctx context.Context, req *connect.Request[v1
 	}
 
 	userCtx := &userContext.UserContext{
-		UserID: parsedUserID,
-		OrgID:  parsedOrgID,
-		Roles:  roles,
+		UserID:  parsedUserID,
+		OrgID:   parsedOrgID,
+		OrgName: orgName,
+		Roles:   roles,
 	}
 
 	logger.Debug("Created user context", "userID", parsedUserID, "orgID", parsedOrgID, "roles", roles)

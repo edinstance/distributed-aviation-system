@@ -79,4 +79,16 @@ public interface AircraftOrBuilder extends
    * @return The status.
    */
   generated.aircraft.v1.AircraftStatus getStatus();
+
+  /**
+   * <code>string airline = 8 [json_name = "airline"];</code>
+   * @return The airline.
+   */
+  java.lang.String getAirline();
+  /**
+   * <code>string airline = 8 [json_name = "airline"];</code>
+   * @return The bytes for airline.
+   */
+  com.google.protobuf.ByteString
+      getAirlineBytes();
 }

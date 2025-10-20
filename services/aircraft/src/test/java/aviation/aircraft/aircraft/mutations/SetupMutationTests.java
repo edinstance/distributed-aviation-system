@@ -53,7 +53,8 @@ public class SetupMutationTests {
             AircraftStatus.AVAILABLE,
             UUID.randomUUID(),
             UUID.randomUUID(),
-            UUID.randomUUID()
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     userContext = UserContext.builder()

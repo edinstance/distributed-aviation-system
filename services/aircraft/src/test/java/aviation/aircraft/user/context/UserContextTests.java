@@ -21,32 +21,38 @@ public class UserContextTests {
 
   @Test
   public void testUserContextConstructor() {
-    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), List.of("roles"));
+    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), "British Airways", List.of("roles"));
 
     assertNotNull(userContext);
   }
 
   @BeforeEach
   public void setup() {
-    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), List.of("roles"));
+    userContext = new UserContext(UUID.randomUUID(), UUID.randomUUID(), "British Airways", List.of("roles"));
   }
 
   @Test
-  public void testUserIdMethods(){
+  public void testUserIdMethods() {
     UUID newId = UUID.randomUUID();
     userContext.setUserId(newId);
     assertEquals(newId, userContext.getUserId());
   }
 
   @Test
-  public void testOrgIdMethods(){
+  public void testOrgIdMethods() {
     UUID newId = UUID.randomUUID();
     userContext.setOrgId(newId);
     assertEquals(newId, userContext.getOrgId());
   }
 
   @Test
-  public void testRolesMethods(){
+  public void testOrganizationNameMethods() {
+    userContext.setOrgName("New Org Name");
+    assertEquals("New Org Name", userContext.getOrgName());
+  }
+
+  @Test
+  public void testRolesMethods() {
     userContext.setRoles(List.of("New Roles"));
     assert userContext.getRoles().contains("New Roles");
   }

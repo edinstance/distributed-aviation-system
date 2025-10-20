@@ -55,6 +55,7 @@ public class AircraftService {
     aircraft.setCreatedBy(userCtx.getUserId());
     aircraft.setLastUpdatedBy(userCtx.getUserId());
     aircraft.setOrganizationId(userCtx.getOrgId());
+    aircraft.setAirline(userCtx.getOrgName());
 
     AircraftLogger.info(String.format(
             "User %s (org=%s) is creating aircraft id=%s (registration=%s)",

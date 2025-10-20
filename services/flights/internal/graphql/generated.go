@@ -63,6 +63,7 @@ type ComplexityRoot struct {
 
 	Flight struct {
 		Aircraft      func(childComplexity int) int
+		Airline       func(childComplexity int) int
 		ArrivalTime   func(childComplexity int) int
 		DepartureTime func(childComplexity int) int
 		Destination   func(childComplexity int) int
@@ -146,6 +147,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Flight.Aircraft(childComplexity), true
+	case "Flight.airline":
+		if e.complexity.Flight.Airline == nil {
+			break
+		}
+
+		return e.complexity.Flight.Airline(childComplexity), true
 	case "Flight.arrivalTime":
 		if e.complexity.Flight.ArrivalTime == nil {
 			break
@@ -631,6 +638,8 @@ func (ec *executionContext) fieldContext_Entity_findFlightByID(ctx context.Conte
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
+			case "airline":
+				return ec.fieldContext_Flight_airline(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -885,6 +894,35 @@ func (ec *executionContext) fieldContext_Flight_aircraft(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Flight_airline(ctx context.Context, field graphql.CollectedField, obj *models.Flight) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Flight_airline,
+		func(ctx context.Context) (any, error) {
+			return obj.Airline, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Flight_airline(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Flight",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createFlight(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -939,6 +977,8 @@ func (ec *executionContext) fieldContext_Mutation_createFlight(ctx context.Conte
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
+			case "airline":
+				return ec.fieldContext_Flight_airline(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -998,6 +1038,8 @@ func (ec *executionContext) fieldContext_Query_getFlightById(ctx context.Context
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
+			case "airline":
+				return ec.fieldContext_Flight_airline(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -2917,6 +2959,11 @@ func (ec *executionContext) _Flight(ctx context.Context, sel ast.SelectionSet, o
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "airline":
+			out.Values[i] = ec._Flight_airline(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

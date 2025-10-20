@@ -66,6 +66,7 @@ pub async fn route_handler(
                 request_id = %request_id,
                 user_id = %c.sub,
                 org_id = %c.org_id,
+                org_name = %c.org_name,
                 roles = ?c.roles,
                 "JWT verification successful"
             );
@@ -97,6 +98,9 @@ pub async fn route_handler(
     }
     if let Ok(header_value) = claims.org_id.parse() {
         parts.headers.insert("x-org-id", header_value);
+    }
+    if let Ok(header_value) = claims.org_name.parse() {
+        parts.headers.insert("x-org-name", header_value);
     }
     if let Ok(header_value) = claims.roles.join(",").parse() {
         parts.headers.insert("x-user-roles", header_value);
