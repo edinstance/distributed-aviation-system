@@ -9,7 +9,8 @@ on:
       - dev
       - test
 
-permissions: 
+permissions:
+  contents: read
   packages: write
 
 concurrency:
