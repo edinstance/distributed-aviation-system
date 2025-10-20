@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub struct Claims {
     pub sub: String,
     pub org_id: String,
+    pub org_name: String,
     pub roles: Vec<String>,
     pub exp: usize,
 }

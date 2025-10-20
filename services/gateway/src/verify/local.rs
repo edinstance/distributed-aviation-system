@@ -122,6 +122,7 @@ pub async fn verify_jwt(
         kid = %kid,
         user_id = %claims.sub,
         org_id = %claims.org_id,
+        org_name = %claims.org_name,
         roles = ?claims.roles,
         expires_at = claims.exp,
         duration_ms = %duration,
