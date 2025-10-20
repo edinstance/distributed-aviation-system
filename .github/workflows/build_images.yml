@@ -53,4 +53,4 @@ jobs:
           push: true
           tags: |
             ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:${{ github.sha }}
-            ${{ github.event.pull_request.base.ref == 'main' && format('{0}-{1}:latest', env.IMAGE_PREFIX, matrix.service) || '' }}
+            ${{ github.ref_name == 'main' && format('{0}-{1}:latest', env.IMAGE_PREFIX, matrix.service) || '' }}
