@@ -1,0 +1,39 @@
+{
+  "settings": {
+    "number_of_shards": 1
+  },
+  "mappings": {
+    "properties": {
+      "flightId": {
+        "type": "keyword"
+      },
+      "number": {
+        "type": "text"
+      },
+      "origin": {
+        "type": "keyword"
+      },
+      "destination": {
+        "type": "keyword"
+      },
+      "route": {
+        "type": "keyword"
+      },
+      "departureTime": {
+        "type": "date"
+      },
+      "arrivalTime": {
+        "type": "date"
+      },
+      "airline": {
+        "type": "keyword"
+      },
+      "status": {
+        "type": "keyword"
+      },
+      "indexedAt": {
+        "type": "date"
+      }
+    }
+  }
+}

@@ -25,6 +25,7 @@ include:
   - ./services/flights/docker-compose.yml
   - ./services/aircraft/docker-compose.yml
   - ./services/authentication/docker-compose.yml
+  - ./services/search/docker-compose.yml
   - ./kafka/docker-compose.yml
   - ./monitoring/docker-compose.yml
 

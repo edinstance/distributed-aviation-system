@@ -1,0 +1,10 @@
+{
+  "attributes": {
+    "title": "Top Origin Airports",
+    "visState": "{\"title\":\"Top Origin Airports\",\"type\":\"horizontal_bar\",\"params\":{\"addTooltip\":true,\"addLegend\":false,\"categoryAxes\":[{\"position\":\"left\"}],\"valueAxes\":[{\"position\":\"bottom\"}]},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\"},{\"id\":\"2\",\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"origin\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}]}",
+    "uiStateJSON": "{}",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"flights\",\"query\":{\"match_all\":{}},\"filter\":[]}"
+    }
+  }
+}

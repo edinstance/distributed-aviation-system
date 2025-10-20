@@ -1,0 +1,13 @@
+{
+  "attributes": {
+    "title": "Flight Details Search",
+    "description": "All flight details for table view",
+    "hits": 0,
+    "columns": ["flightId", "number", "airline", "origin", "destination", "status", "departureTime", "arrivalTime"],
+    "sort": [["departureTime", "desc"]],
+    "version": 1,
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"flights\",\"query\":{\"match_all\":{}},\"filter\":[]}"
+    }
+  }
+}

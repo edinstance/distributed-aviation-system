@@ -8,3 +8,7 @@ subgraphs:
     routing_url: http://aircraft-service:8080/graphql
     schema:
       file: ./services/aircraft/src/main/resources/schema/schema.graphqls
+  search:
+    routing_url: http://search-service:8082/graphql
+    schema:
+      file: ./services/search/src/main/resources/schema/schema.graphqls

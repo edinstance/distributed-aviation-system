@@ -44,6 +44,7 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 		"delivery.timeout.ms":     60000,
 		"socket.keepalive.enable": true,
 	})
+
 	if err != nil {
 		logger.ErrorContext(context.Background(), "Failed to create Kafka producer",
 			"err", err, "broker_url", brokerURL)
@@ -67,7 +68,7 @@ func NewPublisher(brokerURL, schemaRegistryURL, topic string) (*Publisher, error
 
 	// Avro Serializer configuration
 	sConfig := avro.NewSerializerConfig()
-	sConfig.AutoRegisterSchemas = true
+	sConfig.AutoRegisterSchemas = false
 	sConfig.UseLatestVersion = true
 
 	serializer, err := avro.NewGenericSerializer(srClient, serde.ValueSerde, sConfig)
