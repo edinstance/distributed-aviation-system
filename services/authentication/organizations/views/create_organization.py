@@ -171,6 +171,7 @@ class CreateOrganization(APIView):
                     "id": user.id,
                     "username": user.username,
                     "email": user.email,
+                    "roles": user.roles,
                     "org_id": org.id,
                 }
             else:

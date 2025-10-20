@@ -49,6 +49,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	Authentication func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -62,6 +63,7 @@ type ComplexityRoot struct {
 
 	Flight struct {
 		Aircraft      func(childComplexity int) int
+		Airline       func(childComplexity int) int
 		ArrivalTime   func(childComplexity int) int
 		DepartureTime func(childComplexity int) int
 		Destination   func(childComplexity int) int
@@ -145,6 +147,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Flight.Aircraft(childComplexity), true
+	case "Flight.airline":
+		if e.complexity.Flight.Airline == nil {
+			break
+		}
+
+		return e.complexity.Flight.Airline(childComplexity), true
 	case "Flight.arrivalTime":
 		if e.complexity.Flight.ArrivalTime == nil {
 			break
@@ -566,7 +574,9 @@ func (ec *executionContext) _Aircraft_id(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Aircraft_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -628,6 +638,8 @@ func (ec *executionContext) fieldContext_Entity_findFlightByID(ctx context.Conte
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
+			case "airline":
+				return ec.fieldContext_Flight_airline(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -681,7 +693,9 @@ func (ec *executionContext) _Flight_number(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Flight_number,
-		func(ctx context.Context) (any, error) { return obj.Number, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Number, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -708,7 +722,9 @@ func (ec *executionContext) _Flight_origin(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Flight_origin,
-		func(ctx context.Context) (any, error) { return obj.Origin, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Origin, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -735,7 +751,9 @@ func (ec *executionContext) _Flight_destination(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Flight_destination,
-		func(ctx context.Context) (any, error) { return obj.Destination, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Destination, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -762,7 +780,9 @@ func (ec *executionContext) _Flight_departureTime(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Flight_departureTime,
-		func(ctx context.Context) (any, error) { return obj.DepartureTime, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DepartureTime, nil
+		},
 		nil,
 		ec.marshalNTime2timeᚐTime,
 		true,
@@ -789,7 +809,9 @@ func (ec *executionContext) _Flight_arrivalTime(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Flight_arrivalTime,
-		func(ctx context.Context) (any, error) { return obj.ArrivalTime, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ArrivalTime, nil
+		},
 		nil,
 		ec.marshalNTime2timeᚐTime,
 		true,
@@ -816,7 +838,9 @@ func (ec *executionContext) _Flight_status(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Flight_status,
-		func(ctx context.Context) (any, error) { return obj.Status, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Status, nil
+		},
 		nil,
 		ec.marshalNFlightStatus2githubᚗcomᚋedinstanceᚋdistributedᚑaviationᚑsystemᚋservicesᚋflightsᚋinternalᚋdatabaseᚋmodelsᚐFlightStatus,
 		true,
@@ -870,6 +894,35 @@ func (ec *executionContext) fieldContext_Flight_aircraft(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Flight_airline(ctx context.Context, field graphql.CollectedField, obj *models.Flight) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Flight_airline,
+		func(ctx context.Context) (any, error) {
+			return obj.Airline, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Flight_airline(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Flight",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createFlight(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -880,7 +933,20 @@ func (ec *executionContext) _Mutation_createFlight(ctx context.Context, field gr
 			fc := graphql.GetFieldContext(ctx)
 			return ec.resolvers.Mutation().CreateFlight(ctx, fc.Args["number"].(string), fc.Args["origin"].(string), fc.Args["destination"].(string), fc.Args["departureTime"].(time.Time), fc.Args["arrivalTime"].(time.Time), fc.Args["aircraftId"].(string))
 		},
-		nil,
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.Authentication == nil {
+					var zeroVal *models.Flight
+					return zeroVal, errors.New("directive authentication is not implemented")
+				}
+				return ec.directives.Authentication(ctx, nil, directive0)
+			}
+
+			next = directive1
+			return next
+		},
 		ec.marshalNFlight2ᚖgithubᚗcomᚋedinstanceᚋdistributedᚑaviationᚑsystemᚋservicesᚋflightsᚋinternalᚋdatabaseᚋmodelsᚐFlight,
 		true,
 		true,
@@ -911,6 +977,8 @@ func (ec *executionContext) fieldContext_Mutation_createFlight(ctx context.Conte
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
+			case "airline":
+				return ec.fieldContext_Flight_airline(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -970,6 +1038,8 @@ func (ec *executionContext) fieldContext_Query_getFlightById(ctx context.Context
 				return ec.fieldContext_Flight_status(ctx, field)
 			case "aircraft":
 				return ec.fieldContext_Flight_aircraft(ctx, field)
+			case "airline":
+				return ec.fieldContext_Flight_airline(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Flight", field.Name)
 		},
@@ -1176,7 +1246,9 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext__Service_sdl,
-		func(ctx context.Context) (any, error) { return obj.SDL, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SDL, nil
+		},
 		nil,
 		ec.marshalOString2string,
 		true,
@@ -1203,7 +1275,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1259,7 +1333,9 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_isRepeatable,
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -1286,7 +1362,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_locations,
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		ec.marshalN__DirectiveLocation2ᚕstringᚄ,
 		true,
@@ -1313,7 +1391,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -1365,7 +1445,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___EnumValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1479,7 +1561,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1535,7 +1619,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -1587,7 +1673,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -1696,7 +1784,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1752,7 +1842,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -1803,7 +1895,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_defaultValue,
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2865,6 +2959,11 @@ func (ec *executionContext) _Flight(ctx context.Context, sel ast.SelectionSet, o
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "airline":
+			out.Values[i] = ec._Flight_airline(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

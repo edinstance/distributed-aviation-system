@@ -14,9 +14,11 @@ import (
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/clients/aircraft_client"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/config"
 	flightRepository "github.com/edinstance/distributed-aviation-system/services/flights/internal/database/repositories/flights"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/directives"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/flights"
 	graphqlschema "github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/graphql/resolvers"
+	"github.com/edinstance/distributed-aviation-system/services/flights/internal/kafka"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/logger"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/metrics"
 	"github.com/edinstance/distributed-aviation-system/services/flights/internal/resolvers/flights/create"
@@ -28,7 +30,7 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 )
 
-func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
+func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client, kafkaPublisher *kafka.Publisher) http.Handler {
 	logger.Info("Setting up GraphQL Handler")
 	dbRepo := flightRepository.NewFlightRepository(pool)
 	cacheRepo := cacheRepository.NewRedisFlightRepository(client, config.App.CacheTTL)
@@ -39,7 +41,7 @@ func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 		return nil
 	}
 
-	flightService := flights.NewFlightsService(dbRepo, cacheRepo, aircraftClient)
+	flightService := flights.NewFlightsService(dbRepo, cacheRepo, aircraftClient, kafkaPublisher)
 	graphqlCreateFlightResolver := create.NewCreateFlightResolver(flightService)
 	graphqlGetFlightResolver := get.NewGetFlightResolver(flightService)
 
@@ -48,7 +50,16 @@ func newGraphQLHandler(pool *pgxpool.Pool, client *redis.Client) http.Handler {
 		GetFlightResolver:    graphqlGetFlightResolver,
 	}
 
-	srv := handler.New(graphqlschema.NewExecutableSchema(graphqlschema.Config{Resolvers: resolver}))
+	srv := handler.New(
+		graphqlschema.NewExecutableSchema(
+			graphqlschema.Config{
+				Resolvers: resolver,
+				Directives: graphqlschema.DirectiveRoot{
+					Authentication: directives.AuthenticationDirective,
+				},
+			},
+		),
+	)
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})

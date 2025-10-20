@@ -1,0 +1,63 @@
+spring:
+  application:
+    name: search
+  profiles:
+    active: dev
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: search-service
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: io.confluent.kafka.serializers.KafkaAvroDeserializer
+      properties:
+        schema.registry.url: http://localhost:8081
+        specific.avro.reader: false
+
+server:
+  port: 8082
+
+opensearch:
+  host: opensearch-node-1
+  port: 9200
+  username: admin
+  password: CH@nge1M3
+  scheme: https
+  dashboard:
+    host: opensearch-dashboards
+    port: 5601
+    auto-setup: true
+
+# Actuator config
+management:
+  endpoints:
+    web:
+      base-path: "/details"
+      exposure:
+        include: "health,info,metrics"
+    jmx:
+      exposure:
+        include: "health"
+  otlp:
+    metrics:
+      export:
+        url: http://localhost:4317
+        step: 5
+    tracing:
+      endpoint: http://localhost:4317
+  tracing:
+    otlp:
+      endpoint: http://localhost:4317
+  logging:
+    otlp:
+      endpoint: http://localhost:4317
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+dgs:
+  graphql:
+    path: "/graphql"
+    introspection:
+      enabled: true

@@ -32,6 +32,7 @@ private static final long serialVersionUID = 0L;
     manufacturer_ = "";
     model_ = "";
     status_ = 0;
+    airline_ = "";
   }
 
   public static final com.google.protobuf.Descriptors.Descriptor
@@ -243,6 +244,45 @@ private static final long serialVersionUID = 0L;
     return result == null ? generated.aircraft.v1.AircraftStatus.UNRECOGNIZED : result;
   }
 
+  public static final int AIRLINE_FIELD_NUMBER = 8;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object airline_ = "";
+  /**
+   * <code>string airline = 8 [json_name = "airline"];</code>
+   * @return The airline.
+   */
+  @java.lang.Override
+  public java.lang.String getAirline() {
+    java.lang.Object ref = airline_;
+    if (ref instanceof java.lang.String) {
+      return (java.lang.String) ref;
+    } else {
+      com.google.protobuf.ByteString bs = 
+          (com.google.protobuf.ByteString) ref;
+      java.lang.String s = bs.toStringUtf8();
+      airline_ = s;
+      return s;
+    }
+  }
+  /**
+   * <code>string airline = 8 [json_name = "airline"];</code>
+   * @return The bytes for airline.
+   */
+  @java.lang.Override
+  public com.google.protobuf.ByteString
+      getAirlineBytes() {
+    java.lang.Object ref = airline_;
+    if (ref instanceof java.lang.String) {
+      com.google.protobuf.ByteString b = 
+          com.google.protobuf.ByteString.copyFromUtf8(
+              (java.lang.String) ref);
+      airline_ = b;
+      return b;
+    } else {
+      return (com.google.protobuf.ByteString) ref;
+    }
+  }
+
   private byte memoizedIsInitialized = -1;
   @java.lang.Override
   public final boolean isInitialized() {
@@ -278,6 +318,9 @@ private static final long serialVersionUID = 0L;
     if (status_ != generated.aircraft.v1.AircraftStatus.AIRCRAFT_STATUS_UNSPECIFIED.getNumber()) {
       output.writeEnum(7, status_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(airline_)) {
+      com.google.protobuf.GeneratedMessage.writeString(output, 8, airline_);
+    }
     getUnknownFields().writeTo(output);
   }
 
@@ -311,6 +354,9 @@ private static final long serialVersionUID = 0L;
       size += com.google.protobuf.CodedOutputStream
         .computeEnumSize(7, status_);
     }
+    if (!com.google.protobuf.GeneratedMessage.isStringEmpty(airline_)) {
+      size += com.google.protobuf.GeneratedMessage.computeStringSize(8, airline_);
+    }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
@@ -339,6 +385,8 @@ private static final long serialVersionUID = 0L;
     if (getCapacity()
         != other.getCapacity()) return false;
     if (status_ != other.status_) return false;
+    if (!getAirline()
+        .equals(other.getAirline())) return false;
     if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
@@ -364,6 +412,8 @@ private static final long serialVersionUID = 0L;
     hash = (53 * hash) + getCapacity();
     hash = (37 * hash) + STATUS_FIELD_NUMBER;
     hash = (53 * hash) + status_;
+    hash = (37 * hash) + AIRLINE_FIELD_NUMBER;
+    hash = (53 * hash) + getAirline().hashCode();
     hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
@@ -502,6 +552,7 @@ private static final long serialVersionUID = 0L;
       yearOfManufacture_ = 0;
       capacity_ = 0;
       status_ = 0;
+      airline_ = "";
       return this;
     }
 
@@ -556,6 +607,9 @@ private static final long serialVersionUID = 0L;
       if (((from_bitField0_ & 0x00000040) != 0)) {
         result.status_ = status_;
       }
+      if (((from_bitField0_ & 0x00000080) != 0)) {
+        result.airline_ = airline_;
+      }
     }
 
     @java.lang.Override
@@ -598,6 +652,11 @@ private static final long serialVersionUID = 0L;
       }
       if (other.status_ != 0) {
         setStatusValue(other.getStatusValue());
+      }
+      if (!other.getAirline().isEmpty()) {
+        airline_ = other.airline_;
+        bitField0_ |= 0x00000080;
+        onChanged();
       }
       this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
@@ -660,6 +719,11 @@ private static final long serialVersionUID = 0L;
               bitField0_ |= 0x00000040;
               break;
             } // case 56
+            case 66: {
+              airline_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000080;
+              break;
+            } // case 66
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -1078,6 +1142,78 @@ private static final long serialVersionUID = 0L;
     public Builder clearStatus() {
       bitField0_ = (bitField0_ & ~0x00000040);
       status_ = 0;
+      onChanged();
+      return this;
+    }
+
+    private java.lang.Object airline_ = "";
+    /**
+     * <code>string airline = 8 [json_name = "airline"];</code>
+     * @return The airline.
+     */
+    public java.lang.String getAirline() {
+      java.lang.Object ref = airline_;
+      if (!(ref instanceof java.lang.String)) {
+        com.google.protobuf.ByteString bs =
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        airline_ = s;
+        return s;
+      } else {
+        return (java.lang.String) ref;
+      }
+    }
+    /**
+     * <code>string airline = 8 [json_name = "airline"];</code>
+     * @return The bytes for airline.
+     */
+    public com.google.protobuf.ByteString
+        getAirlineBytes() {
+      java.lang.Object ref = airline_;
+      if (ref instanceof String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        airline_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+    /**
+     * <code>string airline = 8 [json_name = "airline"];</code>
+     * @param value The airline to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAirline(
+        java.lang.String value) {
+      if (value == null) { throw new NullPointerException(); }
+      airline_ = value;
+      bitField0_ |= 0x00000080;
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string airline = 8 [json_name = "airline"];</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearAirline() {
+      airline_ = getDefaultInstance().getAirline();
+      bitField0_ = (bitField0_ & ~0x00000080);
+      onChanged();
+      return this;
+    }
+    /**
+     * <code>string airline = 8 [json_name = "airline"];</code>
+     * @param value The bytes for airline to set.
+     * @return This builder for chaining.
+     */
+    public Builder setAirlineBytes(
+        com.google.protobuf.ByteString value) {
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
+      airline_ = value;
+      bitField0_ |= 0x00000080;
       onChanged();
       return this;
     }

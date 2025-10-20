@@ -1,5 +1,5 @@
 services:
-  apollo-router:
+  graphql-router:
     image: ghcr.io/apollographql/router:v2.6.2
     container_name: graphql-router
     volumes:
@@ -21,9 +21,12 @@ services:
       - aviation-network
 
 include:
+  - ./services/gateway/docker-compose.yml
   - ./services/flights/docker-compose.yml
   - ./services/aircraft/docker-compose.yml
   - ./services/authentication/docker-compose.yml
+  - ./services/search/docker-compose.yml
+  - ./kafka/docker-compose.yml
   - ./monitoring/docker-compose.yml
 
 networks:

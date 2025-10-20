@@ -13,6 +13,18 @@ include_subgraph_errors:
     flights: true
     aircraft: true
 
+headers:
+  all:
+    request:
+      - propagate:
+          named: x-user-sub
+      - propagate:
+          named: x-org-id
+      - propagate:
+          named: x-org-name
+      - propagate:
+          named: x-user-roles
+
 telemetry:
   exporters:
     tracing:

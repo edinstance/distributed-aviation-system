@@ -1,0 +1,46 @@
+# Build the docker image
+FROM maven:3.9-eclipse-temurin-21-alpine AS build
+
+# Set the working directory
+WORKDIR /app
+
+# Copy the pom and prefetch the dependencies.
+COPY pom.xml .
+RUN mvn dependency:go-offline
+
+# Copy the rest of the project files
+COPY src ./src
+COPY config ./config
+
+# Set property files
+RUN mv src/main/resources/prod-application.example.yml src/main/resources/application.yml
+
+# Run the maven lifecycles to build the application
+RUN mvn clean package -DskipTests
+
+# Stage 2: Create the run time image
+FROM eclipse-temurin:21-jdk-alpine AS run
+
+# Set the working directory
+WORKDIR /app
+
+RUN apk add --no-cache curl jq
+
+HEALTHCHECK CMD curl -sSf http://127.0.0.1:8082/details/health | jq '.status' | grep -q '\"UP\"' || exit 1
+
+
+# Copy the JAR file built in the previous stage
+COPY --from=build /app/target/*-SNAPSHOT.jar ./app.jar
+
+# Copy the open telemetry java agent that was downloaded
+COPY --from=build /app/target/opentelemetry-javaagent.jar ./opentelemetry-javaagent.jar
+
+ENV PORT=8082
+
+# Expose the applications port
+EXPOSE ${PORT}
+
+# Command to run the application
+CMD ["java", \
+    "-javaagent:/app/opentelemetry-javaagent.jar", \
+    "-jar", "app.jar"]

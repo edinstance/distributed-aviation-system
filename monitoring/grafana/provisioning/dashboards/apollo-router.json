@@ -37,7 +37,7 @@
       },
       "targets": [
         {
-          "expr": "sum(apollo_router_operations_total{job=\"apollo-router\"})",
+          "expr": "sum(apollo_router_operations_total)",
           "legendFormat": "total"
         }
       ]
@@ -53,7 +53,7 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(apollo_router_operations_total{job=\"apollo-router\"}[5m]))",
+          "expr": "sum(rate(apollo_router_operations_total[5m]))",
           "legendFormat": "req/sec"
         }
       ]
@@ -69,7 +69,7 @@
       },
       "targets": [
         {
-          "expr": "100 * sum(rate(apollo_router_graphql_error_total{job=\"apollo-router\"}[5m])) / clamp_min(sum(rate(apollo_router_operations_total{job=\"apollo-router\"}[5m])),1e-9)",
+          "expr": "100 * sum(rate(apollo_router_graphql_error_total[5m])) / clamp_min(sum(rate(apollo_router_operations_total[5m])),1e-9)",
           "legendFormat": "errors %"
         }
       ]
@@ -85,7 +85,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket{job=\"apollo-router\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket[5m])) by (le))",
           "legendFormat": "latency"
         }
       ]
@@ -112,7 +112,7 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket{job=\"apollo-router\"}[5m])) by (le,subgraph_name))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_client_request_duration_seconds_bucket[5m])) by (le,subgraph_name))",
           "legendFormat": "{{code}}"
         }
       ]
@@ -128,7 +128,7 @@
       },
       "targets": [
         {
-          "expr": "sum by (code) (rate(apollo_router_graphql_error_total{job=\"apollo-router\"}[5m]))",
+          "expr": "sum by (code) (rate(apollo_router_graphql_error_total[5m]))",
           "legendFormat": "{{code}}"
         }
       ]

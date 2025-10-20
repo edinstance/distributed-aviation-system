@@ -58,6 +58,9 @@ services:
       CACHE_URL: ${REDIS_URL:-redis://flights-cache:6379}
       AIRCRAFT_SERVICE_GRPC_URL: ${AIRCRAFT_SERVICE_GRPC_URL:-aircraft-service:9090}
       OTLP_GRPC_URL: ${OTLP_GRPC_URL:-otel-collector:4317}
+      KAFKA_BROKER_URL: ${KAFKA_BROKER_URL:-kafka:9092}
+      KAFKA_SCHEMA_REGISTRY_URL: ${KAFKA_SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      KAFKA_FLIGHTS_TOPIC: ${KAFKA_FLIGHTS_TOPIC:-flights}
       ENVIRONMENT: "prod"
       PORT: 8081
     healthcheck:

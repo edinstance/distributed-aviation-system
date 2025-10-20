@@ -12,6 +12,7 @@ public class CreateAircraftMapper {
    * The function which maps an input to an entity.
    *
    * @param createAircraftInput the create aircraft input that should be mapped.
+   *
    * @return the input as an entity.
    */
   public static AircraftEntity toEntity(CreateAircraftInput createAircraftInput) {
@@ -23,7 +24,11 @@ public class CreateAircraftMapper {
             createAircraftInput.getModel(),
             createAircraftInput.getYearOfManufacture(),
             createAircraftInput.getCapacity(),
-            createAircraftInput.getStatus()
+            createAircraftInput.getStatus(),
+            null,
+            null,
+            null,
+            null
     );
 
   }

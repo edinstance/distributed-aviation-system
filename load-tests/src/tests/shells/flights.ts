@@ -9,6 +9,7 @@ import {
 } from "../../gql/graphql";
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import { check } from "k6";
+import { AuthContext } from "src/types/auth_context";
 
 function randomFlightNumber(): string {
   const airlines = ["BA", "UA", "LH", "AF"];
@@ -16,24 +17,43 @@ function randomFlightNumber(): string {
   return code + Math.floor(100 + Math.random() * 9000);
 }
 
-export function runFlightScenario(url: string, aircraftId: string) {
+export function runFlightScenario(
+  url: string,
+  aircraftId: string,
+  accessToken?: string,
+  authContext?: AuthContext,
+) {
   graphql<GetFlightByIdQuery, GetFlightByIdQueryVariables>(
     url,
     GetFlightByIdDocument,
     { id: uuidv4() },
+    accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
   );
 
   const createRes = graphql<
     CreateFlightMutation,
     CreateFlightMutationVariables
-  >(url, CreateFlightDocument, {
-    aircraftId,
-    number: randomFlightNumber(),
-    origin: "LHR",
-    destination: "JFK",
-    departureTime: new Date().toISOString(),
-    arrivalTime: new Date(Date.now() + 3600 * 1000).toISOString(),
-  });
+  >(
+    url,
+    CreateFlightDocument,
+    {
+      aircraftId,
+      number: randomFlightNumber(),
+      origin: "LHR",
+      destination: "JFK",
+      departureTime: new Date().toISOString(),
+      arrivalTime: new Date(Date.now() + 3600 * 1000).toISOString(),
+    },
+    {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      ...(authContext
+        ? {
+            "x-org-id": authContext.organization.id,
+            "x-user-sub": authContext.admin.id,
+          }
+        : {}),
+    },
+  );
 
   check(createRes, {
     "flight created": (r) => !!r?.createFlight?.id,
@@ -46,6 +66,7 @@ export function runFlightScenario(url: string, aircraftId: string) {
       url,
       GetFlightByIdDocument,
       { id: flightId },
+      accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
     );
   }
 

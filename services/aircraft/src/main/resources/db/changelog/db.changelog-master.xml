@@ -7,5 +7,6 @@
 
     <include file="triggers/triggers.xml" relativeToChangelogFile="true" author="edinstance"/>
     <include file="tables/tables.xml" relativeToChangelogFile="true" author="edinstance"/>
+    <include file="updates/updates.xml" relativeToChangelogFile="true" author="edinstance"/>
 
 </databaseChangeLog>

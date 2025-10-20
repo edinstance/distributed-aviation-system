@@ -1,0 +1,9 @@
+{
+  "attributes": {
+    "title": "Flights by Airline",
+    "visState": "{\"title\":\"Flights by Airline\",\"type\":\"pie\",\"params\":{\"isDonut\":true,\"labels\":{\"show\":true,\"last_level\":true,\"values\":true},\"legendPosition\":\"right\"},\"aggs\":[{\"id\":\"1\",\"type\":\"count\",\"schema\":\"metric\"},{\"id\":\"2\",\"type\":\"terms\",\"schema\":\"segment\",\"params\":{\"field\":\"airline\",\"size\":10,\"order\":\"desc\",\"orderBy\":\"1\"}}]}",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"index\":\"flights\",\"query\":{\"match_all\":{}},\"filter\":[]}"
+    }
+  }
+}

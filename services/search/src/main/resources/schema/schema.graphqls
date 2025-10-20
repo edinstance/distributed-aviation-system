@@ -1,0 +1,17 @@
+type Query {
+    searchFlights(searchTerm: String!): [FlightDocument!]!
+    searchFlightsByRoute(origin: String!, destination: String!): [FlightDocument!]!
+    searchFlightsByAirline(airline: String!): [FlightDocument!]!
+}
+
+type FlightDocument {
+    flightId: String!
+    number: String!
+    origin: String!
+    destination: String!
+    departureTime: String!
+    arrivalTime: String!
+    airline: String!
+    status: String!
+    indexedAt: String!
+}

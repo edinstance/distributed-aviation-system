@@ -14,14 +14,19 @@ type repository interface {
 	GetFlightByID(ctx context.Context, id uuid.UUID) (*models.Flight, error)
 }
 
+type kafkaPublisher interface {
+	PublishFlightCreated(ctx context.Context, flight *models.Flight) error
+}
+
 type Service struct {
 	Repo           repository
 	Cache          flights.FlightCacheRepository
 	AircraftClient aircraft_client.AircraftValidator
+	KafkaPublisher kafkaPublisher
 }
 
 // NewFlightsService returns a new *Service that uses the provided repository for flight persistence.
 func NewFlightsService(repo repository, cache flights.FlightCacheRepository,
-	aircraftClient aircraft_client.AircraftValidator) *Service {
-	return &Service{Repo: repo, Cache: cache, AircraftClient: aircraftClient}
+	aircraftClient aircraft_client.AircraftValidator, kafkaPublisher kafkaPublisher) *Service {
+	return &Service{Repo: repo, Cache: cache, AircraftClient: aircraftClient, KafkaPublisher: kafkaPublisher}
 }

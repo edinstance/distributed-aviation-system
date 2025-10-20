@@ -90,16 +90,20 @@ func TestFlightRepositoryCreateFlight(testHelper *testing.T) {
 			defer mock.Close()
 
 			flight := &models.Flight{
-				ID:            uuid.New(),
-				Number:        "AA123",
-				Origin:        "LAX",
-				Destination:   "JFK",
-				DepartureTime: time.Date(2024, 12, 15, 10, 0, 0, 0, time.UTC),
-				ArrivalTime:   time.Date(2024, 12, 15, 15, 0, 0, 0, time.UTC),
-				Status:        models.FlightStatusScheduled,
+				ID:             uuid.New(),
+				Number:         "AA123",
+				Origin:         "LAX",
+				Destination:    "JFK",
+				DepartureTime:  time.Date(2024, 12, 15, 10, 0, 0, 0, time.UTC),
+				ArrivalTime:    time.Date(2024, 12, 15, 15, 0, 0, 0, time.UTC),
+				Status:         models.FlightStatusScheduled,
+				AircraftID:     uuid.New(),
+				CreatedBy:      uuid.New(),
+				LastUpdatedBy:  uuid.New(),
+				OrganizationID: uuid.New(),
 			}
 
-			expectedSQL := `INSERT INTO flights ( id, number, origin, destination, departure_time, arrival_time, status ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING created_at, updated_at`
+			expectedSQL := `INSERT INTO flights ( id, number, origin, destination, departure_time, arrival_time, status, aircraft_id, created_by, last_updated_by, organization_id ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING created_at, updated_at`
 			createdAt := time.Date(2024, 12, 15, 9, 0, 0, 0, time.UTC)
 			updatedAt := createdAt
 
@@ -112,6 +116,10 @@ func TestFlightRepositoryCreateFlight(testHelper *testing.T) {
 				flight.DepartureTime,
 				flight.ArrivalTime,
 				flight.Status,
+				flight.AircraftID,
+				flight.CreatedBy,
+				flight.LastUpdatedBy,
+				flight.OrganizationID,
 			)
 
 			if tc.returnRows {
@@ -157,16 +165,20 @@ func TestFlightRepositoryCreateFlightAllFlightStatuses(testHelper *testing.T) {
 			defer mock.Close()
 
 			flight := &models.Flight{
-				ID:            uuid.New(),
-				Number:        "TEST123",
-				Origin:        "LAX",
-				Destination:   "JFK",
-				DepartureTime: time.Date(2024, 12, 15, 10, 0, 0, 0, time.UTC),
-				ArrivalTime:   time.Date(2024, 12, 15, 15, 0, 0, 0, time.UTC),
-				Status:        status,
+				ID:             uuid.New(),
+				Number:         "TEST123",
+				Origin:         "LAX",
+				Destination:    "JFK",
+				DepartureTime:  time.Date(2024, 12, 15, 10, 0, 0, 0, time.UTC),
+				ArrivalTime:    time.Date(2024, 12, 15, 15, 0, 0, 0, time.UTC),
+				Status:         status,
+				AircraftID:     uuid.New(),
+				CreatedBy:      uuid.New(),
+				LastUpdatedBy:  uuid.New(),
+				OrganizationID: uuid.New(),
 			}
 
-			expectedSQL := `INSERT INTO flights ( id, number, origin, destination, departure_time, arrival_time, status ) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING created_at, updated_at`
+			expectedSQL := `INSERT INTO flights ( id, number, origin, destination, departure_time, arrival_time, status, aircraft_id, created_by, last_updated_by, organization_id ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING created_at, updated_at`
 			createdAt := time.Date(2024, 12, 15, 9, 0, 0, 0, time.UTC)
 			updatedAt := createdAt
 
@@ -181,6 +193,10 @@ func TestFlightRepositoryCreateFlightAllFlightStatuses(testHelper *testing.T) {
 					flight.DepartureTime,
 					flight.ArrivalTime,
 					status,
+					flight.AircraftID,
+					flight.CreatedBy,
+					flight.LastUpdatedBy,
+					flight.OrganizationID,
 				).
 				WillReturnRows(pgxmock.NewRows([]string{"created_at", "updated_at"}).
 					AddRow(createdAt, updatedAt))

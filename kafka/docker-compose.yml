@@ -1,0 +1,66 @@
+networks:
+  aviation-network:
+    name: aviation-network
+    driver: bridge
+
+services:
+  kafka:
+    image: apache/kafka:4.0.0
+    container_name: kafka
+    ports:
+      - "9092:9092"
+      - "19092:19092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      CLUSTER_ID: 4L6g3nShT-eMCtK--X86sw
+      KAFKA_LISTENERS: >
+        PLAINTEXT://0.0.0.0:19092,
+        INTERNAL://0.0.0.0:9092,
+        CONTROLLER://0.0.0.0:9093
+
+      KAFKA_ADVERTISED_LISTENERS: >
+        PLAINTEXT://localhost:19092,
+        INTERNAL://kafka:9092
+
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: >
+        PLAINTEXT:PLAINTEXT,
+        INTERNAL:PLAINTEXT,
+        CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+    networks:
+      - aviation-network
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:8.1.0
+    container_name: schema-registry
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: "PLAINTEXT://kafka:9092"
+      SCHEMA_REGISTRY_LISTENERS: "http://0.0.0.0:8081"
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_LOG4J_ROOT_LOGLEVEL: WARN
+      SCHEMA_REGISTRY_KAFKASTORE_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9091:8081"
+    networks:
+      - aviation-network
+
+  schema-loader:
+    image: alpine:3.20
+    depends_on:
+      - schema-registry
+    volumes:
+      - ./schemas:/schemas
+      - ./script.sh:/app/register-schemas.sh
+    entrypoint: >
+      sh -c "apk add --no-cache curl jq; sh /app/register-schemas.sh"
+    networks:
+      - aviation-network

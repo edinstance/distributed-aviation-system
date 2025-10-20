@@ -27,6 +27,7 @@ message Aircraft {
   int32 year_of_manufacture = 5;
   int32 capacity = 6;
   AircraftStatus status = 7;
+  string airline = 8;
 }
 
 enum AircraftStatus {

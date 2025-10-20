@@ -28,8 +28,11 @@ class AircraftGrpcTests {
             "Model",
             2020,
             180,
-            AircraftStatus.AVAILABLE
-
+            AircraftStatus.AVAILABLE,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     Aircraft proto = AircraftGrpc.toProto(entity);

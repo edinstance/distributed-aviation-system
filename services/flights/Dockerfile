@@ -2,6 +2,7 @@ FROM golang:1.25-bookworm AS builder
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
+    librdkafka-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -13,8 +14,8 @@ RUN go mod download && go mod verify
 # Copy source code
 COPY . .
 
-# Build with optimizations
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
+# Build with optimizations (CGO enabled for librdkafka)
+RUN CGO_ENABLED=1 go build \
     -ldflags='-w -s' \
     -o flights-service ./cmd/main.go
 
@@ -33,6 +34,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     tzdata \
     curl \
+    librdkafka1 \
     && rm -rf /var/lib/apt/lists/* \
     && update-ca-certificates
 

@@ -1,5 +1,7 @@
 scalar Time
 
+directive @authentication on FIELD_DEFINITION
+
 type Query {
     getFlightById(id: ID!): Flight
 }
@@ -12,7 +14,7 @@ type Mutation {
         departureTime: Time!
         arrivalTime: Time!
         aircraftId: ID!
-    ): Flight!
+    ): Flight! @authentication
 }
 
 enum FlightStatus {
@@ -34,6 +36,7 @@ type Flight @key(fields: "id") {
     arrivalTime: Time!
     status: FlightStatus!
     aircraft: Aircraft
+    airline: String!
 }
 
 extend type Aircraft @key(fields: "id") {

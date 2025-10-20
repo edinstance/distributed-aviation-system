@@ -1,0 +1,140 @@
+services:
+  search-service:
+    build: .
+    container_name: search-service
+    ports:
+      - "8082:8082"
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-prod}
+      PORT: 8082
+      OPENSEARCH_HOST: ${OPENSEARCH_HOST:-opensearch-node-1}
+      OPENSEARCH_PORT: ${OPENSEARCH_PORT:-9200}
+      OPENSEARCH_USERNAME: ${OPENSEARCH_USERNAME:-admin}
+      OPENSEARCH_PASSWORD: ${OPENSEARCH_PASSWORD:-OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+      OPENSEARCH_SCHEME: http
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      SCHEMA_REGISTRY_URL: ${SCHEMA_REGISTRY_URL:-http://schema-registry:8081}
+      OTEL_SERVICE_NAME: search-service
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: otlp
+      OTEL_LOGS_EXPORTER: otlp
+      OTEL_METRIC_EXPORT_INTERVAL: 5000
+      OTEL_BSP_SCHEDULE_DELAY: 5000
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:8082/details/health || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    depends_on:
+      opensearch-node-1:
+        condition: service_healthy
+      opensearch-node-2:
+        condition: service_healthy
+    networks:
+      - aviation-network
+
+  opensearch-node-1:
+    image: opensearchproject/opensearch:3.3.0
+    container_name: opensearch-node-1
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node-1
+      - discovery.seed_hosts=opensearch-node-1,opensearch-node-2
+      - cluster.initial_cluster_manager_nodes=opensearch-node-1,opensearch-node-2
+      - bootstrap.memory_lock=true
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    volumes:
+      - opensearch-data-node-1:/usr/share/opensearch/data
+    ports:
+      - 9200:9200
+      - 9600:9600
+    networks:
+      - aviation-network
+
+  opensearch-node-2:
+    image: opensearchproject/opensearch:3.3.0
+    container_name: opensearch-node-2
+    environment:
+      - cluster.name=opensearch-cluster
+      - node.name=opensearch-node-2
+      - discovery.seed_hosts=opensearch-node-1,opensearch-node-2
+      - cluster.initial_cluster_manager_nodes=opensearch-node-1,opensearch-node-2
+      - bootstrap.memory_lock=true
+      - plugins.security.disabled=true
+      - OPENSEARCH_JAVA_OPTS=-Xms512m -Xmx512m
+      - OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1" ]
+      interval: 20s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    volumes:
+      - opensearch-data-node-2:/usr/share/opensearch/data
+    networks:
+      - aviation-network
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:3.3.0
+    container_name: opensearch-dashboards
+    ports:
+      - 5601:5601
+    expose:
+      - '5601'
+    environment:
+      OPENSEARCH_HOSTS: '["http://opensearch-node-1:9200","http://opensearch-node-2:9200"]'
+      OPENSEARCH_SSL_VERIFICATIONMODE: none
+      OPENSEARCH_SECURITY_ENABLED: false
+      DISABLE_SECURITY_DASHBOARDS_PLUGIN: true
+    depends_on:
+      opensearch-node-1:
+        condition: service_healthy
+      opensearch-node-2:
+        condition: service_healthy
+    networks:
+      - aviation-network
+
+  opensearch-init:
+    build: ./init
+    container_name: opensearch-init
+    depends_on:
+      opensearch-dashboards:
+        condition: service_started
+      opensearch-node-1:
+        condition: service_healthy
+    networks:
+      - aviation-network
+    restart: "no"
+
+volumes:
+  opensearch-data-node-1:
+  opensearch-data-node-2:
+
+networks:
+  aviation-network:
+    name: aviation-network
+    driver: bridge

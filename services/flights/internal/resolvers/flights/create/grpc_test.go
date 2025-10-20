@@ -14,6 +14,15 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
+// Helper to create a request with required user context headers
+func newRequestWithUserContext(req *v1.CreateFlightRequest) *connect.Request[v1.CreateFlightRequest] {
+	connectReq := connect.NewRequest(req)
+	connectReq.Header().Set("x-user-sub", "123e4567-e89b-12d3-a456-426614174000")
+	connectReq.Header().Set("x-org-id", "987fcdeb-51a2-43d1-9f87-123456789abc")
+	connectReq.Header().Set("x-user-roles", "user")
+	return connectReq
+}
+
 type fakeService struct {
 	createFn func(ctx context.Context, number, origin, dest string, dep, arr time.Time, aircraftId uuid.UUID) (*models.Flight, error)
 }
@@ -135,7 +144,7 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 	for _, testCase := range testCases {
 		testingHelper.Run(testCase.name, func(testingHelper *testing.T) {
 			ctx := context.Background()
-			req := connect.NewRequest(testCase.req)
+			req := newRequestWithUserContext(testCase.req)
 			resp, err := resolver.CreateFlightGRPC(ctx, req)
 
 			if !testCase.wantErr {
@@ -165,7 +174,7 @@ func TestCreateFlightGRPCValidation(testingHelper *testing.T) {
 func TestCreateFlightGRPCServiceNotConfigured(testingHelper *testing.T) {
 	resolver := NewCreateFlightResolver(nil)
 
-	req := connect.NewRequest(&v1.CreateFlightRequest{
+	req := newRequestWithUserContext(&v1.CreateFlightRequest{
 		Number:        "AB123",
 		Origin:        "LHR",
 		Destination:   "LGW",
@@ -209,7 +218,7 @@ func TestCreateFlightGRPCSuccess(testingHelper *testing.T) {
 
 	resolver := NewCreateFlightResolver(f)
 
-	req := connect.NewRequest(&v1.CreateFlightRequest{
+	req := newRequestWithUserContext(&v1.CreateFlightRequest{
 		Number:        "XY789",
 		Origin:        "LHR",
 		Destination:   "LGW",
@@ -249,7 +258,7 @@ func TestCreateFlightGRPCServiceError(testingHelper *testing.T) {
 	}
 	resolver := NewCreateFlightResolver(f)
 
-	req := connect.NewRequest(&v1.CreateFlightRequest{
+	req := newRequestWithUserContext(&v1.CreateFlightRequest{
 		Number:        "CD456",
 		Origin:        "LHR",
 		Destination:   "LGW",

@@ -43,7 +43,8 @@ func (service *Service) GetFlightByID(ctx context.Context, id uuid.UUID) (*model
 			"destination", flight.Destination,
 			"departure_time", flight.DepartureTime,
 			"arrival_time", flight.ArrivalTime,
-			"aircraft_id", flight.AircraftID)
+			"aircraft_id", flight.AircraftID,
+			"airline", flight.Airline)
 
 		return flight, nil
 	}

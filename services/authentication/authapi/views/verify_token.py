@@ -6,8 +6,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from rest_framework_simplejwt.tokens import AccessToken
 
+from common.jwt.tokens import CustomAccessToken
 from common.telemetry.helpers import get_tracer
 from common.telemetry.telemetry import auth_metrics
 from users.models import User as CustomUser
@@ -44,8 +44,8 @@ class VerifyToken(APIView):
                 )
 
             try:
-                token = AccessToken(token_str)
-                user_id = token["user_id"]
+                token = CustomAccessToken(token_str)
+                user_id = token["sub"]
                 user = CustomUser.objects.get(id=user_id)
                 duration = time.time() - start_time
 

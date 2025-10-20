@@ -44,6 +44,18 @@ public class AircraftEntity {
   @Column(name = "status", nullable = false)
   private AircraftStatus status;
 
+  @Column(name = "created_by", nullable = false)
+  private UUID createdBy;
+
+  @Column(name = "last_updated_by", nullable = false)
+  private UUID lastUpdatedBy;
+
+  @Column(name = "organization_id", nullable = false)
+  private UUID organizationId;
+
+  @Column(name = "airline", nullable = false)
+  private String airline;
+
   /**
    * The default constructor.
    */
@@ -53,40 +65,56 @@ public class AircraftEntity {
   /**
    * A constructor with everything apart from id.
    *
-   * @param registration the aircraft's registration number.
-   * @param manufacturer the aircraft's manufacturer.
-   * @param model the aircraft's model.
+   * @param registration      the aircraft's registration number.
+   * @param manufacturer      the aircraft's manufacturer.
+   * @param model             the aircraft's model.
    * @param yearOfManufacture the year the aircraft was manufactured.
-   * @param capacity the capacity of the aircraft.
-   * @param status the current status of the aircraft.
+   * @param capacity          the capacity of the aircraft.
+   * @param status            the current status of the aircraft.
+   * @param createdBy         the user who created the aircraft.
+   * @param lastUpdatedBy     the user who last updated the aircraft.
+   * @param organizationId    the organization id of the aircraft.
+   * @param airline           the airline of the aircraft.
    */
   public AircraftEntity(String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,
-                        AircraftStatus status) {
+                        AircraftStatus status, UUID createdBy,
+                        UUID lastUpdatedBy, UUID organizationId,
+                        String airline) {
     this.registration = registration;
     this.manufacturer = manufacturer;
     this.model = model;
     this.yearOfManufacture = yearOfManufacture;
     this.capacity = capacity;
     this.status = status;
+    this.createdBy = createdBy;
+    this.lastUpdatedBy = lastUpdatedBy;
+    this.organizationId = organizationId;
+    this.airline = airline;
   }
 
   /**
    * A constructor with all fields.
    *
-   * @param id the aircraft's id.
-   * @param registration the aircraft's registration number.
-   * @param manufacturer the aircraft's manufacturer.
-   * @param model the aircraft's model.
+   * @param id                the aircraft's id.
+   * @param registration      the aircraft's registration number.
+   * @param manufacturer      the aircraft's manufacturer.
+   * @param model             the aircraft's model.
    * @param yearOfManufacture the year the aircraft was manufactured.
-   * @param capacity the capacity of the aircraft.
-   * @param status the current status of the aircraft.
+   * @param capacity          the capacity of the aircraft.
+   * @param status            the current status of the aircraft.
+   * @param createdBy         the user who created the aircraft.
+   * @param lastUpdatedBy     the user who last updated the aircraft.
+   * @param organizationId    the organization id of the aircraft.
+   * @param airline           the airline of the aircraft.
    */
   public AircraftEntity(UUID id, String registration,
                         String manufacturer, String model,
                         int yearOfManufacture, int capacity,
-                        AircraftStatus status) {
+                        AircraftStatus status, UUID createdBy,
+                        UUID lastUpdatedBy, UUID organizationId,
+                        String airline) {
     this.id = id;
     this.registration = registration;
     this.manufacturer = manufacturer;
@@ -94,6 +122,10 @@ public class AircraftEntity {
     this.yearOfManufacture = yearOfManufacture;
     this.capacity = capacity;
     this.status = status;
+    this.createdBy = createdBy;
+    this.lastUpdatedBy = lastUpdatedBy;
+    this.organizationId = organizationId;
+    this.airline = airline;
   }
 
 }

@@ -30,7 +30,11 @@ public class AircraftEntityTests {
             "A380",
             2020,
             50,
-            AircraftStatus.AVAILABLE
+            AircraftStatus.AVAILABLE,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     assertNotNull(aircraftEntity);
@@ -51,7 +55,11 @@ public class AircraftEntityTests {
             "A380",
             2020,
             50,
-            AircraftStatus.AVAILABLE
+            AircraftStatus.AVAILABLE,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "British Airways"
     );
 
     assertNotNull(aircraftEntity);
@@ -73,7 +81,11 @@ public class AircraftEntityTests {
             "A380",
             2020,
             50,
-            AircraftStatus.AVAILABLE
+            AircraftStatus.AVAILABLE,
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            UUID.randomUUID(),
+            "British Airways"
     );
   }
 
@@ -118,5 +130,26 @@ public class AircraftEntityTests {
   public void testAircraftStatusMethods() {
     aircraftEntity.setStatus(AircraftStatus.IN_SERVICE);
     assertEquals(AircraftStatus.IN_SERVICE, aircraftEntity.getStatus());
+  }
+
+  @Test
+  public void testAircraftCreatedByMethods() {
+    UUID newId = UUID.randomUUID();
+    aircraftEntity.setCreatedBy(newId);
+    assertEquals(newId, aircraftEntity.getCreatedBy());
+  }
+
+  @Test
+  public void testAircraftLastUpdatedByMethods() {
+    UUID newId = UUID.randomUUID();
+    aircraftEntity.setLastUpdatedBy(newId);
+    assertEquals(newId, aircraftEntity.getLastUpdatedBy());
+  }
+
+  @Test
+  public void testAircraftOrganizationIdMethods() {
+    UUID newId = UUID.randomUUID();
+    aircraftEntity.setOrganizationId(newId);
+    assertEquals(newId, aircraftEntity.getOrganizationId());
   }
 }
