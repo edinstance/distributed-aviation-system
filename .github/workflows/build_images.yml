@@ -31,6 +31,12 @@ jobs:
     strategy:
       matrix:
         include:
+          - service: services/authentication
+            target: web
+            uses_buf: false
+          - service: services/authentication
+            target: migrate
+            uses_buf: false
           - service: services/flights
             uses_buf: true
           - service: services/aircraft
@@ -38,8 +44,6 @@ jobs:
             needs_app_file: true
           - service: services/search
             needs_app_file: true
-            uses_buf: false
-          - service: services/authentication
             uses_buf: false
           - service: services/gateway
             uses_buf: false
@@ -78,6 +82,7 @@ jobs:
           context: ./${{ matrix.service }}
           file: ./${{ matrix.service }}/Dockerfile
           push: true
+          target: ${{ matrix.target || '' }}
           tags: |
-            ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}:${{ github.sha }}
-            ${{ github.ref_name == 'main' && format('{0}-{1}:latest', env.IMAGE_PREFIX, matrix.service) || '' }}
+            ${{ env.IMAGE_PREFIX }}-${{ matrix.service }}${{ matrix.target && format('-{0}', matrix.target) || '' }}:${{ github.ref_name }}
+            ${{ github.ref_name == 'main' && format('{0}-{1}{2}:latest', env.IMAGE_PREFIX, matrix.service, matrix.target && format('-{0}', matrix.target) || '') || '' }}
