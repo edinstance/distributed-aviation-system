@@ -37,9 +37,6 @@ jobs:
           - service: services/authentication
             target: migrate
             uses_buf: false
-          - service: services/authentication
-            target: keygen
-            uses_buf: false
           - service: services/flights
             uses_buf: true
           - service: services/aircraft
