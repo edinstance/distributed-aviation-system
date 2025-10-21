@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: authentication-keygen
+  namespace: aviation
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: keygen
+          image: python:3.12-alpine
+          workingDir: /app
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "Installing dependencies..."
+              pip install --no-cache-dir cryptography==46.0.2
+              echo "Cloning repository..."
+              apk add --no-cache git >/dev/null
+              git clone https://github.com/edinstance/distributed-aviation-system.git /repo
+              cd /repo/services/authentication/keys
+              echo "Generating keys..."
+              python generate_keys.py
+              echo "Key generation completed successfully."
+          env:
+            - name: KEYS_DIR
+              value: "/keys"
+            - name: KEY_PASSWORD
+              valueFrom: {
+                secretKeyRef:
+                  key: authentication-key-password
+              }
+          volumeMounts:
+            - name: keys-volume
+              mountPath: /keys
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: keys-volume
+          persistentVolumeClaim:
+            claimName: authentication-keys-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: authentication-keys-pvc
+  namespace: aviation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi
+---
