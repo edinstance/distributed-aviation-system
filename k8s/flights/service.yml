@@ -49,9 +49,9 @@ spec:
             - name: PORT
               value: "8081"
             - name: AIRCRAFT_SERVICE_GRPC_URL
-              value: host.docker.internal:9090
+              value: aircraft-service:9090
             - name: OTLP_GRPC_URL
-              value: host.docker.internal:4317
+              value: otel-collector.monitoring:4317
             - name: KAFKA_BROKER_URL
               value: host.docker.internal:9092
             - name: KAFKA_SCHEMA_REGISTRY_URL

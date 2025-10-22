@@ -46,9 +46,9 @@ spec:
             - name: JSON_LOGS
               value: "true"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: http://host.docker.internal:4317
+              value: http://otel-collector.monitoring:4317
             - name: OTEL_SERVICE_NAME
-              value: aviation-gateway
+              value: gateway-service
           readinessProbe:
             httpGet:
               path: /health
