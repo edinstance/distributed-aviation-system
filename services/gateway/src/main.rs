@@ -5,7 +5,7 @@ mod requests;
 mod verify;
 
 use crate::config::Config;
-use crate::handling::route_handler;
+use crate::handling::{route_handler, health_handler};
 use crate::observability::{ObservabilityConfig, init_observability, shutdown_observability};
 use crate::verify::JwksCache;
 use axum::{Router, routing::any};
@@ -38,12 +38,13 @@ async fn main() {
 
     let client = Arc::new(
         Client::builder()
-            .timeout(std::time::Duration::from_secs(30))
+            .timeout(Duration::from_secs(30))
             .build()
             .expect("Failed to create HTTP client"),
     );
 
     let app = Router::new()
+        .route("/health", any(health_handler))
         .route(
             "/",
             any({
