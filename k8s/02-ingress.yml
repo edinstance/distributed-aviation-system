@@ -11,6 +11,20 @@ spec:
     - host: api.aviation.local
       http:
         paths:
+          - path: /router/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: router-service
+                port:
+                  number: 4000
+          - path: /router
+            pathType: Prefix
+            backend:
+              service:
+                name: router-service
+                port:
+                  number: 4000
           - path: /flights/(.*)
             pathType: ImplementationSpecific
             backend:
@@ -53,3 +67,24 @@ spec:
                 name: authentication-service
                 port:
                   number: 8000
+          - path: /gateway/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 4001
+          - path: /gateway
+            pathType: Prefix
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 4001
+          - path: /(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: gateway-service
+                port:
+                  number: 4001
