@@ -51,7 +51,10 @@ spec:
             - name: DATABASE_USERNAME
               value: "postgres"
             - name: DATABASE_PASSWORD
-              value: "postgres"
+              valueFrom:
+                secretKeyRef:
+                  name: aircraft-database-password
+                  key: password
             - name: CACHE_URL
               value: "redis://aircraft-cache:6379"
             - name: LIQUIBASE_ENABLED

@@ -37,7 +37,10 @@ spec:
             - name: POSTGRES_USER
               value: postgres
             - name: POSTGRES_PASSWORD
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: aircraft-database-password
+                  key: password
           readinessProbe:
             exec:
               command: [ "pg_isready","-U","postgres","-d","aircraft" ]

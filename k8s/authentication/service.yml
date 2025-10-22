@@ -73,7 +73,10 @@ spec:
             - name: DATABASE_USER
               value: postgres
             - name: DATABASE_PASSWORD
-              value: postgres
+              valueFrom:
+                secretKeyRef:
+                  name: authentication-database-password
+                  key: password
             - name: DATABASE_HOST
               value: authentication-database
             - name: DATABASE_PORT
@@ -111,10 +114,10 @@ spec:
             - name: KEYS_DIR
               value: /keys
             - name: KEY_PASSWORD
-              valueFrom: {
+              valueFrom:
                 secretKeyRef:
-                  key: authentication-key-password
-              }
+                  name: authentication-key-password
+                  key: password
           volumeMounts:
             - name: keys-volume
               mountPath: /keys

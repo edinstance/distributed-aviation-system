@@ -43,12 +43,26 @@ spec:
               echo "Running Liquibase migrations..."
               cd /repo/services/aircraft/src/main/resources/db
               liquibase \
-                --url=jdbc:postgresql://aircraft-database:5432/aircraft \
-                --username=postgres \
-                --password=postgres \
-                --changelog-file=changelog/db.changelog-master.xml \
+                --url="jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}" \
+                --username="${DATABASE_USER}" \
+                --password="${DATABASE_PASSWORD}" \
+                --changelog-file="changelog/db.changelog-master.xml" \
                 update
               echo "Liquibase migrations completed successfully."
+          env:
+            - name: DATABASE_HOST
+              value: aircraft-database
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: aircraft
+            - name: DATABASE_USER
+              value: postgres
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aircraft-database-password
+                  key: password
           volumeMounts:
             - name: repo-volume
               mountPath: /repo

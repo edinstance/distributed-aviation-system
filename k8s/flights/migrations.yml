@@ -33,5 +33,19 @@ spec:
               git clone https://github.com/edinstance/distributed-aviation-system.git /repo
               echo "Running migrations..."
               migrate -path /repo/services/flights/migrations \
-                      -database "postgres://postgres:postgres@flights-database:5432/flights?sslmode=disable" up
+                      -database "postgres://${DATABASE_USER}:${DATABASE_PASSWORD}@${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}?sslmode=disable" up
               echo "Migrations completed successfully."
+          env:
+            - name: DATABASE_HOST
+              value: flights-database
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: flights
+            - name: DATABASE_USER
+              value: postgres
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: flights-database-password
+                  key: password
