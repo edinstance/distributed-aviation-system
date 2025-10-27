@@ -1,44 +1,31 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: otel-collector
+  name: prometheus
   namespace: monitoring
 spec:
   type: ClusterIP
   selector:
-    app: otel-collector
+    app: prometheus
   ports:
-    - port: 4317
-      targetPort: 4317
-      name: otlp-grpc
-      protocol: TCP
-    - port: 4318
-      targetPort: 4318
-      name: otlp-http
-      protocol: TCP
-    - port: 9464
-      targetPort: 9464
-      name: prometheus-metrics
-      protocol: TCP
-    - port: 8888
-      targetPort: 8888
-      name: service-metrics
+    - port: 9090
+      targetPort: 9090
       protocol: TCP
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: otel-collector
+  name: prometheus
   namespace: monitoring
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: otel-collector
+      app: prometheus
   template:
     metadata:
       labels:
-        app: otel-collector
+        app: prometheus
     spec:
       initContainers:
         - name: fetch-config
@@ -49,22 +36,19 @@ spec:
             - |
               echo "Cloning configuration..."
               git clone --branch main https://github.com/edinstance/distributed-aviation-system.git /repo
-              echo "Copying otel config files..."
+              echo "Copying prometheus config files..."
               mkdir -p /config
-              cp /repo/monitoring/otel/otel.yml /config/config.yaml
+              cp /repo/monitoring/prometheus/prometheus.yml /config/config.yaml
               echo "Config ready."
           volumeMounts:
-            - name: otel-collector-config
+            - name: prometheus-config
               mountPath: /config
       containers:
-        - name: otel-collector
-          image: otel/opentelemetry-collector:0.136.0
-          args: ["--config=/etc/otel/config.yaml"]
+        - name: prometheus
+          image: prom/prometheus:v3.6.0
+          args: ["--config.file=/etc/prometheus/config.yaml"]
           ports:
-            - containerPort: 4317
-            - containerPort: 4318
-            - containerPort: 8888
-            - containerPort: 9464
+            - containerPort: 9090
           resources:
             requests:
               cpu: 200m
@@ -73,9 +57,9 @@ spec:
               cpu: 500m
               memory: 512Mi
           volumeMounts:
-            - name: otel-collector-config
-              mountPath: /etc/otel
+            - name: prometheus-config
+              mountPath: /etc/prometheus
               readOnly: true
       volumes:
-        - name: otel-collector-config
+        - name: prometheus-config
           emptyDir: { }
