@@ -45,28 +45,14 @@ async fn main() {
 
     let app = Router::new()
         .route("/health", any(health_handler))
-        .route(
-            "/",
-            any({
-                let router_url = router_url.clone();
-                let client = client.clone();
-                let jwks_cache = jwks_cache.clone();
-                move |req| {
-                    route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
-                }
-            }),
-        )
-        .route(
-            "/{*wildcard}",
-            any({
-                let router_url = router_url.clone();
-                let client = client.clone();
-                let jwks_cache = jwks_cache.clone();
-                move |req| {
-                    route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
-                }
-            }),
-        );
+        .fallback({
+            let router_url = router_url.clone();
+            let client = client.clone();
+            let jwks_cache = jwks_cache.clone();
+            move |req| {
+                route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
+            }
+        });
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     info!(address = %addr, "Aviation gateway service started");
