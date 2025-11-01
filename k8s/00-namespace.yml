@@ -21,3 +21,8 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
   name: ingress-nginx
 ---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: search
+---
