@@ -5,7 +5,7 @@ mod requests;
 mod verify;
 
 use crate::config::Config;
-use crate::handling::route_handler;
+use crate::handling::{route_handler, health_handler};
 use crate::observability::{ObservabilityConfig, init_observability, shutdown_observability};
 use crate::verify::JwksCache;
 use axum::{Router, routing::any};
@@ -38,34 +38,21 @@ async fn main() {
 
     let client = Arc::new(
         Client::builder()
-            .timeout(std::time::Duration::from_secs(30))
+            .timeout(Duration::from_secs(30))
             .build()
             .expect("Failed to create HTTP client"),
     );
 
     let app = Router::new()
-        .route(
-            "/",
-            any({
-                let router_url = router_url.clone();
-                let client = client.clone();
-                let jwks_cache = jwks_cache.clone();
-                move |req| {
-                    route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
-                }
-            }),
-        )
-        .route(
-            "/{*wildcard}",
-            any({
-                let router_url = router_url.clone();
-                let client = client.clone();
-                let jwks_cache = jwks_cache.clone();
-                move |req| {
-                    route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
-                }
-            }),
-        );
+        .route("/health", any(health_handler))
+        .fallback({
+            let router_url = router_url.clone();
+            let client = client.clone();
+            let jwks_cache = jwks_cache.clone();
+            move |req| {
+                route_handler(req, router_url.clone(), client.clone(), jwks_cache.clone())
+            }
+        });
 
     let addr = SocketAddr::from(([0, 0, 0, 0], config.port));
     info!(address = %addr, "Aviation gateway service started");

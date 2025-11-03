@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app: prometheus
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      initContainers:
+        - name: fetch-config
+          image: alpine/git:2.49.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cloning configuration..."
+              git clone --branch main https://github.com/edinstance/distributed-aviation-system.git /repo
+              echo "Copying prometheus config files..."
+              mkdir -p /config
+              cp /repo/monitoring/prometheus/prometheus.yml /config/config.yaml
+              echo "Config ready."
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /config
+      containers:
+        - name: prometheus
+          image: prom/prometheus:v3.6.0
+          args: ["--config.file=/etc/prometheus/config.yaml"]
+          ports:
+            - containerPort: 9090
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: prometheus-config
+              mountPath: /etc/prometheus
+              readOnly: true
+      volumes:
+        - name: prometheus-config
+          emptyDir: { }

@@ -1,0 +1,63 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: opensearch-init
+  namespace: search
+spec:
+  template:
+    metadata:
+      labels:
+        app: opensearch-init
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: fetch-config
+          image: alpine/git:2.49.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cloning repository..."
+              git clone --branch main https://github.com/edinstance/distributed-aviation-system.git /repo
+              echo "Copying init files and script..."
+              mkdir -p /config /init/indexes /init/visualizations /init/searches /init/dashboards
+              cp /repo/services/search/init/setup-dashboard.sh /config/
+              cp -r /repo/services/search/init/indexes/* /init/indexes/
+              cp -r /repo/services/search/init/visualizations/* /init/visualizations/
+              cp -r /repo/services/search/init/searches/* /init/searches/
+              cp -r /repo/services/search/init/dashboards/* /init/dashboards/
+              chmod +x /config/setup-dashboard.sh
+              echo "Init files ready."
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: init-volume
+              mountPath: /init
+      containers:
+        - name: opensearch-init
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              apk add --no-cache curl jq bash
+              # Update URLs for Kubernetes services
+              sed -i 's|opensearch-node-1:9200|opensearch.search.svc.cluster.local:9200|g' /config/setup-dashboard.sh
+              sed -i 's|opensearch-dashboards:5601|opensearch-dashboards.search.svc.cluster.local:5601|g' /config/setup-dashboard.sh
+              /config/setup-dashboard.sh
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: init-volume
+              mountPath: /init
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: config-volume
+          emptyDir: {}
+        - name: init-volume
+          emptyDir: {}

@@ -10,6 +10,7 @@ import {
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
 import { check } from "k6";
 import { AuthContext } from "src/types/auth_context";
+import { buildAuthHeaders } from "../../helpers/auth_headers";
 
 function randomFlightNumber(): string {
   const airlines = ["BA", "UA", "LH", "AF"];
@@ -23,11 +24,14 @@ export function runFlightScenario(
   accessToken?: string,
   authContext?: AuthContext,
 ) {
+  // Determine if we should use direct headers (for router) vs JWT (for gateway)
+  const useDirectHeaders = !url.includes("/gateway");
+
   graphql<GetFlightByIdQuery, GetFlightByIdQueryVariables>(
     url,
     GetFlightByIdDocument,
     { id: uuidv4() },
-    accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+    buildAuthHeaders(accessToken, authContext, useDirectHeaders),
   );
 
   const createRes = graphql<
@@ -44,15 +48,7 @@ export function runFlightScenario(
       departureTime: new Date().toISOString(),
       arrivalTime: new Date(Date.now() + 3600 * 1000).toISOString(),
     },
-    {
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      ...(authContext
-        ? {
-            "x-org-id": authContext.organization.id,
-            "x-user-sub": authContext.admin.id,
-          }
-        : {}),
-    },
+    buildAuthHeaders(accessToken, authContext, useDirectHeaders),
   );
 
   check(createRes, {
@@ -66,7 +62,7 @@ export function runFlightScenario(
       url,
       GetFlightByIdDocument,
       { id: flightId },
-      accessToken ? { Authorization: `Bearer ${accessToken}` } : {},
+      buildAuthHeaders(accessToken, authContext, useDirectHeaders),
     );
   }
 

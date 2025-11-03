@@ -1,0 +1,43 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aviation
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: authentication
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flights
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aircraft
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: monitoring
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: messaging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/instance: ingress-nginx
+    app.kubernetes.io/name: ingress-nginx
+  name: ingress-nginx
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: search
+---

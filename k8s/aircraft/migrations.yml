@@ -1,0 +1,71 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: aircraft-migrations
+  namespace: aircraft
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - |
+              echo "Waiting for Postgres to become available..."
+              until nc -z aircraft-database.aircraft.svc.cluster.local 5432; do
+                echo "Still waiting for DB..."; sleep 2;
+              done
+              echo "Database is ready!"
+        - name: fetch-repo
+          image: alpine/git:2.49.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cloning Liquibase project repo..."
+              git clone https://github.com/edinstance/distributed-aviation-system.git /repo
+              echo "Repository cloned successfully."
+          volumeMounts:
+            - name: repo-volume
+              mountPath: /repo
+      containers:
+        - name: liquibase
+          image: liquibase/liquibase:4.31
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "Running Liquibase migrations..."
+              cd /repo/services/aircraft/src/main/resources/db
+              liquibase \
+                --url="jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}" \
+                --username="${DATABASE_USER}" \
+                --password="${DATABASE_PASSWORD}" \
+                --changelog-file="changelog/db.changelog-master.xml" \
+                update
+              echo "Liquibase migrations completed successfully."
+          env:
+            - name: DATABASE_HOST
+              value: aircraft-database
+            - name: DATABASE_PORT
+              value: "5432"
+            - name: DATABASE_NAME
+              value: aircraft
+            - name: DATABASE_USER
+              value: postgres
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: aircraft-database-password
+                  key: password
+          volumeMounts:
+            - name: repo-volume
+              mountPath: /repo
+      volumes:
+        - name: repo-volume
+          emptyDir: {}

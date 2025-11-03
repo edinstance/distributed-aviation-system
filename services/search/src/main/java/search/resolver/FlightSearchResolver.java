@@ -1,7 +1,7 @@
-package aviation.search.resolver;
+package search.resolver;
 
-import aviation.search.model.FlightDocument;
-import aviation.search.service.FlightSearchService;
+import search.model.FlightDocument;
+import search.service.FlightSearchService;
 import com.netflix.graphql.dgs.DgsComponent;
 import com.netflix.graphql.dgs.DgsQuery;
 import com.netflix.graphql.dgs.InputArgument;

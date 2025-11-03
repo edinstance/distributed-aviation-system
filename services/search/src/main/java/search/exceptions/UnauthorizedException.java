@@ -1,4 +1,4 @@
-package aviation.search.exceptions;
+package search.exceptions;
 
 /**
  * An exception for when a user is unauthorized.

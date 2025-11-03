@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: router-service
+  namespace: aviation
+spec:
+  type: ClusterIP
+  selector:
+    app: router-service
+  ports:
+    - port: 4000
+      targetPort: 4000
+      name: http
+      protocol: TCP
+    - port: 8088
+      targetPort: 8088
+      name: health
+      protocol: TCP
+    - port: 8089
+      targetPort: 8089
+      name: metrics
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router-service
+  namespace: aviation
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router-service
+  template:
+    metadata:
+      labels:
+        app: router-service
+    spec:
+      containers:
+        - name: apollo-router
+          image: ghcr.io/apollographql/router:v2.6.2
+          args:
+            - "--supergraph"
+            - /etc/apollo/supergraph.graphql
+            - "--config"
+            - /etc/router/router.yml
+            - "--hot-reload"
+          ports:
+            - containerPort: 4000
+            - containerPort: 8088
+            - containerPort: 8089
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local:4317
+            - name: OTEL_METRICS_EXPORTER_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local:4317
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8088
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: shared-schema
+              mountPath: /etc/apollo
+              readOnly: true
+            - name: router-config
+              mountPath: /etc/router
+              readOnly: true
+      volumes:
+        - name: shared-schema
+          persistentVolumeClaim:
+            claimName: supergraph-schema-pvc
+        - name: router-config
+          persistentVolumeClaim:
+            claimName: router-config-pvc

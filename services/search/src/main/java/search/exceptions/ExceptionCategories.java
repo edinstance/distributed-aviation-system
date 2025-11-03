@@ -1,4 +1,4 @@
-package aviation.search.exceptions;
+package search.exceptions;
 
 /**
  * An enum for managing exception categories.
