@@ -43,6 +43,10 @@ spec:
               value: "9200"
             - name: OPENSEARCH_SCHEME
               value: "http"
+            - name: OPENSEARCH_USERNAME
+              value: "admin"
+            - name: OPENSEARCH_PASSWORD
+              value: "admin"
             - name: KAFKA_BOOTSTRAP_SERVERS
               value: "kafka.messaging.svc.cluster.local:9092"
             - name: SCHEMA_REGISTRY_URL
