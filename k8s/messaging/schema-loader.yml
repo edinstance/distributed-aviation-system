@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: schema-loader
+  namespace: messaging
+spec:
+  template:
+    metadata:
+      labels:
+        app: schema-loader
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        - name: fetch-config
+          image: alpine/git:2.49.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cloning repository..."
+              git clone --branch main https://github.com/edinstance/distributed-aviation-system.git /repo
+              echo "Copying schema files and script..."
+              mkdir -p /config /schemas
+              cp /repo/kafka/script.sh /config/
+              cp -r /repo/kafka/schemas/* /schemas/
+              chmod +x /config/script.sh
+              echo "Config and schemas ready."
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: schemas-volume
+              mountPath: /schemas
+      containers:
+        - name: schema-loader
+          image: alpine:3.20
+          command: ["/bin/sh", "-c"]
+          args: ["apk add --no-cache curl jq && /config/script.sh"]
+          volumeMounts:
+            - name: config-volume
+              mountPath: /config
+            - name: schemas-volume
+              mountPath: /schemas
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+      volumes:
+        - name: config-volume
+          emptyDir: {}
+        - name: schemas-volume
+          emptyDir: {}

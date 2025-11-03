@@ -1,0 +1,78 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: search-service
+  namespace: search
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8082
+      targetPort: 8082
+      protocol: TCP
+  selector:
+    app: search-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-service
+  namespace: search
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: search-service
+  template:
+    metadata:
+      labels:
+        app: search-service
+    spec:
+      containers:
+        - name: search-service
+          image: ghcr.io/edinstance/distributed-aviation-system-services/search:latest
+          ports:
+            - containerPort: 8082
+          env:
+            - name: ENVIRONMENT
+              value: "prod"
+            - name: PORT
+              value: "8082"
+            - name: OPENSEARCH_HOST
+              value: "opensearch.search.svc.cluster.local"
+            - name: OPENSEARCH_PORT
+              value: "9200"
+            - name: OPENSEARCH_SCHEME
+              value: "http"
+            - name: KAFKA_BOOTSTRAP_SERVERS
+              value: "kafka.messaging.svc.cluster.local:9092"
+            - name: SCHEMA_REGISTRY_URL
+              value: "http://schema-registry.messaging.svc.cluster.local:8081"
+            - name: OTEL_SERVICE_NAME
+              value: "search-service"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.monitoring:4317"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "grpc"
+            - name: OTEL_TRACES_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRICS_EXPORTER
+              value: "otlp"
+            - name: OTEL_LOGS_EXPORTER
+              value: "otlp"
+            - name: OTEL_METRIC_EXPORT_INTERVAL
+              value: "5000"
+            - name: OTEL_BSP_SCHEDULE_DELAY
+              value: "5000"
+          readinessProbe:
+            httpGet:
+              path: /details/health
+              port: 8082
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 256Mi
+            limits:
+              cpu: 1000m
+              memory: 512Mi

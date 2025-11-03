@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: supergraph-config
+  namespace: aviation
+data:
+  supergraph.yml: |
+    federation_version: =2.3.2
+    subgraphs:
+      flights:
+        routing_url: http://flights-service.flights.svc.cluster.local:8081/graphql
+        schema:
+          subgraph_url: http://flights-service.flights.svc.cluster.local:8081/graphql
+      aircraft:
+        routing_url: http://aircraft-service.aircraft.svc.cluster.local:8080/graphql
+        schema:
+          subgraph_url: http://aircraft-service.aircraft.svc.cluster.local:8080/graphql
+      search:
+        routing_url: http://search-service.search.svc.cluster.local:8082/graphql
+        schema:
+          subgraph_url: http://search-service.search.svc.cluster.local:8082/graphql
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: supergraph-composer
+  namespace: aviation
+spec:
+  template:
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: rover
+          image: ubuntu:22.04
+          command:
+            - bash
+            - -c
+            - |
+              echo "Installing Rover..."
+              apt-get update && apt-get install -y curl
+              curl -sSL https://rover.apollo.dev/nix/latest | sh
+              export PATH="/root/.rover/bin:$PATH"
+
+              echo "Composing supergraph schema..."
+              rover supergraph compose \
+                --config /config/supergraph.yml \
+                --output /shared/supergraph.graphql \
+                --elv2-license accept
+
+              echo "Supergraph composed successfully!"
+              ls -la /shared/
+          volumeMounts:
+            - name: supergraph-config
+              mountPath: /config
+              readOnly: true
+            - name: shared-schema
+              mountPath: /shared
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi
+      volumes:
+        - name: supergraph-config
+          configMap:
+            name: supergraph-config
+        - name: shared-schema
+          persistentVolumeClaim:
+            claimName: supergraph-schema-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: supergraph-schema-pvc
+  namespace: aviation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi

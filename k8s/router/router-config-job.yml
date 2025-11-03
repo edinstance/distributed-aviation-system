@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: router-config-fetch
+  namespace: aviation
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: config-fetch
+          image: alpine:3.19
+          workingDir: /app
+          command:
+            - sh
+            - -c
+            - |
+              set -e
+              echo "Installing dependencies..."
+              apk add --no-cache git >/dev/null
+              echo "Cloning repository..."
+              git clone https://github.com/edinstance/distributed-aviation-system.git /repo
+              echo "Copying router configuration..."
+              cp /repo/router.yml /config/router.yml
+              echo "Router configuration fetched successfully."
+              ls -la /config/
+          volumeMounts:
+            - name: router-config-volume
+              mountPath: /config
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: router-config-volume
+          persistentVolumeClaim:
+            claimName: router-config-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: router-config-pvc
+  namespace: aviation
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Mi

@@ -1,0 +1,98 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: opensearch
+  namespace: search
+spec:
+  clusterIP: None
+  selector:
+    app: opensearch
+  ports:
+    - name: http
+      port: 9200
+      protocol: TCP
+    - name: transport
+      port: 9300
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: opensearch
+  namespace: search
+spec:
+  serviceName: opensearch
+  replicas: 2
+  selector:
+    matchLabels:
+      app: opensearch
+  template:
+    metadata:
+      labels:
+        app: opensearch
+    spec:
+      containers:
+        - name: opensearch
+          image: opensearchproject/opensearch:2.11.1
+          ports:
+            - containerPort: 9200
+              name: http
+            - containerPort: 9300
+              name: transport
+          env:
+            - name: OPENSEARCH_JAVA_OPTS
+              value: "-Xms512m -Xmx512m"
+            - name: bootstrap.memory_lock
+              value: "true"
+            - name: discovery.seed_hosts
+              value: "opensearch-0.opensearch.search.svc.cluster.local,opensearch-1.opensearch.search.svc.cluster.local"
+            - name: cluster.initial_cluster_manager_nodes
+              value: "opensearch-0"
+            - name: cluster.name
+              value: "aviation-search-cluster"
+            - name: node.name
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: network.host
+              value: "0.0.0.0"
+            - name: DISABLE_SECURITY_PLUGIN
+              value: "true"
+            - name: DISABLE_INSTALL_DEMO_CONFIG
+              value: "true"
+          volumeMounts:
+            - name: opensearch-data
+              mountPath: /usr/share/opensearch/data
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1
+              memory: 2Gi
+          readinessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: 9200
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+          livenessProbe:
+            httpGet:
+              path: /_cluster/health
+              port: 9200
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+      securityContext:
+        fsGroup: 1000
+  volumeClaimTemplates:
+    - metadata:
+        name: opensearch-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: local-path

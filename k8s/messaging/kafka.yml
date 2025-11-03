@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka
+  namespace: messaging
+spec:
+  clusterIP: None
+  selector:
+    app: kafka
+  ports:
+    - name: internal
+      port: 9092
+      protocol: TCP
+    - name: external
+      port: 19092
+      protocol: TCP
+    - name: controller
+      port: 9093
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: kafka
+  namespace: messaging
+spec:
+  serviceName: kafka
+  replicas: 3
+  selector:
+    matchLabels:
+      app: kafka
+  template:
+    metadata:
+      labels:
+        app: kafka
+    spec:
+      containers:
+        - name: kafka
+          image: apache/kafka:4.0.0
+          ports:
+            - containerPort: 9092
+            - containerPort: 19092
+            - containerPort: 9093
+          env:
+            # Make HOSTNAME available to Kafka (Kubernetes will expand this)
+            - name: HOSTNAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+
+            # Cluster settings
+            - name: CLUSTER_ID
+              value: "7sWhx1QdSqGGl3a57SSZXA"
+            - name: KAFKA_PROCESS_ROLES
+              value: "broker,controller"
+
+            # Controller quorum definition – all 3 brokers are voters
+            - name: KAFKA_CONTROLLER_QUORUM_VOTERS
+              value: "0@kafka-0.kafka.messaging.svc.cluster.local:9093,1@kafka-1.kafka.messaging.svc.cluster.local:9093,2@kafka-2.kafka.messaging.svc.cluster.local:9093"
+
+            # Define listeners
+            - name: KAFKA_LISTENERS
+              value: "INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092,CONTROLLER://0.0.0.0:9093"
+
+            # Advertised listeners (now correctly expands HOSTNAME)
+            - name: KAFKA_ADVERTISED_LISTENERS
+              value: "INTERNAL://$(HOSTNAME).kafka.messaging.svc.cluster.local:9092,EXTERNAL://$(HOSTNAME).kafka.messaging.svc.cluster.local:19092"
+
+            # Listener protocol mappings
+            - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+              value: "INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
+
+            - name: KAFKA_INTER_BROKER_LISTENER_NAME
+              value: "INTERNAL"
+            - name: KAFKA_CONTROLLER_LISTENER_NAMES
+              value: "CONTROLLER"
+
+            # Replication settings
+            - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+              value: "3"
+            - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+              value: "3"
+            - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+              value: "2"
+            - name: KAFKA_MIN_INSYNC_REPLICAS
+              value: "2"
+
+            # Node ID for KRaft mode
+            - name: KAFKA_NODE_ID
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.labels['apps.kubernetes.io/pod-index']
+
+            # Log directories
+            - name: KAFKA_LOG_DIRS
+              value: /var/lib/kafka/data
+
+          volumeMounts:
+            - name: kafka-data
+              mountPath: /var/lib/kafka
+
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: 1
+              memory: 1Gi
+  volumeClaimTemplates:
+    - metadata:
+        name: kafka-data
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
+        storageClassName: local-path

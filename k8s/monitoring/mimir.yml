@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mimir
+  namespace: monitoring
+spec:
+  type: ClusterIP
+  selector:
+    app: mimir
+  ports:
+    - port: 9009
+      targetPort: 9009
+      protocol: TCP
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mimir
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mimir
+  template:
+    metadata:
+      labels:
+        app: mimir
+    spec:
+      initContainers:
+        - name: fetch-config
+          image: alpine/git:2.49.1
+          command:
+            - sh
+            - -c
+            - |
+              echo "Cloning configuration..."
+              git clone --branch main https://github.com/edinstance/distributed-aviation-system.git /repo
+              echo "Copying mimir config files..."
+              mkdir -p /config
+              cp /repo/monitoring/mimir/config/mimir.yml /config/config.yaml
+              echo "Config ready."
+          volumeMounts:
+            - name: mimir-config
+              mountPath: /config
+      containers:
+        - name: mimir
+          image: grafana/mimir:2.17.1
+          args: ["-config.file=/etc/mimir/config.yaml"]
+          ports:
+            - containerPort: 9009
+          resources:
+            requests:
+              cpu: 200m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+          volumeMounts:
+            - name: mimir-config
+              mountPath: /etc/mimir
+              readOnly: true
+      volumes:
+        - name: mimir-config
+          emptyDir: { }
