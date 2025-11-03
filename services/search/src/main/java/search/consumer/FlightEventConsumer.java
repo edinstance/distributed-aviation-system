@@ -1,8 +1,8 @@
-package aviation.search.consumer;
+package search.consumer;
 
-import aviation.search.config.SearchLogger;
-import aviation.search.model.FlightDocument;
-import aviation.search.service.FlightSearchService;
+import search.config.SearchLogger;
+import search.model.FlightDocument;
+import search.service.FlightSearchService;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.apache.avro.Schema;

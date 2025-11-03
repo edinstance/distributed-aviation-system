@@ -1,7 +1,7 @@
-package aviation.search.helpers;
+package search.helpers;
 
-import aviation.search.model.FlightDocument;
-import aviation.search.service.FlightIndexService;
+import search.model.FlightDocument;
+import search.service.FlightIndexService;
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;

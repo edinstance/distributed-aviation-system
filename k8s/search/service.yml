@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: search-service
-          image: ghcr.io/edinstance/distributed-aviation-system-services/search:latest
+          image: ghcr.io/edinstance/distributed-aviation-system-services/search:dev
           ports:
             - containerPort: 8082
           env:

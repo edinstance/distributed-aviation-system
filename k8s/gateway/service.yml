@@ -29,7 +29,7 @@ spec:
     spec:
       containers:
         - name: gateway-service
-          image: ghcr.io/edinstance/distributed-aviation-system-services/gateway:latest
+          image: ghcr.io/edinstance/distributed-aviation-system-services/gateway:dev
           ports:
             - containerPort: 4001
           env:

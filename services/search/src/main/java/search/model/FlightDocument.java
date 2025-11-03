@@ -1,4 +1,4 @@
-package aviation.search.model;
+package search.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

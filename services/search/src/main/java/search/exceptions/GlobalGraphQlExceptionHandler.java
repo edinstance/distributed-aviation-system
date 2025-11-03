@@ -1,4 +1,4 @@
-package aviation.search.exceptions;
+package search.exceptions;
 
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;

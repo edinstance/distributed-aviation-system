@@ -1,8 +1,8 @@
-package aviation.search.service;
+package search.service;
 
-import aviation.search.config.SearchLogger;
-import aviation.search.helpers.SearchHelpers;
-import aviation.search.model.FlightDocument;
+import search.config.SearchLogger;
+import search.helpers.SearchHelpers;
+import search.model.FlightDocument;
 import java.io.IOException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
