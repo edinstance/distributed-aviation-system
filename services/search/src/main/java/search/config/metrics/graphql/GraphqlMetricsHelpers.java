@@ -1,4 +1,4 @@
-package aviation.search.config.metrics.graphql;
+package search.config.metrics.graphql;
 
 import graphql.execution.instrumentation.parameters.InstrumentationFieldFetchParameters;
 import graphql.language.Definition;

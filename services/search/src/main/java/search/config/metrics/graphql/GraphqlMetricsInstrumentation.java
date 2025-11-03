@@ -1,4 +1,4 @@
-package aviation.search.config.metrics.graphql;
+package search.config.metrics.graphql;
 
 import graphql.ExecutionResult;
 import graphql.execution.DataFetcherResult;
@@ -37,7 +37,7 @@ public class GraphqlMetricsInstrumentation implements Instrumentation {
    * A constructor for the instrumentation.
    */
   public GraphqlMetricsInstrumentation() {
-    Meter meter = GlobalOpenTelemetry.getMeter("aviation.search.graphql");
+    Meter meter = GlobalOpenTelemetry.getMeter("search.graphql");
 
     this.graphqlRequests = meter.counterBuilder("search_graphql_requests_total")
             .setDescription("Total GraphQL operations")

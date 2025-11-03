@@ -1,4 +1,4 @@
-package aviation.search.service;
+package search.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

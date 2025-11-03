@@ -41,7 +41,7 @@ spec:
           command: [ "sh", "-c", "until nc -z aircraft-cache.aircraft.svc.cluster.local 6379; do sleep 2; done;" ]
       containers:
         - name: aircraft-service
-          image: ghcr.io/edinstance/distributed-aviation-system-services/aircraft:latest
+          image: ghcr.io/edinstance/distributed-aviation-system-services/aircraft:dev
           ports:
             - containerPort: 8080
               name: http
