@@ -2,7 +2,7 @@ apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: aviation-ingress
-  namespace: aviation
+  namespace: ingress-nginx
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /$1
 spec:
@@ -81,6 +81,20 @@ spec:
                 name: gateway-service
                 port:
                   number: 4001
+          - path: /search/(.*)
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: search-service
+                port:
+                  number: 8082
+          - path: /search
+            pathType: Prefix
+            backend:
+              service:
+                name: search-service
+                port:
+                  number: 8082
           - path: /(.*)
             pathType: ImplementationSpecific
             backend:

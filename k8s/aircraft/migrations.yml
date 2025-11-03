@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: aircraft-migrations
-  namespace: aviation
+  namespace: aircraft
 spec:
   backoffLimit: 0
   template:
@@ -16,7 +16,7 @@ spec:
             - -c
             - |
               echo "Waiting for Postgres to become available..."
-              until nc -z aircraft-database.aviation.svc.cluster.local 5432; do
+              until nc -z aircraft-database.aircraft.svc.cluster.local 5432; do
                 echo "Still waiting for DB..."; sleep 2;
               done
               echo "Database is ready!"

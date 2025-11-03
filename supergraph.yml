@@ -1,14 +1,14 @@
 federation_version: =2.3.2
 subgraphs:
   flights:
-    routing_url: http://flights-service:8081/graphql
+    routing_url: ${FLIGHTS_SERVICE_URL:-http://flights-service:8081/graphql}
     schema:
       file: ./services/flights/internal/graphql/schema.graphqls
   aircraft:
-    routing_url: http://aircraft-service:8080/graphql
+    routing_url: ${AIRCRAFT_SERVICE_URL:-http://aircraft-service:8080/graphql}
     schema:
       file: ./services/aircraft/src/main/resources/schema/schema.graphqls
   search:
-    routing_url: http://search-service:8082/graphql
+    routing_url: ${SEARCH_SERVICE_URL:-http://search-service:8082/graphql}
     schema:
       file: ./services/search/src/main/resources/schema/schema.graphqls

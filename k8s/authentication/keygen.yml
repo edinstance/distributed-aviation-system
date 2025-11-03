@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: authentication-keygen
-  namespace: aviation
+  namespace: authentication
 spec:
   backoffLimit: 0
   template:
@@ -53,7 +53,7 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: authentication-keys-pvc
-  namespace: aviation
+  namespace: authentication
 spec:
   accessModes:
     - ReadWriteOnce

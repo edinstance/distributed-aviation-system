@@ -6,6 +6,21 @@ metadata:
 apiVersion: v1
 kind: Namespace
 metadata:
+  name: authentication
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: flights
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aircraft
+---
+apiVersion: v1
+kind: Namespace
+metadata:
   name: monitoring
 ---
 apiVersion: v1

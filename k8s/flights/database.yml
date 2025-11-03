@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: flights-database
-  namespace: aviation
+  namespace: flights
 spec:
   clusterIP: None
   ports:
@@ -14,7 +14,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: flights-database
-  namespace: aviation
+  namespace: flights
 spec:
   serviceName: flights-database
   replicas: 1

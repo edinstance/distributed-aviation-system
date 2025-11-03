@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: authentication-service
-  namespace: aviation
+  namespace: authentication
 spec:
   type: ClusterIP
   ports:
@@ -16,7 +16,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: authentication-service
-  namespace: aviation
+  namespace: authentication
 spec:
   replicas: 1
   selector:
@@ -30,7 +30,7 @@ spec:
       initContainers:
         - name: wait-for-db
           image: busybox:1.36
-          command: [ "sh", "-c", "until nc -z authentication-database.aviation.svc.cluster.local 5432; do sleep 2; done;" ]
+          command: [ "sh", "-c", "until nc -z authentication-database.authentication.svc.cluster.local 5432; do sleep 2; done;" ]
         - name: wait-for-keygen
           image: busybox:1.36
           command:
@@ -67,7 +67,7 @@ spec:
             - name: DEBUG
               value: "False"
             - name: ALLOWED_HOSTS
-              value: localhost,127.0.0.1,authentication-service.aviation.svc.cluster.local,*.aviation.svc.cluster.local,api.aviation.local
+              value: localhost,127.0.0.1,authentication-service.authentication.svc.cluster.local,authentication-service.aviation.svc.cluster.local,*.authentication.svc.cluster.local,api.authentication.local,api.aviation.local
             - name: DATABASE_NAME
               value: authentication
             - name: DATABASE_USER

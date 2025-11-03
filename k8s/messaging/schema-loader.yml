@@ -23,6 +23,7 @@ spec:
               mkdir -p /config /schemas
               cp /repo/kafka/script.sh /config/
               cp -r /repo/kafka/schemas/* /schemas/
+              chmod +x /config/script.sh
               echo "Config and schemas ready."
           volumeMounts:
             - name: config-volume

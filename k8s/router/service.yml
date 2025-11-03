@@ -36,23 +36,6 @@ spec:
       labels:
         app: router-service
     spec:
-      initContainers:
-        - name: fetch-config
-          image: alpine/git:2.49.1
-          command:
-            - sh
-            - -c
-            - |
-              echo "Cloning router configuration..."
-              git clone --branch main https://github.com/edinstance/distributed-aviation-system.git /repo
-              echo "Copying supergraph and config files..."
-              mkdir -p /config
-              cp /repo/supergraph.graphql /config/supergraph.graphql
-              cp /repo/router.yml /config/router.yml
-              echo "Config ready."
-          volumeMounts:
-            - name: router-config
-              mountPath: /config
       containers:
         - name: apollo-router
           image: ghcr.io/apollographql/router:v2.6.2
@@ -60,12 +43,17 @@ spec:
             - "--supergraph"
             - /etc/apollo/supergraph.graphql
             - "--config"
-            - /etc/apollo/router.yml
+            - /etc/router/router.yml
             - "--hot-reload"
           ports:
             - containerPort: 4000
             - containerPort: 8088
             - containerPort: 8089
+          env:
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local:4317
+            - name: OTEL_METRICS_EXPORTER_ENDPOINT
+              value: http://otel-collector.monitoring.svc.cluster.local:4317
           readinessProbe:
             httpGet:
               path: /health
@@ -80,9 +68,16 @@ spec:
               cpu: 500m
               memory: 512Mi
           volumeMounts:
-            - name: router-config
+            - name: shared-schema
               mountPath: /etc/apollo
               readOnly: true
+            - name: router-config
+              mountPath: /etc/router
+              readOnly: true
       volumes:
+        - name: shared-schema
+          persistentVolumeClaim:
+            claimName: supergraph-schema-pvc
         - name: router-config
-          emptyDir: {}
+          persistentVolumeClaim:
+            claimName: router-config-pvc
