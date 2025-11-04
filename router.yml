@@ -33,7 +33,7 @@ telemetry:
         service_name: "graphql-router"
       otlp:
         enabled: true
-        endpoint: ${OTEL_EXPORTER_OTLP_ENDPOINT:http://otel-collector:4317}
+        endpoint: ${env.OTEL_EXPORTER_OTLP_ENDPOINT:-http://otel-collector:4317}
         protocol: grpc
     metrics:
       common:
@@ -41,7 +41,7 @@ telemetry:
         service_name: "graphql-router"
       otlp:
         enabled: true
-        endpoint: ${OTEL_METRICS_EXPORTER_ENDPOINT:http://otel-collector:4317}
+        endpoint: ${env.OTEL_METRICS_EXPORTER_ENDPOINT:-http://otel-collector:4317}
         protocol: grpc
     logging:
       stdout:
